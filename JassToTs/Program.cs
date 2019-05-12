@@ -7,8 +7,9 @@ namespace JassToTs
     {
         static void Main(string[] args)
         {
+            if (0 == args.Length) args = new[] { Console.ReadLine() };
             var source = "";
-            using (var sr = new StreamReader("common.j"))
+            using (var sr = new StreamReader(args[0]))
                 source = sr.ReadToEnd();
             var helper = new Jass.JassLexer();
             try
