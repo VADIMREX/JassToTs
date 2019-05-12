@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.572
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jass o TS", "JassToTs\JassToTs.csproj", "{3ADCBDA0-D51A-4C8B-B50E-7223759A5B3A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3ADCBDA0-D51A-4C8B-B50E-7223759A5B3A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3ADCBDA0-D51A-4C8B-B50E-7223759A5B3A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3ADCBDA0-D51A-4C8B-B50E-7223759A5B3A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3ADCBDA0-D51A-4C8B-B50E-7223759A5B3A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {16354199-A6D7-4A0C-8CB6-FB8E295EC8F3}
+	EndGlobalSection
+EndGlobal
