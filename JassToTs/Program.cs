@@ -11,12 +11,16 @@ namespace JassToTs
             var source = "";
             using (var sr = new StreamReader(args[0]))
                 source = sr.ReadToEnd();
-            var helper = new Jass.JassLexer();
+            var lexer = new Jass.JassLexer();
+            var parser = new Jass.JassParser();
             try
             {
-                var tokens = helper.Tokenize(source);
-                foreach (var tok in tokens)
-                    Console.WriteLine(tok);
+                Console.WriteLine("start lexer");
+                var tokens = lexer.Tokenize(source);
+                Console.WriteLine("start parser");
+                var ast = parser.Parse(tokens);
+                //foreach (var tok in ast)
+                //    Console.WriteLine(tok);
             }
             catch (Exception e)
             {
