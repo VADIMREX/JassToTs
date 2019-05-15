@@ -347,10 +347,10 @@ namespace Jass
                     var s = $"{source[i]}";
                     switch (source[i])
                     {
-                        case '(': typ = "lbra"; break;
-                        case ')': typ = "rbra"; break;
-                        case '[': typ = "lind"; break;
-                        case ']': typ = "rind"; break;
+                        case '(': typ = Token.lbra; break;
+                        case ')': typ = Token.rbra; break;
+                        case '[': typ = Token.lind; break;
+                        case ']': typ = Token.rind; break;
                     }
                     tok = new Token { Col = pos, Line = line, Pos = i, Text = s, Type = typ };
                     tokens.Add(tok);

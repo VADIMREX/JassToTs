@@ -53,6 +53,15 @@ namespace Jass
         /// <summary> перевод строки </summary>
         public const string ln = "ln";
 
+        /// <summary> левая скобка </summary>
+        public const string lbra = "lbra";
+        /// <summary> правая скобка </summary>
+        public const string rbra = "rbra";
+        /// <summary> левая квадратная скобка </summary>
+        public const string lind = "lind";
+        /// <summary> правая квадратная скобка </summary>
+        public const string rind = "rind";
+
         #endregion
 
         public string Type = "";
