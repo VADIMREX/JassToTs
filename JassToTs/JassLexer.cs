@@ -235,7 +235,7 @@ namespace Jass
                     ;
             }
 
-            if (i < source.Length) i--;
+            //if (i < source.Length) i--;
             //return new Token { Col = p, Line = l, Pos = j, Text = s, Type = eoc == '"' ? TokenType.dstr : TokenType.sstr };
             return new Token { Col = p, Line = l, Pos = j, Text = s, Kind = TokenKind.dstr };
         }
