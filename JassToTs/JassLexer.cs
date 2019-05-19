@@ -27,50 +27,50 @@ namespace Jass
         /// <summary> справочник ключевых слов </summary>
         readonly Dictionary<string, string> keywords = new Dictionary<string, string> {
             // Базовые типы
-            { "integer", Token.btyp },
-            { "real",    Token.btyp },
-            { "boolean", Token.btyp },
-            { "string",  Token.btyp },
-            { "handle",  Token.btyp },
-            { "code",    Token.btyp },
+            { "integer", TokenType.btyp },
+            { "real",    TokenType.btyp },
+            { "boolean", TokenType.btyp },
+            { "string",  TokenType.btyp },
+            { "handle",  TokenType.btyp },
+            { "code",    TokenType.btyp },
             // 
-            { "nothing", Token.btyp },
+            { "nothing", TokenType.btyp },
             // 
-            { "type",        Token.kwd },
-            { "extends",     Token.kwd },
-            { "globals",     Token.kwd },
-            { "endglobals",  Token.kwd },
-            { "constant",    Token.kwd },
-            { "native",      Token.kwd },
-            { "takes",       Token.kwd },
-            { "returns",     Token.kwd },
-            { "function",    Token.kwd },
-            { "endfunction", Token.kwd },
+            { "type",        TokenType.kwd },
+            { "extends",     TokenType.kwd },
+            { "globals",     TokenType.kwd },
+            { "endglobals",  TokenType.kwd },
+            { "constant",    TokenType.kwd },
+            { "native",      TokenType.kwd },
+            { "takes",       TokenType.kwd },
+            { "returns",     TokenType.kwd },
+            { "function",    TokenType.kwd },
+            { "endfunction", TokenType.kwd },
             //
-            { "local", Token.kwd },
-            { "array", Token.kwd },
+            { "local", TokenType.kwd },
+            { "array", TokenType.kwd },
             //
-            { "set",      Token.kwd },
-            { "call",     Token.kwd },
-            { "if",       Token.kwd },
-            { "then",     Token.kwd },
-            { "endif",    Token.kwd },
-            { "else",     Token.kwd },
-            { "elseif",   Token.kwd },
-            { "loop",     Token.kwd },
-            { "endloop",  Token.kwd },
-            { "exitwhen", Token.kwd },
-            { "return",   Token.kwd },
-            { "debug",    Token.kwd },
+            { "set",      TokenType.kwd },
+            { "call",     TokenType.kwd },
+            { "if",       TokenType.kwd },
+            { "then",     TokenType.kwd },
+            { "endif",    TokenType.kwd },
+            { "else",     TokenType.kwd },
+            { "elseif",   TokenType.kwd },
+            { "loop",     TokenType.kwd },
+            { "endloop",  TokenType.kwd },
+            { "exitwhen", TokenType.kwd },
+            { "return",   TokenType.kwd },
+            { "debug",    TokenType.kwd },
             //
-            { "and", Token.oper },
-            { "or",  Token.oper },
+            { "and", TokenType.oper },
+            { "or",  TokenType.oper },
             //
-            { "not", Token.oper },
+            { "not", TokenType.oper },
             //
-            { "null",  Token.@null },
-            { "true",  Token.@bool },
-            { "false", Token.@bool },
+            { "null",  TokenType.@null },
+            { "true",  TokenType.@bool },
+            { "false", TokenType.@bool },
         };
 
         List<string> operators = new List<string> { "=", ",", "+", "-", "*", "/", ">", "<", "==", "!=", ">=", "<=" };
@@ -109,7 +109,7 @@ namespace Jass
             }
 
             if (i < source.Length) i--;
-            return new Token { Col = p, Line = l, Pos = j, Text = s, Type = Token.lcom };
+            return new Token { Col = p, Line = l, Pos = j, Text = s, Type = TokenType.lcom };
         }
 
         /// <summary> Попытаться распарсить число </summary>
@@ -171,10 +171,10 @@ namespace Jass
                 }
                 throw new Exception($"Line {l}, Col {p}: wrong number: not a number");
             }
-            var typ = Token.ndec;
-            if (isOct) typ = Token.oct;
-            if (isHex) typ = isXFound ? Token.xhex : Token.dhex;
-            if (isDotFound) typ = Token.real;
+            var typ = TokenType.ndec;
+            if (isOct) typ = TokenType.oct;
+            if (isHex) typ = isXFound ? TokenType.xhex : TokenType.dhex;
+            if (isDotFound) typ = TokenType.real;
 
             if (i < source.Length) i--;
             return new Token { Col = p, Line = l, Pos = j, Text = s, Type = typ };
@@ -197,7 +197,7 @@ namespace Jass
             if (!operators.Contains(s)) throw new Exception($"Line {l}, Col {p}: wrong operator");
 
             if (i < source.Length) i--;
-            return new Token { Col = p, Line = l, Pos = j, Text = s, Type = Token.oper };
+            return new Token { Col = p, Line = l, Pos = j, Text = s, Type = TokenType.oper };
         }
 
         /// <summary> Попытаться распарсить число из 4х ASCII символов </summary>
@@ -209,7 +209,7 @@ namespace Jass
                 if (c > '\u00ff')
                     throw new Exception($"Line {tok.Line}, Col {tok.Col}: wrong number: non ascii symbol");
             // Надо проверить как оригинальный компилятор относится к 'a\'bc' последовательности
-            tok.Type = Token.adec;
+            tok.Type = TokenType.adec;
             return tok;
         }
 
@@ -236,8 +236,8 @@ namespace Jass
             }
 
             if (i < source.Length) i--;
-            //return new Token { Col = p, Line = l, Pos = j, Text = s, Type = eoc == '"' ? Token.dstr : Token.sstr };
-            return new Token { Col = p, Line = l, Pos = j, Text = s, Type = Token.dstr };
+            //return new Token { Col = p, Line = l, Pos = j, Text = s, Type = eoc == '"' ? TokenType.dstr : TokenType.sstr };
+            return new Token { Col = p, Line = l, Pos = j, Text = s, Type = TokenType.dstr };
         }
 
         /// <summary> Попытаться распарсить имя </summary>
@@ -264,7 +264,7 @@ namespace Jass
                 // левые символы
                 throw new Exception($"Line {l}, Col {p}: wrong identifier: unknown symbol");
             }
-            var typ = Token.name;
+            var typ = TokenType.name;
             if (keywords.ContainsKey(s)) typ = keywords[s];
             if ('_' == s[s.Length - 1]) throw new Exception($"Line {l}, Col {p}: wrong identifier: ends with \"_\"");
 
@@ -347,10 +347,10 @@ namespace Jass
                     var s = $"{source[i]}";
                     switch (source[i])
                     {
-                        case '(': typ = Token.lbra; break;
-                        case ')': typ = Token.rbra; break;
-                        case '[': typ = Token.lind; break;
-                        case ']': typ = Token.rind; break;
+                        case '(': typ = TokenType.lbra; break;
+                        case ')': typ = TokenType.rbra; break;
+                        case '[': typ = TokenType.lind; break;
+                        case ']': typ = TokenType.rind; break;
                     }
                     tok = new Token { Col = pos, Line = line, Pos = i, Text = s, Type = typ };
                     tokens.Add(tok);
@@ -359,7 +359,7 @@ namespace Jass
                 if (LineBreak(false))
                 {
                     // записываем конец строки
-                    tokens.Add(new Token { Col = pos, Line = line, Pos = i, Text = "\n", Type = Token.ln });
+                    tokens.Add(new Token { Col = pos, Line = line, Pos = i, Text = "\n", Type = TokenType.ln });
                     continue;
                 }
                 tok = TryParseName();

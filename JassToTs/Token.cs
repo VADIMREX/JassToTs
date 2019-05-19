@@ -4,8 +4,7 @@ using System.Text;
 
 namespace Jass
 {
-
-    class Token
+    class TokenType
     {
         #region типы токенов
 
@@ -18,7 +17,7 @@ namespace Jass
         /// <summary> десятичное целое </summary>
         public const string ndec = "ndec";
         /// <summary> восьмеричное целое </summary>
-        public const string oct  = "oct";
+        public const string oct = "oct";
         /// <summary> шеснадцатиричное целое в формате 0xNN </summary>
         public const string xhex = "xhex";
         /// <summary> шеснадцатиричное целое в формате $NN </summary>
@@ -43,7 +42,7 @@ namespace Jass
         /// <summary> базовый тип </summary>
         public const string btyp = "btyp";
         /// <summary> ключевое слово </summary>
-        public const string kwd  = "kwd";
+        public const string kwd = "kwd";
 
         /// <summary> null значение </summary>
         public const string @null = "null";
@@ -63,7 +62,10 @@ namespace Jass
         public const string rind = "rind";
 
         #endregion
+    }
 
+    class Token
+    {
         public string Type = "";
         public int Line = 0;
         public int Col = 0;
