@@ -5,6 +5,45 @@ using System.Text;
 
 namespace Jass
 {
+    class StatementType
+    {
+        /// <summary> Программа </summary>
+        public const string Prog = "Prog";
+
+        public const string TypeDecl   = "TypeDecl";
+        public const string Glob       = "Glob";
+        public const string GConst     = "GConst";
+        public const string GVar       = "GVar";
+        public const string GArr       = "GArr";
+        public const string LVar       = "LVar";
+        public const string LArr       = "LArr";
+        public const string Expr       = "Expr";
+        public const string RVar       = "RVar";
+        public const string FCall      = "FCall";
+        public const string RArr       = "RArr";
+        public const string RFunc      = "RFunc";
+        public const string Native     = "Native";
+        public const string CNative    = "CNative";
+        public const string FuncDecl   = "FuncDecl";
+        public const string Params     = "Params";
+        public const string Func       = "Func";
+        public const string CFunc      = "CFunc";
+        public const string FuncLocals = "FuncLocals";
+        public const string FuncBody   = "FuncBody";
+        public const string Comm       = "Comm";
+        public const string Debug      = "Debug";
+        public const string Set        = "Set";
+        public const string ASet       = "ASet";
+        public const string If         = "If";
+        public const string Cond       = "Cond";
+        public const string Then       = "Then";
+        public const string ElseCond   = "ElseCond";
+        public const string Else       = "Else";
+        public const string Loop       = "Loop";
+        public const string Exit       = "Exit";
+        public const string Return     = "Return";
+    }
+
     class Statement
     {
         public string Type;
