@@ -4,9 +4,10 @@ using System.Text;
 
 namespace Jass
 {
-    class TokenType
+    /// <summary> Виды токенов </summary>
+    class TokenKind
     {
-        #region типы токенов
+        #region виды токенов
 
         /// <summary> однострочный комментарий </summary>
         public const string lcom = "lcom";
@@ -62,15 +63,66 @@ namespace Jass
         public const string rind = "rind";
 
         #endregion
+
+        /// <summary> связь между видом и типом </summary>
+        static Dictionary<string, string> TypeByKind = new Dictionary<string, string>
+        {
+            { lcom,  TokenType.comm },
+            { mcom,  TokenType.comm },
+            { ndec,  TokenType.val },
+            { oct,   TokenType.val },
+            { xhex,  TokenType.val },
+            { dhex,  TokenType.val },
+            { real,  TokenType.val },
+            { adec,  TokenType.val },
+            { oper,  TokenType.oper },
+            { dstr,  TokenType.val },
+            { sstr,  TokenType.val },
+            { name,  TokenType.name },
+            { btyp,  TokenType.name },
+            { kwd,   TokenType.kwd },
+            { @null, TokenType.val },
+            { @bool, TokenType.val },
+            { ln,    TokenType.br },
+            { lbra,  TokenType.par },
+            { rbra,  TokenType.par },
+            { lind,  TokenType.par },
+            { rind,  TokenType.par },
+        };
+
+        /// <summary> получить тип </summary>
+        /// <param name="kind"> вид токена </param>
+        public static string GetType(string kind) => TypeByKind[kind];
     }
 
+    /// <summary> Типы токенов </summary>
+    class TokenType
+    {
+        /// <summary> разделитель </summary>
+        public const string br = "br";
+        /// <summary> значение (безымянная константа) </summary>
+        public const string val = "val";
+        /// <summary> ключевое слово </summary>
+        public const string kwd = "kwd";
+        /// <summary> идентификатор </summary>
+        public const string name = "name";
+        /// <summary> оператор </summary>
+        public const string oper = "oper";
+        /// <summary> скобки </summary>
+        public const string par = "par";
+        /// <summary> комментарий </summary>
+        public const string comm = "comm";
+    }
+
+    /// <summary> Токен </summary>
     class Token
     {
-        public string Type = "";
+        public string Type => TokenKind.GetType(Kind);
+        public string Kind = "";
         public int Line = 0;
         public int Col = 0;
         public int Pos = 0;
         public string Text = "";
-        public override string ToString() => $"{Line},{Col} [{Type}]: {Text}";
+        public override string ToString() => $"{Line},{Col} [{Type}|{Kind}]: {Text}";
     }
 }

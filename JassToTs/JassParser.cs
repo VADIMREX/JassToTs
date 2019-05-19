@@ -100,8 +100,8 @@ namespace Jass
     /// <summary> Скобки </summary>
     class Parens : Expression
     {
-        string template => TokenType.lbra == Start.Type ? "({0})" :
-                           TokenType.lind == Start.Type ? "[{0}]" :
+        string template => TokenKind.lbra == Start.Kind ? "({0})" :
+                           TokenKind.lind == Start.Kind ? "[{0}]" :
                            "{0}";
         public override string ToJass() => string.Format(template, base.ToJass());
         public override string ToTypeScript() => string.Format(template, base.ToTypeScript());
@@ -151,29 +151,29 @@ namespace Jass
             int j = 0;
             for (; i < tokens.Count && j < 5; i++)
             {
-                if (TokenType.lcom == tokens[i].Type) continue;
-                if (j < 4 && TokenType.ln == tokens[i].Type)
+                if (TokenKind.lcom == tokens[i].Kind) continue;
+                if (j < 4 && TokenKind.ln == tokens[i].Kind)
                     throw new Exception($"Line {tokens[i].Line}, Col {tokens[i].Col}: wrong type declaration: linebreak");
                 switch (j)
                 {
                     case 0:
-                        if (TokenType.kwd != tokens[i].Type || "type" != tokens[i].Text) return null;
+                        if (TokenKind.kwd != tokens[i].Kind || "type" != tokens[i].Text) return null;
                         stat.Start = tokens[i];
                         j++;
                         break;
                     case 1:
-                        if (TokenType.name != tokens[i].Type)
+                        if (TokenKind.name != tokens[i].Kind)
                             throw new Exception($"Line {tokens[i].Line}, Col {tokens[i].Col}: wrong type declaration: identifier expected");
                         stat.Name = tokens[i].Text;
                         j++;
                         break;
                     case 2:
-                        if (TokenType.kwd != tokens[i].Type || "extends" != tokens[i].Text)
+                        if (TokenKind.kwd != tokens[i].Kind || "extends" != tokens[i].Text)
                             throw new Exception($"Line {tokens[i].Line}, Col {tokens[i].Col}: wrong type declaration: extends keyword expected");
                         j++;
                         break;
                     case 3:
-                        if (TokenType.name != tokens[i].Type && TokenType.btyp != tokens[i].Type)
+                        if (TokenKind.name != tokens[i].Kind && TokenKind.btyp != tokens[i].Kind)
                             throw new Exception($"Line {tokens[i].Line}, Col {tokens[i].Col}: wrong type declaration: type identifier expected");
                         j++;
                         if (!Types.ContainsKey(tokens[i].Text))
@@ -182,7 +182,7 @@ namespace Jass
                         stat.BaseType = tokens[i].Text;
                         break;
                     case 4:
-                        if (TokenType.ln != tokens[i].Type)
+                        if (TokenKind.ln != tokens[i].Kind)
                             throw new Exception($"Line {tokens[i].Line}, Col {tokens[i].Col}: wrong type declaration: new line expected");
                         j++;
                         break;
@@ -206,23 +206,23 @@ namespace Jass
             int j = 0;
             for (; i < tokens.Count && j < 4; i++)
             {
-                if (TokenType.lcom == tokens[i].Type) continue;
+                if (TokenKind.lcom == tokens[i].Kind) continue;
                 switch (j)
                 {
                     case 0:
-                        if (TokenType.kwd != tokens[i].Type || "globals" != tokens[i].Text) return null;
+                        if (TokenKind.kwd != tokens[i].Kind || "globals" != tokens[i].Text) return null;
                         stat.Start = tokens[i];
                         j++;
                         break;
                     case 1:
                     case 3:
-                        if (TokenType.ln != tokens[i].Type)
+                        if (TokenKind.ln != tokens[i].Kind)
                             throw new Exception($"Line {tokens[i].Line}, Col {tokens[i].Col}: wrong globals declaration: new line expected");
                         j++;
                         break;
                     case 2:
-                        if (TokenType.ln == tokens[i].Type) continue;
-                        if (TokenType.kwd == tokens[i].Type && "endglobals" == tokens[i].Text)
+                        if (TokenKind.ln == tokens[i].Kind) continue;
+                        if (TokenKind.kwd == tokens[i].Kind && "endglobals" == tokens[i].Text)
                         {
                             j++;
                             continue;
@@ -242,7 +242,7 @@ namespace Jass
         VarDeclaration TryParseGlobalVarDecl(Statement parent)
         {
             VarDeclaration stat;
-            if (TokenType.kwd == tokens[i].Type && "constant" == tokens[i].Text)
+            if (TokenKind.kwd == tokens[i].Kind && "constant" == tokens[i].Text)
             {
                 stat = TryParseGlobalConst(parent);
                 stat.Type = "gconst";
@@ -270,17 +270,17 @@ namespace Jass
             int j = 0;
             for (; i < tokens.Count && j < 5; i++)
             {
-                if (TokenType.lcom == tokens[i].Type) continue;
+                if (TokenKind.lcom == tokens[i].Kind) continue;
                 switch (j)
                 {
                     case 0:
-                        if (TokenType.kwd != tokens[i].Type || "constant" != tokens[i].Text) return null;
+                        if (TokenKind.kwd != tokens[i].Kind || "constant" != tokens[i].Text) return null;
                         stat.Start = tokens[i];
                         stat.IsConst = true;
                         j++;
                         break;
                     case 1:
-                        if (TokenType.name != tokens[i].Type && TokenType.btyp != tokens[i].Type)
+                        if (TokenKind.name != tokens[i].Kind && TokenKind.btyp != tokens[i].Kind)
                             throw new Exception($"Line {tokens[i].Line}, Col {tokens[i].Col}: wrong var declaration: type identifier expected");
                         if (!Types.ContainsKey(tokens[i].Text))
 #warning сделать предупреждением
@@ -289,13 +289,13 @@ namespace Jass
                         j++;
                         break;
                     case 2:
-                        if (TokenType.name != tokens[i].Type)
+                        if (TokenKind.name != tokens[i].Kind)
                             throw new Exception($"Line {tokens[i].Line}, Col {tokens[i].Col}: wrong var declaration: identifier expected");
                         stat.Name = tokens[i].Text;
                         j++;
                         break;
                     case 3:
-                        if (TokenType.oper != tokens[i].Type || "=" != tokens[i].Text)
+                        if (TokenKind.oper != tokens[i].Kind || "=" != tokens[i].Text)
                             throw new Exception($"Line {tokens[i].Line}, Col {tokens[i].Col}: wrong var declaration: = operator expected");
                         i++;
                         var expr = TryParseExpression(stat);
@@ -303,7 +303,7 @@ namespace Jass
                         j++;
                         break;
                     case 4:
-                        if (TokenType.ln == tokens[i].Type)
+                        if (TokenKind.ln == tokens[i].Kind)
                             //throw new Exception($"Line {tokens[i].Line}, Col {tokens[i].Col}: wrong var declaration: new line expected");
                             j++;
                         break;
@@ -326,12 +326,12 @@ namespace Jass
             int j = 0;
             for (; i < tokens.Count && j < 5; i++)
             {
-                if (TokenType.lcom == tokens[i].Type) continue;
+                if (TokenKind.lcom == tokens[i].Kind) continue;
                 switch (j)
                 {
                     // local не обязательно
                     case 0:
-                        if (TokenType.kwd != tokens[i].Type || "local" != tokens[i].Text)
+                        if (TokenKind.kwd != tokens[i].Kind || "local" != tokens[i].Text)
                         {
                             j++;
                             goto case 1;
@@ -342,7 +342,7 @@ namespace Jass
                         break;
                     //   тип
                     case 1:
-                        if (TokenType.name != tokens[i].Type && TokenType.btyp != tokens[i].Type)
+                        if (TokenKind.name != tokens[i].Kind && TokenKind.btyp != tokens[i].Kind)
                             throw new Exception($"Line {tokens[i].Line}, Col {tokens[i].Col}: wrong var declaration: type identifier expected");
                         if (!Types.ContainsKey(tokens[i].Text))
 #warning сделать предупреждением
@@ -353,7 +353,7 @@ namespace Jass
                         break;
                     //     array не обязательно
                     case 2:
-                        if (TokenType.kwd != tokens[i].Type || "array" != tokens[i].Text)
+                        if (TokenKind.kwd != tokens[i].Kind || "array" != tokens[i].Text)
                         {
                             j++;
                             goto case 3;
@@ -363,14 +363,14 @@ namespace Jass
                         break;
                     //       имя
                     case 3:
-                        if (TokenType.name != tokens[i].Type)
+                        if (TokenKind.name != tokens[i].Kind)
                             throw new Exception($"Line {tokens[i].Line}, Col {tokens[i].Col}: wrong var declaration: identifier expected");
                         stat.Name = tokens[i].Text;
                         j += stat.IsArray ? 2 : 1;
                         break;
                     //         = значение по умолчанию не обязательно
                     case 4:
-                        if (TokenType.oper != tokens[i].Type || "=" != tokens[i].Text)
+                        if (TokenKind.oper != tokens[i].Kind || "=" != tokens[i].Text)
                         {
                             j++;
                             goto case 5;
@@ -382,7 +382,7 @@ namespace Jass
                         break;
                     //           конец строки
                     case 5:
-                        if (TokenType.ln == tokens[i].Type)
+                        if (TokenKind.ln == tokens[i].Kind)
                             throw new Exception($"Line {tokens[i].Line}, Col {tokens[i].Col}: wrong var declaration: new line expected");
                         j++;
                         break;
@@ -407,21 +407,21 @@ namespace Jass
             var type = "";
             for (; i < tokens.Count; i++)
             {
-                switch (tokens[i].Type)
+                switch (tokens[i].Kind)
                 {
-                    case TokenType.ln: break;
-                    case TokenType.lbra:
-                    case TokenType.lind:
-                        stat = new Parens { Type = $"{tokens[i].Type.Substring(1)}parens", Parent = stat, Start = tokens[i] };
+                    case TokenKind.ln: break;
+                    case TokenKind.lbra:
+                    case TokenKind.lind:
+                        stat = new Parens { Type = $"{tokens[i].Kind.Substring(1)}parens", Parent = stat, Start = tokens[i] };
                         stat.Parent.Childs.Add(stat);
                         level++;
-                        expectBra = TokenType.lbra == tokens[i].Type ? TokenType.rbra :
-                                    TokenType.lind == tokens[i].Type ? TokenType.rind :
+                        expectBra = TokenKind.lbra == tokens[i].Kind ? TokenKind.rbra :
+                                    TokenKind.lind == tokens[i].Kind ? TokenKind.rind :
                                     "";
                         continue;
-                    case TokenType.rbra:
-                    case TokenType.rind:
-                        if (tokens[i].Type != expectBra)
+                    case TokenKind.rbra:
+                    case TokenKind.rind:
+                        if (tokens[i].Kind != expectBra)
                             throw new Exception($"Line {tokens[i].Line}, Col {tokens[i].Col}: wrong expression: another bracer expected");
                         stat = stat.Parent;
                         expectBra = "";
@@ -430,38 +430,38 @@ namespace Jass
                             if (null == p) continue;
                             if (!(p is Parens)) p = p.Parent;
                             if (null == p || !(p is Parens)) continue;
-                            expectBra = TokenType.lbra == p.Start.Type ? TokenType.rbra :
-                                        TokenType.lind == p.Start.Type ? TokenType.rind :
+                            expectBra = TokenKind.lbra == p.Start.Kind ? TokenKind.rbra :
+                                        TokenKind.lind == p.Start.Kind ? TokenKind.rind :
                                         "";
                             level--;
                         }
                         continue;
                     // int константы
-                    case TokenType.adec:
-                    case TokenType.ndec:
-                    case TokenType.oct:
-                    case TokenType.dhex:
-                    case TokenType.xhex:
+                    case TokenKind.adec:
+                    case TokenKind.ndec:
+                    case TokenKind.oct:
+                    case TokenKind.dhex:
+                    case TokenKind.xhex:
                     // real константы
-                    case TokenType.real:
+                    case TokenKind.real:
                     // string константы
-                    case TokenType.dstr:
+                    case TokenKind.dstr:
                     // null
-                    case TokenType.@null:
+                    case TokenKind.@null:
                     // bool константы
-                    case TokenType.@bool:
+                    case TokenKind.@bool:
                         stat.Childs.Add(new Atom { Parent = stat, Start = tokens[i] });
                         continue;
-                    case TokenType.oper:
+                    case TokenKind.oper:
                         stat.Childs.Add(new Atom { Parent = stat, Start = tokens[i] });
                         continue;
-                    case TokenType.kwd:
+                    case TokenKind.kwd:
                         if ("function" != tokens[i].Text)
                             throw new Exception($"Line {tokens[i].Line}, Col {tokens[i].Col}: wrong expression: unknown keyword");
                         stat = new Atom { Parent = stat, Start = tokens[i] };
                         stat.Parent.Childs.Add(stat);
                         i++;
-                        if (TokenType.name != tokens[i].Type)
+                        if (TokenKind.name != tokens[i].Kind)
                             throw new Exception($"Line {tokens[i].Line}, Col {tokens[i].Col}: wrong expression: function identifier expected");
                         if (!Functions.ContainsKey(tokens[i].Text))
 #warning сделать предупреждением
@@ -470,7 +470,7 @@ namespace Jass
                         stat.Parent.Childs.Add(stat);
                         stat = stat.Parent;
                         continue;
-                    case TokenType.name:
+                    case TokenKind.name:
                         {
                             Statement reference = null;
                             if (null != context)
@@ -508,7 +508,7 @@ namespace Jass
 
             for (; i < tokens.Count; i++)
             {
-                if (TokenType.ln == tokens[i].Type) break;
+                if (TokenKind.ln == tokens[i].Kind) break;
             }
 
             return stat;
@@ -520,7 +520,7 @@ namespace Jass
 
             for (; i < tokens.Count; i++)
             {
-                if (TokenType.ln == tokens[i].Type) break;
+                if (TokenKind.ln == tokens[i].Kind) break;
             }
 
             return stat;
@@ -576,10 +576,10 @@ namespace Jass
             Statement stat = null;
             for (i = 0; i < tokens.Count; i++)
             {
-                if (TokenType.lcom == tokens[i].Type) continue;
-                if (TokenType.ln == tokens[i].Type) continue;
+                if (TokenKind.lcom == tokens[i].Kind) continue;
+                if (TokenKind.ln == tokens[i].Kind) continue;
 
-                if (TokenType.kwd != tokens[i].Type) new Exception($"Line {tokens[i].Line}, Col {tokens[i].Col}: error: keyword expected");
+                if (TokenKind.kwd != tokens[i].Kind) new Exception($"Line {tokens[i].Line}, Col {tokens[i].Col}: error: keyword expected");
 
                 if ("type" == tokens[i].Text)
                 {

@@ -27,50 +27,50 @@ namespace Jass
         /// <summary> справочник ключевых слов </summary>
         readonly Dictionary<string, string> keywords = new Dictionary<string, string> {
             // Базовые типы
-            { "integer", TokenType.btyp },
-            { "real",    TokenType.btyp },
-            { "boolean", TokenType.btyp },
-            { "string",  TokenType.btyp },
-            { "handle",  TokenType.btyp },
-            { "code",    TokenType.btyp },
+            { "integer", TokenKind.btyp },
+            { "real",    TokenKind.btyp },
+            { "boolean", TokenKind.btyp },
+            { "string",  TokenKind.btyp },
+            { "handle",  TokenKind.btyp },
+            { "code",    TokenKind.btyp },
             // 
-            { "nothing", TokenType.btyp },
+            { "nothing", TokenKind.btyp },
             // 
-            { "type",        TokenType.kwd },
-            { "extends",     TokenType.kwd },
-            { "globals",     TokenType.kwd },
-            { "endglobals",  TokenType.kwd },
-            { "constant",    TokenType.kwd },
-            { "native",      TokenType.kwd },
-            { "takes",       TokenType.kwd },
-            { "returns",     TokenType.kwd },
-            { "function",    TokenType.kwd },
-            { "endfunction", TokenType.kwd },
+            { "type",        TokenKind.kwd },
+            { "extends",     TokenKind.kwd },
+            { "globals",     TokenKind.kwd },
+            { "endglobals",  TokenKind.kwd },
+            { "constant",    TokenKind.kwd },
+            { "native",      TokenKind.kwd },
+            { "takes",       TokenKind.kwd },
+            { "returns",     TokenKind.kwd },
+            { "function",    TokenKind.kwd },
+            { "endfunction", TokenKind.kwd },
             //
-            { "local", TokenType.kwd },
-            { "array", TokenType.kwd },
+            { "local", TokenKind.kwd },
+            { "array", TokenKind.kwd },
             //
-            { "set",      TokenType.kwd },
-            { "call",     TokenType.kwd },
-            { "if",       TokenType.kwd },
-            { "then",     TokenType.kwd },
-            { "endif",    TokenType.kwd },
-            { "else",     TokenType.kwd },
-            { "elseif",   TokenType.kwd },
-            { "loop",     TokenType.kwd },
-            { "endloop",  TokenType.kwd },
-            { "exitwhen", TokenType.kwd },
-            { "return",   TokenType.kwd },
-            { "debug",    TokenType.kwd },
+            { "set",      TokenKind.kwd },
+            { "call",     TokenKind.kwd },
+            { "if",       TokenKind.kwd },
+            { "then",     TokenKind.kwd },
+            { "endif",    TokenKind.kwd },
+            { "else",     TokenKind.kwd },
+            { "elseif",   TokenKind.kwd },
+            { "loop",     TokenKind.kwd },
+            { "endloop",  TokenKind.kwd },
+            { "exitwhen", TokenKind.kwd },
+            { "return",   TokenKind.kwd },
+            { "debug",    TokenKind.kwd },
             //
-            { "and", TokenType.oper },
-            { "or",  TokenType.oper },
+            { "and", TokenKind.oper },
+            { "or",  TokenKind.oper },
             //
-            { "not", TokenType.oper },
+            { "not", TokenKind.oper },
             //
-            { "null",  TokenType.@null },
-            { "true",  TokenType.@bool },
-            { "false", TokenType.@bool },
+            { "null",  TokenKind.@null },
+            { "true",  TokenKind.@bool },
+            { "false", TokenKind.@bool },
         };
 
         List<string> operators = new List<string> { "=", ",", "+", "-", "*", "/", ">", "<", "==", "!=", ">=", "<=" };
@@ -109,7 +109,7 @@ namespace Jass
             }
 
             if (i < source.Length) i--;
-            return new Token { Col = p, Line = l, Pos = j, Text = s, Type = TokenType.lcom };
+            return new Token { Col = p, Line = l, Pos = j, Text = s, Kind = TokenKind.lcom };
         }
 
         /// <summary> Попытаться распарсить число </summary>
@@ -171,13 +171,13 @@ namespace Jass
                 }
                 throw new Exception($"Line {l}, Col {p}: wrong number: not a number");
             }
-            var typ = TokenType.ndec;
-            if (isOct) typ = TokenType.oct;
-            if (isHex) typ = isXFound ? TokenType.xhex : TokenType.dhex;
-            if (isDotFound) typ = TokenType.real;
+            var typ = TokenKind.ndec;
+            if (isOct) typ = TokenKind.oct;
+            if (isHex) typ = isXFound ? TokenKind.xhex : TokenKind.dhex;
+            if (isDotFound) typ = TokenKind.real;
 
             if (i < source.Length) i--;
-            return new Token { Col = p, Line = l, Pos = j, Text = s, Type = typ };
+            return new Token { Col = p, Line = l, Pos = j, Text = s, Kind = typ };
         }
 
         /// <summary> Попытаться распарсить оператор </summary>
@@ -197,7 +197,7 @@ namespace Jass
             if (!operators.Contains(s)) throw new Exception($"Line {l}, Col {p}: wrong operator");
 
             if (i < source.Length) i--;
-            return new Token { Col = p, Line = l, Pos = j, Text = s, Type = TokenType.oper };
+            return new Token { Col = p, Line = l, Pos = j, Text = s, Kind = TokenKind.oper };
         }
 
         /// <summary> Попытаться распарсить число из 4х ASCII символов </summary>
@@ -209,7 +209,7 @@ namespace Jass
                 if (c > '\u00ff')
                     throw new Exception($"Line {tok.Line}, Col {tok.Col}: wrong number: non ascii symbol");
             // Надо проверить как оригинальный компилятор относится к 'a\'bc' последовательности
-            tok.Type = TokenType.adec;
+            tok.Kind = TokenKind.adec;
             return tok;
         }
 
@@ -237,7 +237,7 @@ namespace Jass
 
             if (i < source.Length) i--;
             //return new Token { Col = p, Line = l, Pos = j, Text = s, Type = eoc == '"' ? TokenType.dstr : TokenType.sstr };
-            return new Token { Col = p, Line = l, Pos = j, Text = s, Type = TokenType.dstr };
+            return new Token { Col = p, Line = l, Pos = j, Text = s, Kind = TokenKind.dstr };
         }
 
         /// <summary> Попытаться распарсить имя </summary>
@@ -264,12 +264,12 @@ namespace Jass
                 // левые символы
                 throw new Exception($"Line {l}, Col {p}: wrong identifier: unknown symbol");
             }
-            var typ = TokenType.name;
+            var typ = TokenKind.name;
             if (keywords.ContainsKey(s)) typ = keywords[s];
             if ('_' == s[s.Length - 1]) throw new Exception($"Line {l}, Col {p}: wrong identifier: ends with \"_\"");
 
             if (i < source.Length) i--;
-            return new Token { Col = p, Line = l, Pos = j, Text = s, Type = typ };
+            return new Token { Col = p, Line = l, Pos = j, Text = s, Kind = typ };
         }
 
         /// <summary> распарсить исходный код на токены </summary>
@@ -347,19 +347,19 @@ namespace Jass
                     var s = $"{source[i]}";
                     switch (source[i])
                     {
-                        case '(': typ = TokenType.lbra; break;
-                        case ')': typ = TokenType.rbra; break;
-                        case '[': typ = TokenType.lind; break;
-                        case ']': typ = TokenType.rind; break;
+                        case '(': typ = TokenKind.lbra; break;
+                        case ')': typ = TokenKind.rbra; break;
+                        case '[': typ = TokenKind.lind; break;
+                        case ']': typ = TokenKind.rind; break;
                     }
-                    tok = new Token { Col = pos, Line = line, Pos = i, Text = s, Type = typ };
+                    tok = new Token { Col = pos, Line = line, Pos = i, Text = s, Kind = typ };
                     tokens.Add(tok);
                     continue;
                 }
                 if (LineBreak(false))
                 {
                     // записываем конец строки
-                    tokens.Add(new Token { Col = pos, Line = line, Pos = i, Text = "\n", Type = TokenType.ln });
+                    tokens.Add(new Token { Col = pos, Line = line, Pos = i, Text = "\n", Kind = TokenKind.ln });
                     continue;
                 }
                 tok = TryParseName();
