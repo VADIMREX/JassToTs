@@ -104,8 +104,9 @@ namespace Jass
             i += 2;
             for (; i < source.Length; i++, pos++)
             {
-                s += source[i];
+                if ('\r' == source[i]) continue;
                 if (LineBreak(true)) break;
+                s += source[i];
             }
 
             if (i < source.Length) i--;

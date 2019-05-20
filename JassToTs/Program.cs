@@ -44,7 +44,7 @@ namespace JassToTs
                 Console.WriteLine(e.Message);
             }
 #endif
-            Console.ReadKey();
+            return;
         }
     }
 }

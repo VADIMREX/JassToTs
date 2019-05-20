@@ -42,6 +42,17 @@ namespace Jass
         public const string Loop       = "Loop";
         public const string Exit       = "Exit";
         public const string Return     = "Return";
+
+        public const string TypeName = "TypeName";
+        public const string BaseType = "BaseType";
+        public const string Type     = "Type";
+        public const string Name     = "Name";
+        public const string Val      = "Val";
+        public const string Oper     = "Oper";
+        public const string Result   = "Result";
+        public const string Param    = "Param";
+        public const string Ind      = "Ind";
+        public const string Par      = "Par";
     }
 
     class Statement
