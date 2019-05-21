@@ -354,6 +354,7 @@ namespace JassToTs
             return sb;
         }
 
+        /// <summary> Преобразование параметра функции </summary>
         StringBuilder ConvertFuncParam(Statement tree)
         {
             var sb = new StringBuilder();
@@ -383,6 +384,7 @@ namespace JassToTs
             return sb;
         }
 
+        /// <summary> Преобразование инструкции </summary>
         StringBuilder ConvertStatement(Statement stat)
         {
             var sb = new StringBuilder();
@@ -415,6 +417,7 @@ namespace JassToTs
             }
         }
 
+        /// <summary> Преобразование присваивания </summary>
         StringBuilder ConvertSetStatement(Statement tree)
         {
             var sb = new StringBuilder();
@@ -456,6 +459,7 @@ namespace JassToTs
             return sb;
         }
 
+        /// <summary> Преобразование if then elseif else </summary>
         StringBuilder ConvertIfStatement(Statement tree)
         {
             var sb = new StringBuilder();
