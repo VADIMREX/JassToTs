@@ -274,7 +274,7 @@ namespace JassToTs
                 if (null != funcBody) sb.Append(funcBody);
                 sb.Append("}");
             }
-            else if (IsDTS) sb.Append(" { }");
+            else if (!IsDTS) sb.Append(" { }");
             else sb.Append(";");
             return sb.Append("\n");
         }

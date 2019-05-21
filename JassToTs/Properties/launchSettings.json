@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "JassToTs": {
+      "commandName": "Project",
+      "commandLineArgs": "-input"
+    }
+  }
+}
