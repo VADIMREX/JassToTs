@@ -10,9 +10,12 @@ namespace JassToTs
     {
         bool IsDTS;
 
-        public JassToTs(bool IsDTS = false)
+        int IndentSize;
+
+        public JassToTs(bool IsDTS = false, int IndentSize = 4)
         {
             this.IsDTS = IsDTS;
+            this.IndentSize = IndentSize;
         }
 
         public string Convert(Statement tree)
@@ -50,7 +53,7 @@ namespace JassToTs
                 case StatementType.GArr:
                 case StatementType.LVar:
                 case StatementType.LArr:
-                    //return ConvertVarDecl(stat);
+                //return ConvertVarDecl(stat);
                 case StatementType.Val:
                 case StatementType.RVar:
                 case StatementType.RFunc:
@@ -58,12 +61,12 @@ namespace JassToTs
                 case StatementType.FCall:
                 case StatementType.Expr:
                 case StatementType.Par:
-                    //return ConvertExprElem(stat).Append("\n");
+                //return ConvertExprElem(stat).Append("\n");
                 case StatementType.FuncDecl:
-                case StatementType.Params: 
-                case StatementType.FuncLocals: 
+                case StatementType.Params:
+                case StatementType.FuncLocals:
                 case StatementType.FuncBody:
-                    //
+                //
                 case StatementType.Debug:
                 case StatementType.Set:
                 case StatementType.ASet:
@@ -90,7 +93,7 @@ namespace JassToTs
                 // Базовые типы
                 case "integer":
                 case "real": return "number";
-                case "boolean": return "bool";
+                case "boolean": return "boolean";
                 case "string": return "string";
                 case "handle": return "handle"; // TODO: проверить
                 case "code": return "Function"; // TODO: проверить
@@ -139,7 +142,7 @@ namespace JassToTs
         }
 
         /// <summary> Преобразование объявления переменной </summary>
-        StringBuilder ConvertVarDecl(Statement tree)
+        StringBuilder ConvertVarDecl(Statement tree, int indent = 0)
         {
             var sb = new StringBuilder();
             var typeDecl = "";
@@ -165,7 +168,7 @@ namespace JassToTs
             StringBuilder expr = null;
             for (var i = 0; i < tree.Childs.Count; i++)
             {
-                switch(tree.Childs[i].Type)
+                switch (tree.Childs[i].Type)
                 {
                     case StatementType.Comm:
                         sb.Append(tree.Childs[i].Start.Text).Append('\n');
@@ -183,12 +186,13 @@ namespace JassToTs
                     case StatementType.RFunc:
                     case StatementType.Val:
                     case StatementType.Par:
-                        expr = ConvertExprElem (tree.Childs[i]);
+                        expr = ConvertExprElem(tree.Childs[i]);
                         continue;
                     default:
                         throw new Exception($"unknown statement {tree.Childs[i].Start}");
                 }
             }
+            AddIndent(sb, indent);
             if (isDeclare) sb.Append("declare ");
             sb.Append(typeDecl)
               .Append(name)
@@ -202,13 +206,8 @@ namespace JassToTs
         }
 
         /// <summary> Преобразование выражения </summary>
-        StringBuilder ConvertExpr(Statement tree)
-        {
-            var sb = new StringBuilder();
-            for (var i = 0; i < tree.Childs.Count; i++)
-                sb.Append(ConvertExprElem(tree.Childs[i]));
-            return sb;
-        }
+        StringBuilder ConvertExpr(Statement tree) =>
+            new StringBuilder().AppendJoin(" ", tree.Childs.Select(x => ConvertExprElem(x)));
 
         /// <summary> Преобразование составной части выражения 
         /// (идентификатор, константа, оператор и т.п.) </summary>
@@ -259,10 +258,7 @@ namespace JassToTs
                         continue;
                 }
             }
-            return sb.Append(name)
-                     .Append("(")
-                     .AppendJoin(", ", args)
-                     .Append(")");
+            return sb.Append(name).Append("(").AppendJoin(", ", args).Append(")");
         }
 
         /// <summary> Преобразование объявления функции </summary>
@@ -286,12 +282,12 @@ namespace JassToTs
                     case StatementType.FuncLocals:
                         funcLocals = new StringBuilder()
                             .Append("// local variables\n")
-                            .AppendJoin("", tree.Childs[i].Childs.Select(x => ConvertVarDecl(x)));
+                            .AppendJoin("", tree.Childs[i].Childs.Select(x => ConvertVarDecl(x, 1)));
                         continue;
                     case StatementType.FuncBody:
                         funcBody = new StringBuilder()
                             .Append("// function body\n")
-                            .AppendJoin("", tree.Childs[i].Childs.Select(x => ConvertStatement(x)));
+                            .AppendJoin("", tree.Childs[i].Childs.Select(x => ConvertStatement(x, 1)));
                         continue;
                     default:
                         throw new Exception($"unknown statement {tree.Childs[i].Start}");
@@ -385,42 +381,46 @@ namespace JassToTs
         }
 
         /// <summary> Преобразование инструкции </summary>
-        StringBuilder ConvertStatement(Statement stat)
+        StringBuilder ConvertStatement(Statement stat, int indent = 0)
         {
             var sb = new StringBuilder();
             switch (stat.Type)
             {
                 case StatementType.Comm:
-                    return sb.Append(stat.Start.Text).Append('\n');
+                    return AddIndent(sb, indent).Append(stat.Start.Text).Append('\n');
                 case StatementType.Debug:
-                    return sb.Append("// ").Append(ConvertExpr(stat)).Append(";\n");
+                    return AddIndent(sb, indent).Append("// ").Append(ConvertExpr(stat)).Append(";\n");
                 case StatementType.Set:
                 case StatementType.ASet:
-                    return ConvertSetStatement(stat);
+                    return ConvertSetStatement(stat, indent);
                 case StatementType.FCall:
-                    return ConvertExprElem(stat).Append(";\n");
+                    var s = ConvertExprElem(stat).Append(";\n");
+                    if (indent > 0) s = sb.Append(new string(' ', indent * IndentSize)).Append(s);
+                    return s;
                 case StatementType.If:
-                    return ConvertIfStatement(stat);
+                    return ConvertIfStatement(stat, indent);
                 case StatementType.Cond:
                 case StatementType.Then:
                 case StatementType.ElseCond:
                 case StatementType.Else:
                     throw new NotImplementedException();
                 case StatementType.Loop:
-                    return sb.Append("while (true) {\n").AppendJoin("", stat.Childs.Select(x=>ConvertStatement(x))).Append("}\n");
+                    AddIndent(sb, indent).Append("while (true) {\n").AppendJoin("", stat.Childs.Select(x => ConvertStatement(x, indent + 1)));
+                    AddIndent(sb, indent).Append("}\n");
+                    return sb;
                 case StatementType.Exit:
-                    return sb.Append("if (").Append(ConvertExpr(stat)).Append(") break;\n");
+                    return AddIndent(sb, indent).Append("if (").Append(ConvertExpr(stat)).Append(") break;\n");
                 case StatementType.Return:
-                    return sb.Append("return ").Append(ConvertExpr(stat)).Append(";\n");
+                    return AddIndent(sb, indent).Append("return ").Append(ConvertExpr(stat)).Append(";\n");
                 default:
                     throw new Exception($"unknown statement {stat.Start}");
             }
         }
 
         /// <summary> Преобразование присваивания </summary>
-        StringBuilder ConvertSetStatement(Statement tree)
+        StringBuilder ConvertSetStatement(Statement tree, int indent = 0)
         {
-            var sb = new StringBuilder();
+            var sb = AddIndent(new StringBuilder(), indent);
 
             var name = "";
             var isArray = StatementType.ASet == tree.Type;
@@ -460,39 +460,39 @@ namespace JassToTs
         }
 
         /// <summary> Преобразование if then elseif else </summary>
-        StringBuilder ConvertIfStatement(Statement tree)
+        StringBuilder ConvertIfStatement(Statement tree, int indent = 0)
         {
-            var sb = new StringBuilder();
+            var sb = AddIndent(new StringBuilder(), indent);
 
-            var type = "";
-            var name = "";
             for (var i = 0; i < tree.Childs.Count; i++)
             {
                 switch (tree.Childs[i].Type)
                 {
                     case StatementType.Comm:
-                        sb.Append(tree.Childs[i].Start.Text).Append('\n');
+                        AddIndent(sb, indent).Append(tree.Childs[i].Start.Text).Append('\n');
                         continue;
                     case StatementType.Cond:
                         sb.Append("if (").Append(ConvertExpr(tree.Childs[i])).Append(")\n");
                         continue;
                     case StatementType.ElseCond:
-                        sb.Append("else ");
+                        AddIndent(sb, indent).Append("else ");
                         goto case StatementType.Cond;
                     case StatementType.Then:
-                        sb.Append("{\n").AppendJoin("", tree.Childs[i].Childs.Select(x => ConvertStatement(x))).Append("}\n");
+                        AddIndent(sb, indent).Append("{\n");
+                        sb.AppendJoin("", tree.Childs[i].Childs.Select(x => ConvertStatement(x, indent + 1)));
+                        AddIndent(sb, indent).Append("}\n");
                         continue;
                     case StatementType.Else:
-                        sb.Append("else\n");
+                        AddIndent(sb, indent).Append("else\n");
                         goto case StatementType.Then;
                     default:
                         throw new Exception($"unknown statement {tree.Childs[i].Start}");
                 }
             }
 
-            sb.Append(name).Append(": ").Append(type);
-
             return sb;
         }
+
+        StringBuilder AddIndent(StringBuilder sb, int indent) => indent > 0 ? sb.Append(new string(' ', indent * IndentSize)) : sb;
     }
 }

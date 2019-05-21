@@ -7,6 +7,7 @@ namespace JassToTs
     {
         static void Main(string[] args)
         {
+            
             if (0 == args.Length) args = new[] { Console.ReadLine(), Console.ReadLine(), Console.ReadLine() };
             var path = args[0];
             var newPath = "";
