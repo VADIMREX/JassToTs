@@ -8,8 +8,10 @@ namespace JassToTs
 {
     class JassToTs
     {
+        /// <summary> режи файла описания (*.d.ts) </summary>
         bool IsDTS;
 
+        /// <summary> Количество символов в 1 сдвиге </summary>
         int IndentSize;
 
         public JassToTs(bool IsDTS = false, int IndentSize = 4)
@@ -18,6 +20,7 @@ namespace JassToTs
             this.IndentSize = IndentSize;
         }
 
+        /// <summary> Транслировать дерево в TypeScript код </summary>
         public string Convert(Statement tree)
         {
             var sb = ConvertDeclarations(tree);
@@ -34,7 +37,8 @@ namespace JassToTs
                     return new StringBuilder().Append(stat.Start.Text).Append("\n");
                 case StatementType.Prog:
                     return new StringBuilder()
-                        .Append("// Program\n")
+                        .Append("/// Some references")
+                        .Append("/// <reference path=\"war3core.d.ts\"/>")
                         .AppendJoin("", stat.Childs.Select(x => ConvertDeclarations(x)));
                 case StatementType.TypeDecl:
                     return ConvertTypeDecl(stat);
@@ -48,37 +52,6 @@ namespace JassToTs
                 case StatementType.Func:
                 case StatementType.CFunc:
                     return ConvertFunc(stat);
-                case StatementType.GConst:
-                case StatementType.GVar:
-                case StatementType.GArr:
-                case StatementType.LVar:
-                case StatementType.LArr:
-                //return ConvertVarDecl(stat);
-                case StatementType.Val:
-                case StatementType.RVar:
-                case StatementType.RFunc:
-                case StatementType.RArr:
-                case StatementType.FCall:
-                case StatementType.Expr:
-                case StatementType.Par:
-                //return ConvertExprElem(stat).Append("\n");
-                case StatementType.FuncDecl:
-                case StatementType.Params:
-                case StatementType.FuncLocals:
-                case StatementType.FuncBody:
-                //
-                case StatementType.Debug:
-                case StatementType.Set:
-                case StatementType.ASet:
-                case StatementType.If:
-                case StatementType.Cond:
-                case StatementType.Then:
-                case StatementType.ElseCond:
-                case StatementType.Else:
-                case StatementType.Loop:
-                case StatementType.Exit:
-                case StatementType.Return:
-                    throw new NotImplementedException();
                 default: throw new Exception($"unknown statement {stat.Start}");
             }
         }
@@ -493,6 +466,13 @@ namespace JassToTs
             return sb;
         }
 
-        StringBuilder AddIndent(StringBuilder sb, int indent) => indent > 0 ? sb.Append(new string(' ', indent * IndentSize)) : sb;
+        /// <summary> выравнивание кода </summary>
+        /// <param name="sb"> куда писать </param>
+        /// <param name="indent"> величина сдвига (&lt;кол-во символов&gt; = <paramref name="indent"/> * <see cref="IndentSize"/>)</param>
+        /// <returns> <paramref name="sb"/> с добавленным сдвигом </returns>
+        StringBuilder AddIndent(StringBuilder sb, int indent) => 
+            indent > 0 && IndentSize > 0 ? 
+                sb.Append(new string(' ', indent * IndentSize)) : 
+                sb;
     }
 }
