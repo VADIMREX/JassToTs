@@ -184,6 +184,10 @@ namespace Jass
         /// <summary> Попытаться распарсить оператор </summary>
         Token TryParseOperator()
         {
+            // костыль
+            if (',' == source[i])
+                return new Token { Col = pos, Line = line, Pos = i, Text = ",", Kind = TokenKind.oper };
+
             var s = "";
             int j = i,
                 l = line,

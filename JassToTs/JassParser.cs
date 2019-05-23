@@ -804,7 +804,7 @@ namespace Jass
             var j = 0;
             for (; i < tokens.Count && j < 3; i++)
             {
-                // if (AddComment(stat)) continue;
+                if (AddComment(stat)) continue;
                 switch (j)
                 {
                     case 0:

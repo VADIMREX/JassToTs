@@ -37,15 +37,15 @@ namespace JassToTs
                     return new StringBuilder().Append(stat.Start.Text).Append("\n");
                 case StatementType.Prog:
                     return new StringBuilder()
-                        .Append("/// Some references")
-                        .Append("/// <reference path=\"war3core.d.ts\"/>")
+                        .Append("/// Some references\n")
+                        .Append("/// <reference path=\"war3core.d.ts\"/>\n")
                         .AppendJoin("", stat.Childs.Select(x => ConvertDeclarations(x)));
                 case StatementType.TypeDecl:
                     return ConvertTypeDecl(stat);
                 case StatementType.Glob:
                     return new StringBuilder()
                         .Append("// global var declaration\n")
-                        .AppendJoin("", stat.Childs.Select(x => ConvertVarDecl(x)))
+                        .AppendJoin("", stat.Childs.Select(x => ConvertGlobals(x)))
                         .Append("// end global var declaration\n");
                 case StatementType.Native:
                 case StatementType.CNative:
@@ -75,13 +75,30 @@ namespace JassToTs
             }
         }
 
-        /// <summary> Преобразование комметариев </summary>
-        StringBuilder TryConvertComment(Statement tree) =>
-            StatementType.Comm == tree.Type ?
-                new StringBuilder()
-                    .Append(tree.Start.Text)
-                    .Append('\n') :
-                null;
+        /// <summary> Преобразовать оператор </summary>
+        /// <param name="type"> оператор JASS </param>
+        /// <returns> оператор TypeScript </returns>
+        string ConvertOperator(string type)
+        {
+            switch (type)
+            {
+                case "=": case ",":
+                case "+": case "-":
+                case "*": case "/":
+                case ">": case "<":
+                case "==": case "!=":
+                case ">=": case "<=":
+                    return type;
+                case "and":
+                    return "&&";
+                case "or":
+                    return "||";
+                case "not":
+                    return "!";
+                default:
+                    throw new Exception("unknown operator");
+            }
+        }
 
         /// <summary> Преобразование объявления типа </summary>
         StringBuilder ConvertTypeDecl(Statement tree)
@@ -89,12 +106,13 @@ namespace JassToTs
             var sb = new StringBuilder();
             var typeName = "";
             var baseType = "";
+            var comm = new StringBuilder();
             for (var i = 0; i < tree.Childs.Count; i++)
             {
                 switch (tree.Childs[i].Type)
                 {
                     case StatementType.Comm:
-                        sb.Append(tree.Childs[i].Start.Text).Append('\n');
+                        comm.Append(tree.Childs[i].Start.Text).Append('\n');
                         continue;
                     case StatementType.TypeName:
                         typeName = tree.Childs[i].Start.Text;
@@ -107,11 +125,37 @@ namespace JassToTs
                 }
             }
             if (IsDTS) sb.Append("declare ");
-            return sb.Append("class ")
-                     .Append(typeName)
-                     .Append(" extends ")
-                     .Append(baseType)
-                     .Append(" {}\n");
+            return sb.Append("class ").Append(typeName).Append(" extends ").Append(baseType).Append(" { }\n")
+                     .Append(comm);
+        }
+
+        /// <summary> Преобразование глобальной переменной </summary>
+        StringBuilder ConvertGlobals(Statement stat)
+        {
+            switch (stat.Type)
+            {
+                case StatementType.Comm:
+                    return new StringBuilder().Append(stat.Start.Text).Append("\n");
+                case StatementType.GConst:
+                case StatementType.GVar:
+                case StatementType.GArr:
+                    return ConvertVarDecl(stat);
+                default: throw new Exception($"unknown statement {stat.Start}");
+            }
+        }
+
+        /// <summary> Преобразование локальной переменной </summary>
+        StringBuilder ConvertLocals(Statement stat, int indent = 0)
+        {
+            switch (stat.Type)
+            {
+                case StatementType.Comm:
+                    return AddIndent(new StringBuilder(), indent).Append(stat.Start.Text).Append("\n");
+                case StatementType.LVar:
+                case StatementType.LArr:
+                    return ConvertVarDecl(stat, indent);
+                default: throw new Exception($"unknown statement {stat.Start}");
+            }
         }
 
         /// <summary> Преобразование объявления переменной </summary>
@@ -138,13 +182,14 @@ namespace JassToTs
             var isArr = StatementType.GArr == tree.Type || StatementType.LArr == tree.Type;
             var type = "";
             var name = "";
+            var comm = new StringBuilder();
             StringBuilder expr = null;
             for (var i = 0; i < tree.Childs.Count; i++)
             {
                 switch (tree.Childs[i].Type)
                 {
                     case StatementType.Comm:
-                        sb.Append(tree.Childs[i].Start.Text).Append('\n');
+                        comm.Append(tree.Childs[i].Start.Text).Append('\n');
                         continue;
                     case StatementType.Type:
                         type = ConvertType(tree.Childs[i].Start.Text);
@@ -167,15 +212,12 @@ namespace JassToTs
             }
             AddIndent(sb, indent);
             if (isDeclare) sb.Append("declare ");
-            sb.Append(typeDecl)
-              .Append(name)
-              .Append(": ")
-              .Append(type);
+            sb.Append(typeDecl).Append(name).Append(": ").Append(type);
             if (isArr) sb.Append("[]");
             if (null != expr)
-                sb.Append(" = ")
-                  .Append(expr);
-            return sb.Append(";\n");
+                sb.Append(" = ").Append(expr);
+            return sb.Append(";\n")
+                     .Append(comm);
         }
 
         /// <summary> Преобразование выражения </summary>
@@ -193,11 +235,13 @@ namespace JassToTs
                     return sb.Append(elem.Start.Text).Append('\n');
                 case StatementType.RVar:
                 case StatementType.RFunc:
-                case StatementType.Val:
-                case StatementType.Oper:
                     return sb.Append(elem.Start.Text);
+                case StatementType.Val:
+                    return sb.Append(ConvertValue(elem));
+                case StatementType.Oper:
+                    return sb.Append(ConvertOperator(elem.Start.Text));
                 case StatementType.RArr:
-                    return sb.Append("/* Array reference */");
+                    return sb.Append(ConvertArrayRef(elem));
                 case StatementType.FCall:
                     return sb.Append(ConvertFuncCall(elem));
                 case StatementType.Ind:
@@ -211,12 +255,81 @@ namespace JassToTs
             }
         }
 
+        /// <summary> Преобразовать безымянную константу </summary>
+        StringBuilder ConvertValue(Statement stat)
+        {
+            var sb = new StringBuilder();
+            var val = stat.Start.Text;
+            switch (stat.Start.Kind) {
+                case TokenKind.adec:
+                    var number = 0;
+                    for (var i = 1; i < val.Length -1; i++)
+                    {
+                        number = number << 8;
+                        number += val[i];
+                    }
+                    sb.Append(number.ToString()).Append(" /*").Append(val).Append("*/");
+                    break;
+                //case TokenKind.bin:
+                case TokenKind.oct:
+                    if ("0" == val) goto case TokenKind.ndec;
+                    sb.Append("0o").Append(val.Substring(1));
+                    break;
+                case TokenKind.dhex:
+                    sb.Append("0x").Append(val.Substring(1));
+                    break;
+                case TokenKind.ndec:
+                case TokenKind.xhex:
+                case TokenKind.real:
+                case TokenKind.@bool:
+                case TokenKind.@null:
+                case TokenKind.dstr:
+                    sb.Append(val);
+                    break;
+                default:
+                    break;
+            }
+            return sb;
+        }
+
+        /// <summary> Преобразовать ссылку на элемент массива </summary>
+        StringBuilder ConvertArrayRef(Statement stat)
+        {
+            var sb = new StringBuilder();
+
+            var name = "";
+            StringBuilder index = null;
+            var comm = new StringBuilder();
+            for (var i = 0; i < stat.Childs.Count; i++)
+            {
+                switch (stat.Childs[i].Type)
+                {
+                    case StatementType.Comm:
+                        comm.Append(stat.Childs[i].Start.Text).Append('\n');
+                        continue;
+                    case StatementType.Name:
+                        name = stat.Childs[i].Start.Text;
+                        continue;
+                    case StatementType.Ind:
+                        index = ConvertExprElem(stat.Childs[i]);
+                        continue;
+                    default:
+                        throw new Exception($"unknown statement {stat.Childs[i].Start}");
+                }
+            }
+
+            sb.Append(name).Append(index).Append(comm);
+
+            return sb;
+        }
+
         /// <summary> Преобразование вызова функции </summary>
         StringBuilder ConvertFuncCall(Statement tree)
         {
             var sb = new StringBuilder();
             var name = "";
             var args = new List<StringBuilder>();
+            var comm = new StringBuilder();
             for (var i = 0; i < tree.Childs.Count; i++)
             {
                 switch (tree.Childs[i].Type)
@@ -239,6 +352,7 @@ namespace JassToTs
         {
             var sb = new StringBuilder();
 
+            bool isNative = StatementType.CNative == tree.Type || StatementType.Native == tree.Type;
             StringBuilder funcDecl = null;
             StringBuilder funcLocals = null;
             StringBuilder funcBody = null;
@@ -255,7 +369,7 @@ namespace JassToTs
                     case StatementType.FuncLocals:
                         funcLocals = new StringBuilder()
                             .Append("// local variables\n")
-                            .AppendJoin("", tree.Childs[i].Childs.Select(x => ConvertVarDecl(x, 1)));
+                            .AppendJoin("", tree.Childs[i].Childs.Select(x => ConvertLocals(x, 1)));
                         continue;
                     case StatementType.FuncBody:
                         funcBody = new StringBuilder()
@@ -266,15 +380,20 @@ namespace JassToTs
                         throw new Exception($"unknown statement {tree.Childs[i].Start}");
                 }
             }
+            if (IsDTS || isNative) sb.Append("declare ");
             sb.Append(funcDecl);
-            if ((null != funcLocals || null != funcBody) && !IsDTS)
+            if (!IsDTS && !isNative)
             {
-                sb.Append(" {\n");
-                if (null != funcLocals) sb.Append(funcLocals);
-                if (null != funcBody) sb.Append(funcBody);
-                sb.Append("}");
+                if (null != funcLocals || null != funcBody)
+                {
+                    sb.Append(" {\n");
+                    if (null != funcLocals) sb.Append(funcLocals);
+                    if (null != funcBody) sb.Append(funcBody);
+                    sb.Append("}");
+                }
+                else
+                    sb.Append(" { }");
             }
-            else if (!IsDTS) sb.Append(" { }");
             else sb.Append(";");
             return sb.Append("\n");
         }
@@ -310,7 +429,6 @@ namespace JassToTs
                 }
             }
 
-            if (IsDTS) sb.Append("declare ");
             sb.Append("function ")
               .Append(name)
               .Append(" (");
