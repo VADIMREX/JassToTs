@@ -4,6 +4,14 @@ using System.IO;
 
 namespace JassToTs
 {
+    enum Language
+    {
+        TypeScript,
+        TypeScriptDeclaration,
+        Lua,
+        GalaxyRaw
+    }
+
     class Program
     {
         const string help =
@@ -20,8 +28,7 @@ namespace JassToTs
         static string inPath = "";
         static string outPath = "";
         static string outTree = "";
-        static bool isDTS = false;
-        static bool isLua = true;
+        static Language language;
         static bool isTreeNeeded = false;
 
         static void TranslateFile(string ipath, string opath, string tpath)
@@ -50,24 +57,31 @@ namespace JassToTs
             }
 
             Console.WriteLine("translating");
-            var ts = "";
-            if (isLua)
+            var script = "";
+            switch(language)
             {
-                var converter = new JassToLua();
-                ts = converter.Convert(tree);
-            }
-            else
-            {
-                var converter = new JassToTs(isDTS);
-                ts = converter.Convert(tree);
+                case Language.TypeScript:
+                case Language.TypeScriptDeclaration:
+                    var tsConverter = new JassToTs(language == Language.TypeScriptDeclaration);
+                    script = tsConverter.Convert(tree);
+                    break;
+                case Language.Lua:
+                    var luaConverter = new JassToLua();
+                    script = luaConverter.Convert(tree);
+                    break;
+                case Language.GalaxyRaw:
+                    var galaxyRawConverter = new JassToGalaxyRaw();
+                    script = galaxyRawConverter.Convert(tree);
+                    break;
             }
             Console.WriteLine($"saving into {opath}");
             using (var sw = new StreamWriter(opath))
-                sw.WriteLine(ts);
+                sw.WriteLine(script);
         }
 
         static int Main(string[] args)
         {
+            language = Language.TypeScript;
             for (var i = 0; i < args.Length; i++)
             {
                 switch (args[i])
@@ -93,11 +107,10 @@ namespace JassToTs
                     case "-i": if (i + 1 == args.Length) break; inPath = args[i + 1]; i++; continue;
                     case "-o": if (i + 1 == args.Length) break; outPath = args[i + 1]; i++; continue;
                     case "-ot": if (i + 1 == args.Length) break; outTree = args[i + 1]; i++; continue;
-                    case "-dts": isDTS = true; continue;
-                    case "-t": isDTS = true; continue;
-                    case "-lua":
-                        isLua = true;
-                        continue;
+                    case "-dts": language = Language.TypeScriptDeclaration; continue;
+                    case "-t": language = Language.TypeScriptDeclaration; continue;
+                    case "-lua": language = Language.Lua; continue;
+                    case "-galaxy-raw": language = Language.GalaxyRaw; continue;
                     case "-h":
                         Console.WriteLine(help);
                         return 0;
@@ -112,7 +125,14 @@ namespace JassToTs
                 foreach (var fi in di.GetFiles("*.j|*.ai"))
                 {
                     var iPath = fi.FullName;
-                    var oPath = Path.Combine(Path.GetDirectoryName(inPath), Path.GetFileNameWithoutExtension(inPath) + (isDTS ? ".d.ts" : ".ts"));
+                    var oPath = Path.Combine(Path.GetDirectoryName(inPath), Path.GetFileNameWithoutExtension(inPath));
+                    switch (language)
+                    {
+                        case Language.TypeScript: outPath += ".ts"; break;
+                        case Language.TypeScriptDeclaration: outPath += ".d.ts"; break;
+                        case Language.Lua: outPath += ".lua"; break;
+                        case Language.GalaxyRaw: outPath += ".galaxy"; break;
+                    }
                     var tPath = "";
                     if (isTreeNeeded)
                         tPath = Path.Combine(Path.GetDirectoryName(inPath), Path.GetFileNameWithoutExtension(inPath) + ".tree");
@@ -129,7 +149,17 @@ namespace JassToTs
                 return 0;
             }
 
-            if ("" == outPath) outPath = Path.Combine(Path.GetDirectoryName(inPath), Path.GetFileNameWithoutExtension(inPath) + (isDTS ? ".d.ts" : ".ts"));
+            if ("" == outPath)
+            {
+                outPath = Path.Combine(Path.GetDirectoryName(inPath), Path.GetFileNameWithoutExtension(inPath));
+                switch (language)
+                {
+                    case Language.TypeScript: outPath += ".ts"; break;
+                    case Language.TypeScriptDeclaration: outPath += ".d.ts"; break;
+                    case Language.Lua: outPath += ".lua"; break;
+                    case Language.GalaxyRaw: outPath += ".galaxy"; break;
+                }
+            }
             if (isTreeNeeded && "" == outTree) outTree = Path.Combine(Path.GetDirectoryName(inPath), Path.GetFileNameWithoutExtension(inPath) + ".tree");
 
 #if !DEBUG
