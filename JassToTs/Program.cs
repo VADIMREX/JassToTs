@@ -21,6 +21,7 @@ namespace JassToTs
         static string outPath = "";
         static string outTree = "";
         static bool isDTS = false;
+        static bool isLua = true;
         static bool isTreeNeeded = false;
 
         static void TranslateFile(string ipath, string opath, string tpath)
@@ -29,8 +30,7 @@ namespace JassToTs
 
             var lexer = new Jass.JassLexer();
             var parser = new Jass.JassParser();
-            var converter = new JassToTs(isDTS);
-
+            
             Console.WriteLine($"reading file {ipath}");
             string source;
             using (var sr = new StreamReader(ipath))
@@ -50,7 +50,17 @@ namespace JassToTs
             }
 
             Console.WriteLine("translating");
-            var ts = converter.Convert(tree);
+            var ts = "";
+            if (isLua)
+            {
+                var converter = new JassToLua();
+                ts = converter.Convert(tree);
+            }
+            else
+            {
+                var converter = new JassToTs(isDTS);
+                ts = converter.Convert(tree);
+            }
             Console.WriteLine($"saving into {opath}");
             using (var sw = new StreamWriter(opath))
                 sw.WriteLine(ts);
@@ -85,6 +95,9 @@ namespace JassToTs
                     case "-ot": if (i + 1 == args.Length) break; outTree = args[i + 1]; i++; continue;
                     case "-dts": isDTS = true; continue;
                     case "-t": isDTS = true; continue;
+                    case "-lua":
+                        isLua = true;
+                        continue;
                     case "-h":
                         Console.WriteLine(help);
                         return 0;
