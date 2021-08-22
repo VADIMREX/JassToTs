@@ -10,6 +10,15 @@ public class Token {
     public int Col = 0;
     public int Pos = 0;
     public String Text = "";
+
+    public Token() {}
+    public Token(int col, int line, int pos, String text, String kind) {
+        Col = col;
+        Line = line;
+        Pos = pos;
+        Text = text;
+        Kind = kind;
+    } 
     //public override String ToString() => $"{Line},{Col} [{Type}|{Kind}]: {Text}";
     @Override
     public String toString() {
