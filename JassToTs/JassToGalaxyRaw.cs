@@ -10,9 +10,11 @@ namespace JassToTs
     {
         /// <summary> Количество символов в 1 сдвиге </summary>
         int IndentSize;
+        bool isOptimizationNeeded;
 
-        public JassToGalaxyRaw(int IndentSize = 4)
+        public JassToGalaxyRaw(bool isOptimizationNeeded, int IndentSize = 4)
         {
+            this.isOptimizationNeeded = isOptimizationNeeded;
             this.IndentSize = IndentSize;
         }
 

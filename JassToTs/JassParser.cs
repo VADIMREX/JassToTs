@@ -13,6 +13,9 @@ namespace Jass
         /// <summary> глобальная позиция в списке токенов </summary>
         int i;
 
+        bool isYdweCompatible;
+        public JassParser(bool isYdweCompatible = false) => this.isYdweCompatible = isYdweCompatible;
+
         /// <summary> Добавить комментарий </summary>
         /// <param name="parent"> Инструкция содержащая комментарий </param>
         /// <returns> true если был добавлен комментарий </returns>

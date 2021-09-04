@@ -14,8 +14,11 @@ namespace JassToTs
         /// <summary> Количество символов в 1 сдвиге </summary>
         int IndentSize;
 
-        public JassToTs(bool IsDTS = false, int IndentSize = 4)
+        bool isOptimizationNeeded;
+
+        public JassToTs(bool isOptimizationNeeded = false, bool IsDTS = false, int IndentSize = 4)
         {
+            this.isOptimizationNeeded = isOptimizationNeeded;
             this.IsDTS = IsDTS;
             this.IndentSize = IndentSize;
         }

@@ -21,6 +21,9 @@ public class App
         "-i   <file path> set input file\n" +
         "-o   <file path> set output file \n" +
         "-ot  <file path> set output tree file\n" +
+        "-nt              for saving tree file\n" +
+        "-ydwe            for compatibility with YDWE jass\n" +
+        "-op              for optimiztion\n" +
         "-dts             d.ts mode, make *.d.ts instead of *.ts file\n" +
         "-t               tree mode, will save tree file\n" +
         "-h               show this message\n" +
@@ -31,13 +34,15 @@ public class App
     static String outTree = "";
     static int language;
     static boolean isTreeNeeded = false;
+    static boolean isOptimizationNeeded = false;
+    static boolean isYdweCompatible = false;
 
     static void TranslateFile(String ipath, String opath, String tpath) throws Exception
     {
         System.out.println("JASS to TypeScript translator (by VADIMREX)\n");
 
         var lexer = new JassLexer();
-        // var parser = new Jass.JassParser();
+        // var parser = new Jass.JassParser(isYdweCompatible);
         
         System.out.println(String.format("reading file %s", ipath));
         String source = "";
@@ -80,15 +85,15 @@ public class App
         // {
         //     case Language.TypeScript:
         //     case Language.TypeScriptDeclaration:
-        //         var tsConverter = new JassToTs(language == Language.TypeScriptDeclaration);
+        //         var tsConverter = new JassToTs(isOptimizationNeeded, language == Language.TypeScriptDeclaration);
         //         script = tsConverter.Convert(tree);
         //         break;
         //     case Language.Lua:
-        //         var luaConverter = new JassToLua();
+        //         var luaConverter = new JassToLua(isOptimizationNeeded);
         //         script = luaConverter.Convert(tree);
         //         break;
         //     case Language.GalaxyRaw:
-        //         var galaxyRawConverter = new JassToGalaxyRaw();
+        //         var galaxyRawConverter = new JassToGalaxyRaw(isOptimizationNeeded);
         //         script = galaxyRawConverter.Convert(tree);
         //         break;
         // }
@@ -126,7 +131,9 @@ public class App
                     case "-i": if (i + 1 == args.length) break; inPath = args[i + 1]; i++; continue;
                     case "-o": if (i + 1 == args.length) break; outPath = args[i + 1]; i++; continue;
                     case "-ot": if (i + 1 == args.length) break; outTree = args[i + 1]; i++; continue;
-                    case "-dts": language = Language.TypeScriptDeclaration; continue;
+                    case "-nt": isTreeNeeded = true; continue;
+                    case "-ydwe": isYdweCompatible = true; continue;
+                    case "-op": isOptimizationNeeded = true; continue;case "-dts": language = Language.TypeScriptDeclaration; continue;
                     case "-t": language = Language.TypeScriptDeclaration; continue;
                     case "-lua": language = Language.Lua; continue;
                     case "-galaxy-raw": language = Language.GalaxyRaw; continue;

@@ -20,8 +20,13 @@ namespace JassToTs
 -i   <file path> set input file
 -o   <file path> set output file 
 -ot  <file path> set output tree file
+-nt              for saving tree file
+-ydwe            for compatibility with YDWE jass
+-op              for optimiztion
 -dts             d.ts mode, make *.d.ts instead of *.ts file
 -t               tree mode, will save tree file
+-lua             set output language to lua (default language typescript)
+-galaxy-raw      set output language to galaxy (not final version)
 -h               show this message
 ";
 
@@ -30,13 +35,15 @@ namespace JassToTs
         static string outTree = "";
         static Language language;
         static bool isTreeNeeded = false;
+        static bool isOptimizationNeeded = false;
+        static bool isYdweCompatible = false;
 
         static void TranslateFile(string ipath, string opath, string tpath)
         {
             Console.WriteLine("JASS to TypeScript translator (by VADIMREX)\n");
 
             var lexer = new Jass.JassLexer();
-            var parser = new Jass.JassParser();
+            var parser = new Jass.JassParser(isYdweCompatible);
             
             Console.WriteLine($"reading file {ipath}");
             string source;
@@ -62,15 +69,15 @@ namespace JassToTs
             {
                 case Language.TypeScript:
                 case Language.TypeScriptDeclaration:
-                    var tsConverter = new JassToTs(language == Language.TypeScriptDeclaration);
+                    var tsConverter = new JassToTs(isOptimizationNeeded, language == Language.TypeScriptDeclaration);
                     script = tsConverter.Convert(tree);
                     break;
                 case Language.Lua:
-                    var luaConverter = new JassToLua();
+                    var luaConverter = new JassToLua(isOptimizationNeeded);
                     script = luaConverter.Convert(tree);
                     break;
                 case Language.GalaxyRaw:
-                    var galaxyRawConverter = new JassToGalaxyRaw();
+                    var galaxyRawConverter = new JassToGalaxyRaw(isOptimizationNeeded);
                     script = galaxyRawConverter.Convert(tree);
                     break;
             }
@@ -107,6 +114,9 @@ namespace JassToTs
                     case "-i": if (i + 1 == args.Length) break; inPath = args[i + 1]; i++; continue;
                     case "-o": if (i + 1 == args.Length) break; outPath = args[i + 1]; i++; continue;
                     case "-ot": if (i + 1 == args.Length) break; outTree = args[i + 1]; i++; continue;
+                    case "-nt": isTreeNeeded = true; continue;
+                    case "-ydwe": isYdweCompatible = true; continue;
+                    case "-op": isOptimizationNeeded = true; continue;
                     case "-dts": language = Language.TypeScriptDeclaration; continue;
                     case "-t": language = Language.TypeScriptDeclaration; continue;
                     case "-lua": language = Language.Lua; continue;
