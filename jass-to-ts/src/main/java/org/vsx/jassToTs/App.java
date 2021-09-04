@@ -198,6 +198,8 @@ public class App
             catch (Exception e)
             {
                 System.out.println(e.getMessage());
+                for (var a : e.getStackTrace())
+                    System.out.println(a);
             }
             System.exit(0);
             return;
