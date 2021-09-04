@@ -712,7 +712,7 @@ namespace Jass
 
                 if (TokenKind.ln == tokens[i].Kind) break;
 
-                if (TokenKind.kwd != tokens[i].Kind) new Exception($"Line {tokens[i].Line}, Col {tokens[i].Col}: statement error: keyword expected");
+                if (TokenKind.kwd != tokens[i].Kind) throw new Exception($"Line {tokens[i].Line}, Col {tokens[i].Col}: statement error: keyword expected");
 
                 switch (tokens[i].Text)
                 {
@@ -1031,7 +1031,7 @@ namespace Jass
                 AddComment(prog);
                 if (TokenKind.ln == tokens[i].Kind) continue;
 
-                if (TokenKind.kwd != tokens[i].Kind) new Exception($"Line {tokens[i].Line}, Col {tokens[i].Col}: error: keyword expected");
+                if (TokenKind.kwd != tokens[i].Kind) throw new Exception($"Line {tokens[i].Line}, Col {tokens[i].Col}: error: keyword expected");
 
                 if ("type" == tokens[i].Text)
                 {
