@@ -74,11 +74,6 @@ public class JassLexer {
 
     ArrayList<String> operators = new ArrayList<String>(List.of("=", ",", "+", "-", "*", "/", ">", "<", "==", "!=", ">=", "<=" ));
 
-    Exception makeException(int line, int col, String message) {
-        //Line {l}, Col {p}: 
-        return new Exception(String.format("Line %d, Col %d: %s", line, col, message));
-    }
-
     /** 
      * Проверить на перевод строки.
      * Инкрементирует переменную line и 
@@ -125,7 +120,7 @@ public class JassLexer {
      * Попытаться распарсить число
      * @return  null если не удалось распарсить число 
      */
-    Token TryParseNumber() throws Exception
+    Token TryParseNumber() throws JassException
     {
         var s = "";
         int j = i,
@@ -141,7 +136,7 @@ public class JassLexer {
             // условия при которых продолжаем
             if ('0' <= source.charAt(i) && source.charAt(i) <= '9')
             {
-                if (isOct && '8' <= source.charAt(i)) throw makeException(l, p, "wrong number: wrong octal number");
+                if (isOct && '8' <= source.charAt(i)) throw new JassException(l, p, "wrong number: wrong octal number");
                 isNumFound = true;
                 continue;
             }
@@ -162,9 +157,9 @@ public class JassLexer {
             }
             if ('.' == source.charAt(i))
             {
-                if (isDotFound) throw makeException(l, p, "wrong number: multiple dot");
-                if (isHex) throw makeException(l, p, "wrong number: dot inside hex");
-                if (isOct && s.length() > 1) throw makeException(l, p, "wrong number: dot inside octadecimal");
+                if (isDotFound) throw new JassException(l, p, "wrong number: multiple dot");
+                if (isHex) throw new JassException(l, p, "wrong number: dot inside hex");
+                if (isOct && s.length() > 1) throw new JassException(l, p, "wrong number: dot inside octadecimal");
                 isOct = false;
                 isDotFound = true;
                 continue;
@@ -180,7 +175,7 @@ public class JassLexer {
                 i = j;
                 return null;
             }
-            throw makeException(l, p, "wrong number: not a number");
+            throw new JassException(l, p, "wrong number: not a number");
         }
         var typ = TokenKind.ndec;
         if (isOct) typ = TokenKind.oct;
@@ -192,7 +187,7 @@ public class JassLexer {
     }
 
     /** Попытаться распарсить оператор */
-    Token TryParseOperator() throws Exception
+    Token TryParseOperator() throws JassException
     {
         // костыль
         if (',' == source.charAt(i))
@@ -209,27 +204,27 @@ public class JassLexer {
             break;
         }
 
-        if (!operators.contains(s)) throw makeException(l, p, "wrong operator");
+        if (!operators.contains(s)) throw new JassException(l, p, "wrong operator");
 
         if (i < source.length()) i--;
         return new Token(p, l, j, s, TokenKind.oper);
     }
 
     /** Попытаться распарсить число из 4х ASCII символов */
-    Token TryParse4AsciiInt() throws Exception
+    Token TryParse4AsciiInt() throws JassException
     {
         var tok = TryParseString();
-        if (tok.Text.length() > 6) throw makeException(tok.Line, tok.Col, "wrong number: more than 4 ascii symbols");
+        if (tok.Text.length() > 6) throw new JassException(tok.Line, tok.Col, "wrong number: more than 4 ascii symbols");
         for (char c: tok.Text.toCharArray())
             if (c > '\u00ff')
-                throw makeException(tok.Line, tok.Col, "wrong number: non ascii symbol");
+                throw new JassException(tok.Line, tok.Col, "wrong number: non ascii symbol");
         // Надо проверить как оригинальный компилятор относится к 'a\'bc' последовательности
         tok.Kind = TokenKind.adec;
         return tok;
     }
 
     /** Попытаться распарсить строку */
-    Token TryParseString() throws Exception
+    Token TryParseString() throws JassException
     {
         char eoc = source.charAt(i);
 
@@ -238,7 +233,7 @@ public class JassLexer {
             l = line,
             p = pos;
 
-        if (i == source.length() - 1) throw makeException(l, p, "unclosed String");
+        if (i == source.length() - 1) throw new JassException(l, p, "unclosed String");
 
         i++;
         for (; i < source.length(); i++, pos++)
@@ -256,7 +251,7 @@ public class JassLexer {
     }
 
     /** Попытаться распарсить имя */
-    Token TryParseName() throws Exception
+    Token TryParseName() throws JassException
     {
         var s = "";
         int j = i,
@@ -277,11 +272,11 @@ public class JassLexer {
             if (opers.contains(source.subSequence(i, 1))) break;
             if (strChar.contains(source.subSequence(i, 1))) break; // в некоторых случаях может быть норм
             // левые символы
-            throw makeException(l, p, "wrong identifier: unknown symbol");
+            throw new JassException(l, p, "wrong identifier: unknown symbol");
         }
         var typ = TokenKind.name;
         if (keywords.containsKey(s)) typ = keywords.get(s);
-        if ('_' == s.charAt(s.length() - 1)) throw makeException(l, p, "wrong identifier: ends with \"_\"");
+        if ('_' == s.charAt(s.length() - 1)) throw new JassException(l, p, "wrong identifier: ends with \"_\"");
 
         if (i < source.length()) i--;
         return new Token(p, l, j, s, typ);
@@ -292,7 +287,7 @@ public class JassLexer {
      * @param source исходный код на языке jass
      * @return  список из токенов
      */
-    public List<Token> Tokenize(String source) throws Exception
+    public List<Token> Tokenize(String source) throws JassException
     {
         this.source = source;
         i = 0;
