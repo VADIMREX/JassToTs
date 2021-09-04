@@ -4,15 +4,13 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.util.LinkedList;
+import java.io.FileWriter;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 import org.vsx.jass.JassLexer;
+import org.vsx.jass.JassParser;
 
-/**
- * Hello world!
- *
- */
 public class App 
 {
     final static String help =
@@ -42,7 +40,7 @@ public class App
         System.out.println("JASS to TypeScript translator (by VADIMREX)\n");
 
         var lexer = new JassLexer();
-        // var parser = new Jass.JassParser(isYdweCompatible);
+        var parser = new JassParser(isYdweCompatible);
         
         System.out.println(String.format("reading file %s", ipath));
         String source = "";
@@ -63,21 +61,23 @@ public class App
             System.out.println("file not found");
         }
         
-        // using (var sr = new StreamReader(ipath))
-        //     source = sr.ReadToEnd();
-
         System.out.println("lexeing");
         var tokens = lexer.Tokenize(source);
 
-        // System.out.println("parsing");
-        // var tree = parser.Parse(tokens);
+        System.out.println("parsing");
+        var tree = parser.Parse(tokens);
 
-        // if ("" != tpath)
-        // {
-        //     System.out.println(String.format("saving tree into {tpath}"));
-        //     using (var sw = new StreamWriter(tpath))
-        //         sw.WriteLine(tree.ToString());
-        // }
+        if ("" != tpath)
+        {
+            System.out.println(String.format("saving tree into {tpath}"));
+            try {
+                var fout = new FileWriter(tpath);
+                fout.write(tree.toString());
+                fout.close();
+            } catch (FileNotFoundException e) {
+                System.out.println("file not found");
+            }
+        }
 
         // System.out.println("translating");
         // var script = "";
@@ -112,7 +112,7 @@ public class App
                     case "-input":
                         System.out.println("please enter arguments, empty line for continue");
                         var scan = new Scanner(System.in);
-                        var lst = new LinkedList<String>();
+                        var lst = new ArrayList<String>();
                         int j = 0;
                         while (j < 2)
                         {
