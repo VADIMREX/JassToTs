@@ -1,6 +1,6 @@
 package org.vsx.jass;
 
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Stack;
 
 public class JassParser {
@@ -9,7 +9,7 @@ public class JassParser {
     }
 
     /** список токенов по которому идёт разбор */
-    ArrayList<Token> tokens;
+    List<Token> tokens;
     /** глобальная позиция в списке токенов */
     int i;
 
@@ -1044,7 +1044,7 @@ public class JassParser {
 
     //#endregion
 
-    public Statement Parse(ArrayList<Token> tokens) throws JassException
+    public Statement Parse(List<Token> tokens) throws JassException
     {
         this.tokens = tokens;
 
