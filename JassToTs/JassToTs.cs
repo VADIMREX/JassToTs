@@ -572,11 +572,17 @@ namespace JassToTs
                         AddIndent(sb, indent).Append("else ");
                         goto case StatementType.Cond;
                     case StatementType.Then:
+                        if (isOptimizationNeeded && 1 == tree.Childs[i].Childs.Count) { 
+                            sb.AppendJoin("", tree.Childs[i].Childs.Select(x => ConvertStatement(x, indent + 1)));
+                            continue;
+                        }
                         AddIndent(sb, indent).Append("{\n");
                         sb.AppendJoin("", tree.Childs[i].Childs.Select(x => ConvertStatement(x, indent + 1)));
                         AddIndent(sb, indent).Append("}\n");
                         continue;
                     case StatementType.Else:
+                        if (isOptimizationNeeded && 0 == tree.Childs[i].Childs.Count)
+                            continue;
                         AddIndent(sb, indent).Append("else\n");
                         goto case StatementType.Then;
                     default:

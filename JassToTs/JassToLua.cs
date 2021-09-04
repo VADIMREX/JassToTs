@@ -575,6 +575,8 @@ namespace JassToTs
                         sb.AppendJoin("", tree.Childs[i].Childs.Select(x => ConvertStatement(x, indent + 1)));
                         continue;
                     case StatementType.Else:
+                        if (isOptimizationNeeded && 0 == tree.Childs[i].Childs.Count)                        
+                            continue;
                         AddIndent(sb, indent).Append("else\n");
                         goto case StatementType.Then;
                     default:
