@@ -239,7 +239,14 @@ namespace JassToTs
                 case StatementType.Ind:
                     return sb.Append("[").Append(ConvertExpr(elem)).Append("]");
                 case StatementType.Par:
-                    return sb.Append("(").Append(ConvertExpr(elem)).Append(")");
+                    {
+                        var childExpr = ConvertExpr(elem);
+                        if (isOptimizationNeeded) { 
+                            while('(' == childExpr[0] && childExpr[childExpr.Length - 1] == ')')
+                                childExpr = childExpr.Remove(0, 1).Remove(childExpr.Length - 1, 1);
+                        }
+                        return sb.Append("(").Append(childExpr).Append(")");
+                    }
                 case StatementType.Expr:
                     return ConvertExpr(elem);
                 default:
