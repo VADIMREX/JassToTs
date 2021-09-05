@@ -1028,7 +1028,7 @@ namespace Jass
             Statement stat = null;
             for (i = 0; i < tokens.Count; i++)
             {
-                AddComment(prog);
+                if (AddComment(prog)) continue;
                 if (TokenKind.ln == tokens[i].Kind) continue;
 
                 if (TokenKind.kwd != tokens[i].Kind) throw new Exception($"Line {tokens[i].Line}, Col {tokens[i].Col}: error: keyword expected");
