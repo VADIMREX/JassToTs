@@ -59,7 +59,7 @@ saving into example.ts
  - [ ] *(Possibly)* interpreter
  - [ ] Java version
    - [x] Lexer
-   - [ ] Parser
+   - [x] Parser
    - [ ] To typescript translator
    - [ ] To lua translator
  - [ ] Go version

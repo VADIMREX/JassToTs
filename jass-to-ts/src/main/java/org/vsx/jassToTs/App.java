@@ -69,7 +69,7 @@ public class App
 
         if ("" != tpath)
         {
-            System.out.println(String.format("saving tree into {tpath}"));
+            System.out.println(String.format("saving tree into %s", tpath));
             try {
                 var fout = new FileWriter(tpath);
                 fout.write(tree.toString());
