@@ -306,6 +306,15 @@ namespace Jass
                         stat.AddChild(TryParseFuncRef());
                         continue;
                     case TokenType.name:
+                        # warning Потенциальные дженерики, хз что с ними делать, пока что записываем строкой
+                        if (isYdweCompatible && TokenKind.btyp == tokens[i].Kind)
+                        {
+                            var ctoken = tokens[i].Clone();
+                            ctoken.Text = $"\"{ctoken.Text}\"";
+                            child = new Statement { Type = "RVar", Start = ctoken };
+                            stat.AddChild(child);
+                            continue;
+                        }
                         child = TryParseArrayRef();
                         if (null == child)
                             child = TryParseFuncCall();
@@ -396,7 +405,7 @@ namespace Jass
                 switch (j)
                 {
                     case 0:
-                        if (TokenKind.name != tokens[i].Kind)
+                        if (TokenKind.name != tokens[i].Kind) 
                             throw new Exception($"Line {tokens[i].Line}, Col {tokens[i].Col}: wrong expression: identifier expected");
                         stat.AddChild("Name", tokens[i]);
                         j++;
@@ -726,7 +735,7 @@ namespace Jass
 
                 #warning Вызов потенциального макроса, у парсера макросы должны быть выпилены
                 if (isYdweCompatible && TokenKind.name == tokens[i].Kind) {
-                     return TryParseMacroCall();
+                    return TryParseMacroCall();
                 }
                 if (TokenKind.kwd != tokens[i].Kind) throw new Exception($"Line {tokens[i].Line}, Col {tokens[i].Col}: statement error: keyword expected");
 
