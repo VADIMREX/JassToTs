@@ -23,17 +23,17 @@ public class JassParser {
         this.isYdweCompatible = isYdweCompatible;
     }
 
-    /** Добавить комментарий */
-    /// <param name="parent"> Инструкция содержащая комментарий </param>
-    /// <returns> true если был добавлен комментарий </returns>
+    /** 
+     * Добавить комментарий
+     * @param parent Инструкция содержащая комментарий
+     * @return true если был добавлен комментарий
+     */
     boolean AddComment(Statement parent)
     {
         if (TokenType.comm != tokens.get(i).getType()) return false;
         parent.AddChild("Comm", tokens.get(i));
         return true;
     }
-
-    //#region type/global
 
     /** Попытаться распарсить объявление типа */
     Statement TryParseTypeDecl() throws JassException
@@ -130,10 +130,6 @@ public class JassParser {
         stat.Type = String.format("G%s", stat.Type);
         return stat;
     }
-
-    //#endregion
-
-    //#region var/const declaration
 
     /** Попытаться распарсить глобальную константу */
     Statement TryParseGlobalConst() throws JassException
@@ -259,9 +255,6 @@ public class JassParser {
         return stat;
     }
 
-    //#endregion
-
-    //#region expression
     /** Остановить если встретился перевод строки */
     final Func<Token, Boolean> DefStopper = new Func<Token,Boolean>(){
         @Override
@@ -275,8 +268,10 @@ public class JassParser {
         return this.TryParseExpression(null);
     }
 
-    /** Попытаться распарсить выражение */
-    /// <param name="stopper"> Предикат используемый для остановки парсинга выражения, по умолчанию <see cref="DefStopper(Token)"/></param>
+    /** 
+     * Попытаться распарсить выражение
+     * @param stopper Предикат используемый для остановки парсинга выражения, по умолчанию {@link JassParser#DefStopper}
+     */
     Statement TryParseExpression(Func<Token, Boolean> stopper) throws JassException
     {
         if (null == stopper) stopper = DefStopper;
@@ -320,6 +315,14 @@ public class JassParser {
                     stat.AddChild(TryParseFuncRef());
                     continue;
                 case TokenType.name:
+                    if (isYdweCompatible && TokenKind.btyp == tokens.get(i).Kind)
+                    {
+                        var ctoken = tokens.get(i).Clone();
+                        ctoken.Text = String.format("\"%s\"", ctoken.Text);
+                        child = new Statement("RVar", ctoken);
+                        stat.AddChild(child);
+                        continue;
+                    }
                     child = TryParseArrayRef();
                     if (null == child)
                         child = TryParseFuncCall();
@@ -338,7 +341,7 @@ public class JassParser {
 
     /** 
      * Остановить если найден перево строки, запятая или закрывающая скобка 
-     * <code>token => TokenKind.ln == token.Kind || (TokenKind.oper == token.Kind && "," == token.Text)
+     * <pre>{@code token => TokenKind.ln == token.Kind || (TokenKind.oper == token.Kind && "," == token.Text)}</pre>
      */
     final Func<Token, Boolean> ArgStopper = new Func<Token,Boolean>() {
         @Override
@@ -399,7 +402,7 @@ public class JassParser {
 
     /**
      * Остановить если найден перевод строки или закрывающая квадратная скобка 
-     * <code>token => TokenKind.ln == token.Kind || TokenKind.rind == token.Kind</code>
+     * <pre>{@code token => TokenKind.ln == token.Kind || TokenKind.rind == token.Kind} </pre>
      */
     Func<Token, Boolean> IndStopper = new Func<Token,Boolean>(){
         @Override
@@ -484,10 +487,6 @@ public class JassParser {
         if (i < tokens.size()) i--;
         return stat;
     }
-
-    //#endregion
-
-    //#region functions
 
     /** Попытаться распарсить объявление нативной функции */
     Statement TryParseNative() throws JassException
@@ -721,9 +720,17 @@ public class JassParser {
         return stat;
     }
 
-    //#endregion
-
-    //#region statement
+    public Statement TryParseMacroCall() {
+        var sb = new StringBuilder("//");
+        var stoken = tokens.get(i).Clone();
+        for (; i < tokens.size(); i++)
+        {
+            if (TokenKind.ln == tokens.get(i).Kind) break;
+            sb.append(String.format(" %s", tokens.get(i).Text));
+        }
+        stoken.Text = sb.toString();
+        return new Statement(StatementType.Comm, stoken);
+    }
 
     /** Попытаться распарсить инструкцию */
     public Statement TryParseStatement() throws JassException
@@ -735,6 +742,9 @@ public class JassParser {
 
             if (TokenKind.ln == tokens.get(i).Kind) break;
 
+            if (isYdweCompatible && TokenKind.name == tokens.get(i).Kind) {
+                return TryParseMacroCall();
+            }
             if (TokenKind.kwd != tokens.get(i).Kind) new JassException(tokens.get(i).Line, tokens.get(i).Col, "statement error: keyword expected");
 
             switch (tokens.get(i).Text)
@@ -1041,8 +1051,6 @@ public class JassParser {
         if (i < tokens.size()) i--;
         return stat;
     }
-
-    //#endregion
 
     public Statement Parse(List<Token> tokens) throws JassException
     {

@@ -19,9 +19,13 @@ public class Token {
         Text = text;
         Kind = kind;
     } 
-    //public override String ToString() => $"{Line},{Col} [{Type}|{Kind}]: {Text}";
+    
     @Override
     public String toString() {
         return String.format("%s,%s [%s|%s]: %s", Line, Col, getType(), Kind, Text);
+    }
+
+    public Token Clone() {
+        return new Token(Col, Line, Pos, Text, Kind);
     }
 }
