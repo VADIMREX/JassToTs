@@ -121,7 +121,7 @@ public class JassLexer {
         int j = i,
             l = line,
             p = pos;
-        var s = source.substring(i, i + 1);
+        var s = source.substring(i, i + 2);
         i += 2;
         for (; i < source.length(); i++, pos++)
         {
@@ -206,10 +206,10 @@ public class JassLexer {
                 continue;
             }
             // условия при которых завершаем
-            if (opers.contains(source.subSequence(i, i))) break;
-            if (brac.contains(source.subSequence(i, i))) break;
+            if (opers.contains(source.subSequence(i, i + 1))) break;
+            if (brac.contains(source.subSequence(i, i + 1))) break;
             if (LineBreak(true)) break;
-            if (whiteChar.contains(source.subSequence(i, i))) break;
+            if (whiteChar.contains(source.subSequence(i, i + 1))) break;
             // наткнулись на символ не число, не оператор, не перевод строки, не белый символ
             if (isDotFound || !isNumFound)
             {
@@ -241,7 +241,7 @@ public class JassLexer {
 
         for (; i < source.length(); s += source.charAt(i), i++, pos++)
         {
-            if (opers.contains(source.subSequence(i, i))) continue;
+            if (opers.contains(source.subSequence(i, i + 1))) continue;
             break;
         }
 
@@ -269,7 +269,7 @@ public class JassLexer {
     {
         char eoc = source.charAt(i);
 
-        var s = source.substring(i, i);
+        var s = source.substring(i, i + 1);
         int j = i,
             l = line,
             p = pos;
@@ -307,11 +307,11 @@ public class JassLexer {
             if (s.length() > 0 && '0' <= source.charAt(i) && source.charAt(i) <= '9') continue;
             if (s.length() > 0 && '_' == source.charAt(i)) continue;
             // не допустимые символы
-            if (whiteChar.contains(source.subSequence(i, i))) break;
+            if (whiteChar.contains(source.subSequence(i, i + 1))) break;
             if (LineBreak(true)) break;
-            if (brac.contains(source.subSequence(i, i))) break;
-            if (opers.contains(source.subSequence(i, i))) break;
-            if (strChar.contains(source.subSequence(i, i))) break; // в некоторых случаях может быть норм
+            if (brac.contains(source.subSequence(i, i + 1))) break;
+            if (opers.contains(source.subSequence(i, i + 1))) break;
+            if (strChar.contains(source.subSequence(i, i + 1))) break; // в некоторых случаях может быть норм
             // левые символы
             throw new JassException(l, p, "wrong identifier: unknown symbol");
         }
@@ -357,7 +357,7 @@ public class JassLexer {
                     continue;
                 }
             }
-            if (strChar.contains(source.subSequence(i, i)))
+            if (strChar.contains(source.subSequence(i, i + 1)))
             {
                 // попытка распознать строку
                 tok = TryParseString();
@@ -387,7 +387,7 @@ public class JassLexer {
                     continue;
                 }
             }
-            if (opers.contains(source.subSequence(i, i)))
+            if (opers.contains(source.subSequence(i, i + 1)))
             {
                 // попытка распарсить оператор
                 tok = TryParseOperator();
@@ -397,15 +397,15 @@ public class JassLexer {
                     continue;
                 }
             }
-            if (whiteChar.contains(source.subSequence(i, i)))
+            if (whiteChar.contains(source.subSequence(i, i + 1)))
             {
                 // игнорим пробелы
                 continue;
             }
-            if (brac.contains(source.subSequence(i, i)))
+            if (brac.contains(source.subSequence(i, i + 1)))
             {
                 var typ = "";
-                var s = source.substring(i, i);
+                var s = source.substring(i, i + 1);
                 switch (source.charAt(i))
                 {
                     case '(': typ = TokenKind.lbra; break;
