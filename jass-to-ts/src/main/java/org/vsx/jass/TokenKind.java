@@ -88,7 +88,9 @@ public class TokenKind {
         Map.entry(lbra,  TokenType.par),
         Map.entry(rbra,  TokenType.par),
         Map.entry(lind,  TokenType.par),
-        Map.entry(rind,  TokenType.par)
+        Map.entry(rind,  TokenType.par),
+
+        Map.entry(ymacr, TokenType.comm)
     ));
         
 
