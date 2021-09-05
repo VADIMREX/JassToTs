@@ -129,5 +129,6 @@ namespace Jass
         public int Pos = 0;
         public string Text = "";
         public override string ToString() => $"{Line},{Col} [{Type}|{Kind}]: {Text}";
+        public Token Clone() => new Token { Kind = Kind, Line = Line, Col = Col, Pos = Pos, Text = Text };
     }
 }
