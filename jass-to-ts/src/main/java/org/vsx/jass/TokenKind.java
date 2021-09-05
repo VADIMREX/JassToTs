@@ -5,64 +5,67 @@ import java.util.Map;
 
 /** Виды токенов */
 public class TokenKind {
-    /**однострочный комментарий */
+    /** однострочный комментарий */
     public static final String lcom = "lcom";
-    /**
+    /** 
      * многострочный комментарий (в JASS отсутствуют)
      * @deprecated в JASS только однострочные комментарии начинающиеся с //
      */
     @Deprecated
     public static final String mcom = "mcom";
 
-    /**десятичное целое */
+    /** десятичное целое */
     public static final String ndec = "ndec";
-    /**восьмеричное целое */
+    /** восьмеричное целое */
     public static final String oct = "oct";
-    /**шеснадцатиричное целое в формате 0xNN */
+    /** шеснадцатиричное целое в формате 0xNN */
     public static final String xhex = "xhex";
-    /**шеснадцатиричное целое в формате $NN */
+    /** шеснадцатиричное целое в формате $NN */
     public static final String dhex = "dhex";
-    /**действительное */
+    /** действительное */
     public static final String real = "real";
-    /**шеснадцатиричное из 4х ASCII символов, записавыается в апостравах */
+    /** шеснадцатиричное из 4х ASCII символов, записавыается в апостравах */
     public static final String adec = "adec";
 
-    /**оператор */
+    /** оператор */
     public static final String oper = "oper";
 
-    /**строка в кавычках (в JASS единственный тип строк) */
+    /** строка в кавычках (в JASS единственный тип строк) */
     public static final String dstr = "dstr";
-    /**
+    /** 
      * строка в апострофах (, в JASS в апострафах хранятся целые, смотри <see cref="adec"/>) 
      * @deprecated не используется, в JASS единственный тип строк: заключённые в кавычках
      */
     @Deprecated
     public static final String sstr = "sstr";
 
-    /**идентификатор */
+    /** идентификатор */
     public static final String name = "name";
 
-    /**базовый тип */
+    /** базовый тип */
     public static final String btyp = "btyp";
-    /**ключевое слово */
+    /** ключевое слово */
     public static final String kwd = "kwd";
 
-    /**null значение */
+    /** null значение */
     public static final String _null = "null";
-    /**булевое значение */
+    /** булевое значение */
     public static final String _bool = "bool";
 
-    /**перевод строки */
+    /** перевод строки */
     public static final String ln = "ln";
 
-    /**левая скобка */
+    /** левая скобка */
     public static final String lbra = "lbra";
-    /**правая скобка */
+    /** правая скобка */
     public static final String rbra = "rbra";
-    /**левая квадратная скобка */
+    /** левая квадратная скобка */
     public static final String lind = "lind";
-    /**правая квадратная скобка */
+    /** правая квадратная скобка */
     public static final String rind = "rind";
+
+     /** макросы YDWE, пока что преобразуются в комментарий */
+     public static final String ymacr = "ymacr";
 
     static HashMap<String, String> TypeByKind = new HashMap<String, String>(Map.ofEntries(
         Map.entry(lcom,  TokenType.comm),

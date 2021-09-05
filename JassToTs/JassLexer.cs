@@ -73,7 +73,14 @@ namespace Jass
             { "false", TokenKind.@bool },
         };
 
+        /// <summary> режим совместимости с YDWE </summary>
+        bool isYdweCompatible;
+
         List<string> operators = new List<string> { "=", ",", "+", "-", "*", "/", ">", "<", "==", "!=", ">=", "<=" };
+
+        /// <summary> создать Лексер </summary>
+        /// <param name="isYdweCompatible"> режим совместимости с YDWE, по умолчанию false </param>
+        public JassLexer(bool isYdweCompatible = false)  => this.isYdweCompatible = isYdweCompatible;
 
         /// <summary> 
         /// Проверить на перевод строки.
@@ -111,6 +118,28 @@ namespace Jass
 
             if (i < source.Length) i--;
             return new Token { Col = p, Line = l, Pos = j, Text = s, Kind = TokenKind.lcom };
+        }
+
+        /// <summary> Попытаться распарсить YDWE макрос </summary>
+        /// <returns> null если не удалось распарсить макрос </returns>
+        Token TryParseYDWEMacro()
+        {
+            if (i == source.Length - 1) return null;
+            int j = i,
+                l = line,
+                p = pos;
+            #warning Убрать // после добавления интерпретатора макросов
+            var s = "//#";
+            i++;
+            for (; i < source.Length; i++, pos++)
+            {
+                if ('\r' == source[i]) continue;
+                if (LineBreak(true)) break;
+                s += source[i];
+            }
+
+            if (i < source.Length) i--;
+            return new Token { Col = p, Line = l, Pos = j, Text = s, Kind = TokenKind.ymacr };
         }
 
         /// <summary> Попытаться распарсить число </summary>
@@ -295,6 +324,14 @@ namespace Jass
                 {
                     // попытка распознать комментарий
                     tok = TryParseComment();
+                    if (null != tok)
+                    {
+                        tokens.Add(tok);
+                        continue;
+                    }
+                }
+                if (isYdweCompatible && '#' == source[i]) {
+                    tok = TryParseYDWEMacro();
                     if (null != tok)
                     {
                         tokens.Add(tok);

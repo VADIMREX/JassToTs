@@ -42,7 +42,7 @@ namespace JassToTs
         {
             Console.WriteLine("JASS to TypeScript translator (by VADIMREX)\n");
 
-            var lexer = new Jass.JassLexer();
+            var lexer = new Jass.JassLexer(isYdweCompatible);
             var parser = new Jass.JassParser(isYdweCompatible);
             
             Console.WriteLine($"reading file {ipath}");

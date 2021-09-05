@@ -71,8 +71,26 @@ public class JassLexer {
         Map.entry("null",  TokenKind._null),
         Map.entry("true",  TokenKind._bool),
         Map.entry("false", TokenKind._bool)));
+    
+    /** режим совместимости с YDWE */
+    boolean isYdweCompatible;
 
     ArrayList<String> operators = new ArrayList<String>(List.of("=", ",", "+", "-", "*", "/", ">", "<", "==", "!=", ">=", "<=" ));
+
+    /** 
+     * создать Лексер, без совместимости с YDWE
+     */
+    public JassLexer() {
+        this(false);
+    }
+
+    /** 
+     * создать Лексер
+     * @param isYdweCompatible режим совместимости с YDWE
+     */
+    public JassLexer(boolean isYdweCompatible) {
+        this.isYdweCompatible = isYdweCompatible;
+    }
 
     /** 
      * Проверить на перевод строки.
@@ -114,6 +132,29 @@ public class JassLexer {
 
         if (i < source.length()) i--;
         return new Token(p, l, j, s, TokenKind.lcom);
+    }
+
+    /**
+     * Попытаться распарсить YDWE макрос
+     * @return null если не удалось распарсить макрос
+     */
+    Token TryParseYDWEMacro()
+    {
+        if (i == source.length() - 1) return null;
+        int j = i,
+            l = line,
+            p = pos;
+        var s = "//#";
+        i++;
+        for (; i < source.length(); i++, pos++)
+        {
+            if ('\r' == source.charAt(i)) continue;
+            if (LineBreak(true)) break;
+            s += source.charAt(i);
+        }
+
+        if (i < source.length()) i--;
+        return new Token(p, l, j, s, TokenKind.ymacr);
     }
 
     /** 
@@ -302,6 +343,14 @@ public class JassLexer {
             {
                 // попытка распознать комментарий
                 tok = TryParseComment();
+                if (null != tok)
+                {
+                    tokens.add(tok);
+                    continue;
+                }
+            }
+            if (isYdweCompatible && '#' == source.charAt(i)) {
+                tok = TryParseYDWEMacro();
                 if (null != tok)
                 {
                     tokens.add(tok);

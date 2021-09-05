@@ -39,7 +39,7 @@ public class App
     {
         System.out.println("JASS to TypeScript translator (by VADIMREX)\n");
 
-        var lexer = new JassLexer();
+        var lexer = new JassLexer(isYdweCompatible);
         var parser = new JassParser(isYdweCompatible);
         
         System.out.println(String.format("reading file %s", ipath));

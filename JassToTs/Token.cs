@@ -62,6 +62,9 @@ namespace Jass
         /// <summary> правая квадратная скобка </summary>
         public const string rind = "rind";
 
+        /// <summary> макросы YDWE, пока что преобразуются в комментарий </summary>
+        public const string ymacr = "ymacr";
+
         #endregion
 
         /// <summary> связь между видом и типом </summary>
@@ -88,6 +91,8 @@ namespace Jass
             { rbra,  TokenType.par },
             { lind,  TokenType.par },
             { rind,  TokenType.par },
+            // макросы считаем за коментарии
+            { ymacr, TokenType.comm },
         };
 
         /// <summary> получить тип </summary>
