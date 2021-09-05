@@ -702,6 +702,18 @@ namespace Jass
 
         #region statement
 
+        public Statement TryParseMacroCall() {
+            var sb = new StringBuilder("//");
+            var stoken = tokens[i].Clone();
+            for (; i < tokens.Count; i++)
+            {
+                if (TokenKind.ln == tokens[i].Kind) break;
+                sb.AppendFormat(" {0}", tokens[i].Text);
+            }
+            stoken.Text = sb.ToString();
+            return new Statement { Type = StatementType.Comm, Start = stoken };
+        }
+
         /// <summary> Попытаться распарсить инструкцию </summary>
         public Statement TryParseStatement()
         {
@@ -712,6 +724,10 @@ namespace Jass
 
                 if (TokenKind.ln == tokens[i].Kind) break;
 
+                #warning Вызов потенциального макроса, у парсера макросы должны быть выпилены
+                if (isYdweCompatible && TokenKind.name == tokens[i].Kind) {
+                     return TryParseMacroCall();
+                }
                 if (TokenKind.kwd != tokens[i].Kind) throw new Exception($"Line {tokens[i].Line}, Col {tokens[i].Col}: statement error: keyword expected");
 
                 switch (tokens[i].Text)
