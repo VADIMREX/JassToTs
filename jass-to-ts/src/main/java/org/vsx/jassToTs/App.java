@@ -79,27 +79,32 @@ public class App
             }
         }
 
-        // System.out.println("translating");
-        // var script = "";
-        // switch(language)
-        // {
-        //     case Language.TypeScript:
-        //     case Language.TypeScriptDeclaration:
-        //         var tsConverter = new JassToTs(isOptimizationNeeded, language == Language.TypeScriptDeclaration);
-        //         script = tsConverter.Convert(tree);
-        //         break;
-        //     case Language.Lua:
-        //         var luaConverter = new JassToLua(isOptimizationNeeded);
-        //         script = luaConverter.Convert(tree);
-        //         break;
-        //     case Language.GalaxyRaw:
-        //         var galaxyRawConverter = new JassToGalaxyRaw(isOptimizationNeeded);
-        //         script = galaxyRawConverter.Convert(tree);
-        //         break;
-        // }
-        // System.out.println(String.format("saving into {opath}"));
-        // using (var sw = new StreamWriter(opath))
-        //     sw.WriteLine(script);
+        System.out.println("translating");
+        var script = "";
+        switch(language)
+        {
+            case Language.TypeScript:
+            case Language.TypeScriptDeclaration:
+                var tsConverter = new JassToTs(isOptimizationNeeded, language == Language.TypeScriptDeclaration);
+                script = tsConverter.Convert(tree);
+                break;
+            case Language.Lua:
+                // var luaConverter = new JassToLua(isOptimizationNeeded);
+                // script = luaConverter.Convert(tree);
+                break;
+            case Language.GalaxyRaw:
+                // var galaxyRawConverter = new JassToGalaxyRaw(isOptimizationNeeded);
+                // script = galaxyRawConverter.Convert(tree);
+                break;
+        }
+        System.out.println(String.format("saving into %s", opath));
+        try {
+            var fout = new FileWriter(opath);
+            fout.write(script);
+            fout.close();
+        } catch (FileNotFoundException e) {
+            System.out.println("file not found");
+        }
     }
 
     public static void main( String[] args )
@@ -147,48 +152,48 @@ public class App
                 return;
             }
 
-            // if ("" == inPath)
-            // {
-            //     var di = new DirectoryInfo(AppContext.BaseDirectory);
-            //     foreach (var fi in di.GetFiles("*.j|*.ai"))
-            //     {
-            //         var iPath = fi.FullName;
-            //         var oPath = Path.Combine(Path.GetDirectoryName(inPath), Path.GetFileNameWithoutExtension(inPath));
-            //         switch (language)
-            //         {
-            //             case Language.TypeScript: outPath += ".ts"; break;
-            //             case Language.TypeScriptDeclaration: outPath += ".d.ts"; break;
-            //             case Language.Lua: outPath += ".lua"; break;
-            //             case Language.GalaxyRaw: outPath += ".galaxy"; break;
-            //         }
-            //         var tPath = "";
-            //         if (isTreeNeeded)
-            //             tPath = Path.Combine(Path.GetDirectoryName(inPath), Path.GetFileNameWithoutExtension(inPath) + ".tree");
+            if ("" == inPath)
+            {
+                // var di = new DirectoryInfo(AppContext.BaseDirectory);
+                // foreach (var fi in di.GetFiles("*.j|*.ai"))
+                // {
+                //     var iPath = fi.FullName;
+                //     var oPath = Path.Combine(Path.GetDirectoryName(inPath), Path.GetFileNameWithoutExtension(inPath));
+                //     switch (language)
+                //     {
+                //         case Language.TypeScript: outPath += ".ts"; break;
+                //         case Language.TypeScriptDeclaration: outPath += ".d.ts"; break;
+                //         case Language.Lua: outPath += ".lua"; break;
+                //         case Language.GalaxyRaw: outPath += ".galaxy"; break;
+                //     }
+                //     var tPath = "";
+                //     if (isTreeNeeded)
+                //         tPath = Path.Combine(Path.GetDirectoryName(inPath), Path.GetFileNameWithoutExtension(inPath) + ".tree");
 
-            //         try
-            //         {
-            //             TranslateFile(iPath, oPath, tPath);
-            //         }
-            //         catch (Exception e)
-            //         {
-            //             System.out.println(e.Message);
-            //         }
-            //     }
-            //     System.exit(0);
-            //     return;
-            // }
+                //     try
+                //     {
+                //         TranslateFile(iPath, oPath, tPath);
+                //     }
+                //     catch (Exception e)
+                //     {
+                //         System.out.println(e.Message);
+                //     }
+                // }
+                System.exit(0);
+                return;
+            }
 
-            // if ("" == outPath)
-            // {
-            //     outPath = Path.Combine(Path.GetDirectoryName(inPath), Path.GetFileNameWithoutExtension(inPath));
-            //     switch (language)
-            //     {
-            //         case Language.TypeScript: outPath += ".ts"; break;
-            //         case Language.TypeScriptDeclaration: outPath += ".d.ts"; break;
-            //         case Language.Lua: outPath += ".lua"; break;
-            //         case Language.GalaxyRaw: outPath += ".galaxy"; break;
-            //     }
-            // }
+            if ("" == outPath)
+            {
+                // outPath = Path.Combine(Path.GetDirectoryName(inPath), Path.GetFileNameWithoutExtension(inPath));
+                switch (language)
+                {
+                    case Language.TypeScript: outPath += ".ts"; break;
+                    case Language.TypeScriptDeclaration: outPath += ".d.ts"; break;
+                    case Language.Lua: outPath += ".lua"; break;
+                    case Language.GalaxyRaw: outPath += ".galaxy"; break;
+                }
+            }
             // if (isTreeNeeded && "" == outTree) outTree = Path.Combine(Path.GetDirectoryName(inPath), Path.GetFileNameWithoutExtension(inPath) + ".tree");
 
             try

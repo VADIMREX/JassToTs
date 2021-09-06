@@ -60,7 +60,7 @@ saving into example.ts
  - [ ] Java version
    - [x] Lexer
    - [x] Parser
-   - [ ] To typescript translator
+   - [x] To typescript translator
    - [ ] To lua translator
  - [ ] Go version
  - [ ] *(Possibly)* Python version
