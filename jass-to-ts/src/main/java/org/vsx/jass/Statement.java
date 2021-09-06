@@ -76,7 +76,7 @@ public class Statement {
         for (Statement statement : Childs) {
             s += statement.toString(ident + 2);
         }
-        return String.format("%s%s %s\n%s", "", Type, Start, s);
+        return String.format("%s%s %s\n%s", 0 == ident ? "" : " ".repeat(ident), Type, Start, s);
         // $"// {"".PadLeft(ident, ' ')}{Type} {Start}\n" +
         // (Childs.Count > 0 ?
         // Childs.Select(x => x.ToString(ident + 2)).Aggregate((x, y) => $"{x}{y}") :
