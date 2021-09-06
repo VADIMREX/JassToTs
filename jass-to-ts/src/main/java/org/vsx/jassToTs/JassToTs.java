@@ -48,8 +48,8 @@ public class JassToTs {
 
     /**
      * Преобразовать объявления
+     * @param stat выражение
      */
-    /// <param name="stat"> выражение </param>
     StringBuilder ConvertDeclarations(Statement stat) throws Exception
     {
         switch (stat.Type)
@@ -88,9 +88,9 @@ public class JassToTs {
 
     /**
      * Преобразовать базовый тип
+     * @param type базовый JASS тип
+     * @return Тип в TypeScript </returns>
      */
-    /// <param name="type"> базовый JASS тип </param>
-    /// <returns> Тип в TypeScript </returns>
     String ConvertType(String type)
     {
         switch (type)
@@ -109,9 +109,9 @@ public class JassToTs {
 
     /**
      * Преобразовать оператор
+     * @param type оператор JASS
+     * @return оператор TypeScript
      */
-    /// <param name="type"> оператор JASS </param>
-    /// <returns> оператор TypeScript </returns>
     String ConvertOperator(String type) throws Exception
     {
         switch (type)
@@ -182,6 +182,9 @@ public class JassToTs {
         }
     }
 
+    /**
+     * Преобразование локальной переменной
+     */
     StringBuilder ConvertLocals(Statement stat) throws Exception
     {
         return ConvertLocals(stat, 0);
@@ -587,6 +590,9 @@ public class JassToTs {
         return sb;
     }
 
+    /**
+     * Преобразование инструкции
+     */
     StringBuilder ConvertStatement(Statement stat) throws Exception {
         return ConvertStatement(stat, 0);
     }
@@ -637,9 +643,13 @@ public class JassToTs {
         }
     }
 
+    /**
+     * Преобразование присваивания
+     */
     StringBuilder ConvertSetStatement(Statement tree) throws Exception {
         return ConvertSetStatement(tree, 0);
     }
+
     /**
      * Преобразование присваивания
      */
@@ -684,6 +694,9 @@ public class JassToTs {
         return sb;
     }
 
+    /**
+     * Преобразование if then elseif else
+     */
     StringBuilder ConvertIfStatement(Statement tree) throws Exception {
         return ConvertIfStatement(tree, 0);
     }
