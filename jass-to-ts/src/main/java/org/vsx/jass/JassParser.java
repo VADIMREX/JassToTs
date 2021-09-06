@@ -2,12 +2,9 @@ package org.vsx.jass;
 
 import java.util.List;
 import java.util.Stack;
+import java.util.function.Function;
 
 public class JassParser {
-    interface Func<TArg, TRes> {
-        TRes run(TArg arg);
-    }
-
     /** список токенов по которому идёт разбор */
     List<Token> tokens;
     /** глобальная позиция в списке токенов */
@@ -256,12 +253,7 @@ public class JassParser {
     }
 
     /** Остановить если встретился перевод строки */
-    final Func<Token, Boolean> DefStopper = new Func<Token,Boolean>(){
-        @Override
-        public Boolean run(Token token) {
-            return TokenType.br.equals(tokens.get(i).getType());
-        }
-    };
+    final Function<Token, Boolean> DefStopper = (token)->TokenType.br.equals(tokens.get(i).getType());
 
     Statement TryParseExpression()  throws JassException
     {
@@ -272,7 +264,7 @@ public class JassParser {
      * Попытаться распарсить выражение
      * @param stopper Предикат используемый для остановки парсинга выражения, по умолчанию {@link JassParser#DefStopper}
      */
-    Statement TryParseExpression(Func<Token, Boolean> stopper) throws JassException
+    Statement TryParseExpression(Function<Token, Boolean> stopper) throws JassException
     {
         if (null == stopper) stopper = DefStopper;
         //('constant' type id '=' expr newline | var_declr newline)*
@@ -282,7 +274,7 @@ public class JassParser {
         for (; i < tokens.size(); i++)
         {
             if (AddComment(stat)) continue;
-            if (0 == par.size() && stopper.run(tokens.get(i))) break;
+            if (0 == par.size() && stopper.apply(tokens.get(i))) break;
             switch (tokens.get(i).getType())
             {
                 case TokenType.par:
@@ -341,16 +333,11 @@ public class JassParser {
 
     /** 
      * Остановить если найден перево строки, запятая или закрывающая скобка 
-     * <pre>{@code token => TokenKind.ln == token.Kind || (TokenKind.oper == token.Kind && ",".equals(token.Text)}</pre>
+     * <pre>{@code token => TokenKind.ln == token.Kind || (TokenKind.oper == token.Kind && "," == token.Text)}</pre>
      */
-    final Func<Token, Boolean> ArgStopper = new Func<Token,Boolean>() {
-        @Override
-        public Boolean run(Token token) {
-            return TokenKind.ln.equals(token.Kind) ||
-                   TokenKind.rbra.equals(token.Kind) ||
-                   (TokenKind.oper.equals(token.Kind) && ",".equals(token.Text));
-        };
-    };
+    final Function<Token, Boolean> ArgStopper = (token) -> TokenKind.ln.equals(token.Kind) ||
+                                                           TokenKind.rbra.equals(token.Kind) ||
+                                                           (TokenKind.oper.equals(token.Kind) && ",".equals(token.Text));
 
     /** Попытаться распарсить вызов функции */
     Statement TryParseFuncCall() throws JassException
@@ -404,13 +391,8 @@ public class JassParser {
      * Остановить если найден перевод строки или закрывающая квадратная скобка 
      * <pre>{@code token => TokenKind.ln == token.Kind || TokenKind.rind == token.Kind} </pre>
      */
-    Func<Token, Boolean> IndStopper = new Func<Token,Boolean>(){
-        @Override
-        public Boolean run(Token token) {
-            return TokenKind.ln.equals(token.Kind) ||
-                   TokenKind.rind.equals(token.Kind);
-        };
-    };
+    Function<Token, Boolean> IndStopper = (token) -> TokenKind.ln.equals(token.Kind) ||
+                                                     TokenKind.rind.equals(token.Kind);
 
     /** Попытаться распарсить ссылку на элемент массива */
     Statement TryParseArrayRef() throws JassException
@@ -861,11 +843,8 @@ public class JassParser {
         return stat;
     }
 
-    Func<Token, Boolean> IfStopper = new Func<Token,Boolean>(){
-        public Boolean run(Token token) {
-            return TokenKind.ln.equals(token.Kind) || (TokenKind.kwd.equals(token.Kind) && "then".equals(token.Text));
-        }
-    };
+    Function<Token, Boolean> IfStopper = (token) -> TokenKind.ln.equals(token.Kind) || 
+                                                    (TokenKind.kwd.equals(token.Kind) && "then".equals(token.Text));
 
     Statement TryParseIf() throws JassException
     {
