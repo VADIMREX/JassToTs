@@ -9,10 +9,14 @@ import org.vsx.jass.StatementType;
 import org.vsx.jass.TokenKind;
 
 public class JassToTs {
-    /// <summary> режи файла описания (*.d.ts) </summary>
+    /**
+     * режи файла описания (*.d.ts)
+     */
     boolean IsDTS;
 
-    /// <summary> Количество символов в 1 сдвиге </summary>
+    /**
+     * Количество символов в 1 сдвиге
+     */
     int IndentSize;
 
     boolean isOptimizationNeeded;
@@ -33,14 +37,18 @@ public class JassToTs {
         this.IndentSize = IndentSize;
     }
 
-    /// <summary> Транслировать дерево в TypeScript код </summary>
+    /**
+     * Транслировать дерево в TypeScript код
+     */
     public String Convert(Statement tree) throws Exception
     {
         var sb = ConvertDeclarations(tree);
         return sb.toString();
     }
 
-    /// <summary> Преобразовать объявления </summary>
+    /**
+     * Преобразовать объявления
+     */
     /// <param name="stat"> выражение </param>
     StringBuilder ConvertDeclarations(Statement stat) throws Exception
     {
@@ -78,7 +86,9 @@ public class JassToTs {
         }
     }
 
-    /// <summary> Преобразовать базовый тип </summary>
+    /**
+     * Преобразовать базовый тип
+     */
     /// <param name="type"> базовый JASS тип </param>
     /// <returns> Тип в TypeScript </returns>
     String ConvertType(String type)
@@ -97,7 +107,9 @@ public class JassToTs {
         }
     }
 
-    /// <summary> Преобразовать оператор </summary>
+    /**
+     * Преобразовать оператор
+     */
     /// <param name="type"> оператор JASS </param>
     /// <returns> оператор TypeScript </returns>
     String ConvertOperator(String type) throws Exception
@@ -122,7 +134,9 @@ public class JassToTs {
         }
     }
 
-    /// <summary> Преобразование объявления типа </summary>
+    /**
+     * Преобразование объявления типа
+     */
     StringBuilder ConvertTypeDecl(Statement tree) throws Exception
     {
         var sb = new StringBuilder();
@@ -151,7 +165,9 @@ public class JassToTs {
                  .append(comm);
     }
 
-    /// <summary> Преобразование глобальной переменной </summary>
+    /**
+     * Преобразование глобальной переменной
+     */
     StringBuilder ConvertGlobals(Statement stat) throws Exception
     {
         switch (stat.Type)
@@ -171,7 +187,9 @@ public class JassToTs {
         return ConvertLocals(stat, 0);
     }
 
-    /// <summary> Преобразование локальной переменной </summary>
+    /**
+     * Преобразование локальной переменной
+     */
     StringBuilder ConvertLocals(Statement stat, int indent) throws Exception
     {
         switch (stat.Type)
@@ -189,7 +207,9 @@ public class JassToTs {
         return ConvertVarDecl(tree, 0);
     }
 
-    /// <summary> Преобразование объявления переменной </summary>
+    /**
+     * Преобразование объявления переменной
+     */
     StringBuilder ConvertVarDecl(Statement tree, int indent) throws Exception
     {
         var sb = new StringBuilder();
@@ -251,7 +271,9 @@ public class JassToTs {
                  .append(comm);
     }
 
-    /// <summary> Преобразование выражения </summary>
+    /**
+     * Преобразование выражения
+     */
     StringBuilder ConvertExpr(Statement tree) throws Exception {
         return new StringBuilder()
             //.AppendJoin(" ", tree.Childs.Select(x => ConvertExprElem(x)));
@@ -265,8 +287,10 @@ public class JassToTs {
                     );
     }
 
-    /// <summary> Преобразование составной части выражения 
-    /// (идентификатор, константа, оператор и т.п.) </summary>
+    /**
+     * Преобразование составной части выражения 
+     * (идентификатор, константа, оператор и т.п.)
+     */
     StringBuilder ConvertExprElem(Statement elem) throws Exception
     {
         var sb = new StringBuilder();
@@ -303,7 +327,9 @@ public class JassToTs {
         }
     }
 
-    /// <summary> Преобразовать безымянную константу </summary>
+    /**
+     * Преобразовать безымянную константу
+     */
     StringBuilder ConvertValue(Statement stat)
     {
         var sb = new StringBuilder();
@@ -341,7 +367,9 @@ public class JassToTs {
         return sb;
     }
 
-    /// <summary> Преобразовать ссылку на элемент массива </summary>
+    /**
+     * Преобразовать ссылку на элемент массива
+     */
     StringBuilder ConvertArrayRef(Statement stat) throws Exception
     {
         var sb = new StringBuilder();
@@ -372,7 +400,9 @@ public class JassToTs {
         return sb;
     }
 
-    /// <summary> Преобразование вызова функции </summary>
+    /**
+     * Преобразование вызова функции
+     */
     StringBuilder ConvertFuncCall(Statement tree) throws Exception
     {
         var sb = new StringBuilder();
@@ -403,7 +433,9 @@ public class JassToTs {
                               .append(")");
     }
 
-    /// <summary> Преобразование объявления функции </summary>
+    /**
+     * Преобразование объявления функции
+     */
     StringBuilder ConvertFunc(Statement tree) throws Exception
     {
         var sb = new StringBuilder();
@@ -468,7 +500,9 @@ public class JassToTs {
         return sb.append("\n");
     }
 
-    /// <summary> Преобразование заголовка функции </summary>
+    /**
+     * Преобразование заголовка функции
+     */
     StringBuilder ConvertFuncDecl(Statement tree) throws Exception
     {
         var sb = new StringBuilder();
@@ -521,7 +555,9 @@ public class JassToTs {
         return sb;
     }
 
-    /// <summary> Преобразование параметра функции </summary>
+    /**
+     * Преобразование параметра функции
+     */
     StringBuilder ConvertFuncParam(Statement tree) throws Exception
     {
         var sb = new StringBuilder();
@@ -555,7 +591,9 @@ public class JassToTs {
         return ConvertStatement(stat, 0);
     }
 
-    /// <summary> Преобразование инструкции </summary>
+    /**
+     * Преобразование инструкции
+     */
     StringBuilder ConvertStatement(Statement stat, int indent) throws Exception
     {
         var sb = new StringBuilder();
@@ -602,7 +640,9 @@ public class JassToTs {
     StringBuilder ConvertSetStatement(Statement tree) throws Exception {
         return ConvertSetStatement(tree, 0);
     }
-    /// <summary> Преобразование присваивания </summary>
+    /**
+     * Преобразование присваивания
+     */
     StringBuilder ConvertSetStatement(Statement tree, int indent) throws Exception
     {
         var sb = AddIndent(new StringBuilder(), indent);
@@ -648,7 +688,9 @@ public class JassToTs {
         return ConvertIfStatement(tree, 0);
     }
 
-    /// <summary> Преобразование if then elseif else </summary>
+    /**
+     * Преобразование if then elseif else
+     */
     StringBuilder ConvertIfStatement(Statement tree, int indent) throws Exception
     {
         var sb = AddIndent(new StringBuilder(), indent);
@@ -702,10 +744,12 @@ public class JassToTs {
         return sb;
     }
 
-    /// <summary> выравнивание кода </summary>
-    /// <param name="sb"> куда писать </param>
-    /// <param name="indent"> величина сдвига (&lt;кол-во символов&gt; = <paramref name="indent"/> * <see cref="IndentSize"/>)</param>
-    /// <returns> <paramref name="sb"/> с добавленным сдвигом </returns>
+    /**
+     * выравнивание кода
+     * @param sb куда писать
+     * @param indent величина сдвига (&lt;кол-во символов&gt; = {@code indent} * {@link JassToTs#IndentSize})
+     * @return {@code sb} с добавленным сдвигом
+     */
     StringBuilder AddIndent(StringBuilder sb, int indent) { 
         return indent > 0 && IndentSize > 0 ? 
                sb.append(indent == 0 ? "" : " ".repeat(indent * IndentSize)) : 
