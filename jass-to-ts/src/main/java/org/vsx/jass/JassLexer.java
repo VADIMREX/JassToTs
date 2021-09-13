@@ -241,11 +241,15 @@ public class JassLexer {
 
         for (; i < source.length(); s += source.charAt(i), i++, pos++)
         {
-            if (opers.contains(source.subSequence(i, i + 1))) continue;
-            break;
+            if (!opers.contains(source.subSequence(i, i + 1))) break;
+            if (2 == s.length()) break;
         }
 
-        if (!operators.contains(s)) throw new JassException(l, p, "wrong operator");
+        if (!operators.contains(s))
+        {
+            s = s.substring(0, 1);
+            i--;
+        }
 
         if (i < source.length()) i--;
         return new Token(p, l, j, s, TokenKind.oper);

@@ -224,12 +224,16 @@ namespace Jass
 
             for (; i < source.Length; s += source[i], i++, pos++)
             {
-                if (opers.Contains(source[i])) continue;
-                break;
+                if (!opers.Contains(source[i])) break;
+                if (2 == s.Length) break;
             }
 
-            if (!operators.Contains(s)) throw new Exception($"Line {l}, Col {p}: wrong operator");
-
+            if (!operators.Contains(s))
+            {
+                s = s.Substring(0, 1);
+                i--;
+            }
+            
             if (i < source.Length) i--;
             return new Token { Col = p, Line = l, Pos = j, Text = s, Kind = TokenKind.oper };
         }
