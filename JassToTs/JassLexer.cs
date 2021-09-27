@@ -160,7 +160,7 @@ namespace Jass
                 // условия при которых продолжаем
                 if ('0' <= source[i] && source[i] <= '9')
                 {
-                    if (isOct && '8' <= source[i]) throw new Exception($"Line {l}, Col {p}: wrong number: wrong octal number");
+                    if (isOct && '8' <= source[i]) throw new JassException(l, p, "wrong number: wrong octal number");
                     isNumFound = true;
                     continue;
                 }
@@ -181,9 +181,9 @@ namespace Jass
                 }
                 if ('.' == source[i])
                 {
-                    if (isDotFound) throw new Exception($"Line {l}, Col {p}: wrong number: multiple dot");
-                    if (isHex) throw new Exception($"Line {l}, Col {p}: wrong number: dot inside hex");
-                    if (isOct && s.Length > 1) throw new Exception($"Line {l}, Col {p}: wrong number: dot inside octadecimal");
+                    if (isDotFound) throw new JassException(l, p, "wrong number: multiple dot");
+                    if (isHex) throw new JassException(l, p, "wrong number: dot inside hex");
+                    if (isOct && s.Length > 1) throw new JassException(l, p, "wrong number: dot inside octadecimal");
                     isOct = false;
                     isDotFound = true;
                     continue;
@@ -199,7 +199,7 @@ namespace Jass
                     i = j;
                     return null;
                 }
-                throw new Exception($"Line {l}, Col {p}: wrong number: not a number");
+                throw new JassException(l, p, "wrong number: not a number");
             }
             var typ = TokenKind.ndec;
             if (isOct) typ = TokenKind.oct;
@@ -242,10 +242,10 @@ namespace Jass
         Token TryParse4AsciiInt()
         {
             var tok = TryParseString();
-            if (tok.Text.Length > 6) throw new Exception($"Line {tok.Line}, Col {tok.Col}: wrong number: more than 4 ascii symbols");
+            if (tok.Text.Length > 6) throw new JassException(tok.Line, tok.Col, "wrong number: more than 4 ascii symbols");
             foreach (var c in tok.Text)
                 if (c > '\u00ff')
-                    throw new Exception($"Line {tok.Line}, Col {tok.Col}: wrong number: non ascii symbol");
+                    throw new JassException(tok.Line, tok.Col, "wrong number: non ascii symbol");
             // Надо проверить как оригинальный компилятор относится к 'a\'bc' последовательности
             tok.Kind = TokenKind.adec;
             return tok;
@@ -261,7 +261,7 @@ namespace Jass
                 l = line,
                 p = pos;
 
-            if (i == source.Length - 1) throw new Exception($"Line {l}, Col {p}: unclosed string");
+            if (i == source.Length - 1) throw new JassException(l, p, "unclosed string");
 
             i++;
             for (; i < source.Length; i++, pos++)
@@ -300,11 +300,11 @@ namespace Jass
                 if (opers.Contains(source[i])) break;
                 if (strChar.Contains(source[i])) break; // в некоторых случаях может быть норм
                 // левые символы
-                throw new Exception($"Line {l}, Col {p}: wrong identifier: unknown symbol");
+                throw new JassException(l, p, "wrong identifier: unknown symbol");
             }
             var typ = TokenKind.name;
             if (keywords.ContainsKey(s)) typ = keywords[s];
-            if ('_' == s[s.Length - 1]) throw new Exception($"Line {l}, Col {p}: wrong identifier: ends with \"_\"");
+            if ('_' == s[s.Length - 1]) throw new JassException(l, p, "wrong identifier: ends with \"_\"");
 
             if (i < source.Length) i--;
             return new Token { Col = p, Line = l, Pos = j, Text = s, Kind = typ };

@@ -8,6 +8,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Scanner;
 
+import org.vsx.jass.JassException;
 import org.vsx.jass.JassLexer;
 import org.vsx.jass.JassParser;
 
@@ -25,6 +26,7 @@ public class App
         "-dts             d.ts mode, make *.d.ts instead of *.ts file\n" +
         "-t               tree mode, will save tree file\n" +
         "-h               show this message\n" +
+        "-lenient         less strict mode\n" +
         "";
     
     static String inPath = "";
@@ -128,6 +130,7 @@ public class App
                     case "-t": language = Language.TypeScriptDeclaration; continue;
                     case "-lua": language = Language.Lua; continue;
                     case "-galaxy-raw": language = Language.GalaxyRaw; continue;
+                    case "-lenient": JassException.setIsStrict(false); continue;
                     case "-h":
                         System.out.println(help);
                         System.exit(0);

@@ -177,7 +177,7 @@ public class JassLexer {
             // условия при которых продолжаем
             if ('0' <= source.charAt(i) && source.charAt(i) <= '9')
             {
-                if (isOct && '8' <= source.charAt(i)) throw new JassException(l, p, "wrong number: wrong octal number");
+                if (isOct && '8' <= source.charAt(i)) JassException.Error(l, p, "wrong number: wrong octal number");
                 isNumFound = true;
                 continue;
             }
@@ -198,9 +198,9 @@ public class JassLexer {
             }
             if ('.' == source.charAt(i))
             {
-                if (isDotFound) throw new JassException(l, p, "wrong number: multiple dot");
-                if (isHex) throw new JassException(l, p, "wrong number: dot inside hex");
-                if (isOct && s.length() > 1) throw new JassException(l, p, "wrong number: dot inside octadecimal");
+                if (isDotFound) JassException.Error(l, p, "wrong number: multiple dot");
+                if (isHex) JassException.Error(l, p, "wrong number: dot inside hex");
+                if (isOct && s.length() > 1) JassException.Error(l, p, "wrong number: dot inside octadecimal");
                 isOct = false;
                 isDotFound = true;
                 continue;
@@ -216,7 +216,7 @@ public class JassLexer {
                 i = j;
                 return null;
             }
-            throw new JassException(l, p, "wrong number: not a number");
+            JassException.Error(l, p, "wrong number: not a number");
         }
         var typ = TokenKind.ndec;
         if (isOct) typ = TokenKind.oct;
@@ -259,10 +259,10 @@ public class JassLexer {
     Token TryParse4AsciiInt() throws JassException
     {
         var tok = TryParseString();
-        if (tok.Text.length() > 6) throw new JassException(tok.Line, tok.Col, "wrong number: more than 4 ascii symbols");
+        if (tok.Text.length() > 6) JassException.Error(tok.Line, tok.Col, "wrong number: more than 4 ascii symbols");
         for (char c: tok.Text.toCharArray())
             if (c > '\u00ff')
-                throw new JassException(tok.Line, tok.Col, "wrong number: non ascii symbol");
+                JassException.Error(tok.Line, tok.Col, "wrong number: non ascii symbol");
         // Надо проверить как оригинальный компилятор относится к 'a\'bc' последовательности
         tok.Kind = TokenKind.adec;
         return tok;
@@ -278,7 +278,7 @@ public class JassLexer {
             l = line,
             p = pos;
 
-        if (i == source.length() - 1) throw new JassException(l, p, "unclosed String");
+        if (i == source.length() - 1) JassException.Error(l, p, "unclosed String");
 
         i++;
         for (; i < source.length(); i++, pos++)
@@ -317,11 +317,11 @@ public class JassLexer {
             if (opers.contains(source.subSequence(i, i + 1))) break;
             if (strChar.contains(source.subSequence(i, i + 1))) break; // в некоторых случаях может быть норм
             // левые символы
-            throw new JassException(l, p, "wrong identifier: unknown symbol");
+            JassException.Error(l, p, "wrong identifier: unknown symbol");
         }
         var typ = TokenKind.name;
         if (keywords.containsKey(s)) typ = keywords.get(s);
-        if ('_' == s.charAt(s.length() - 1)) throw new JassException(l, p, "wrong identifier: ends with \"_\"");
+        if ('_' == s.charAt(s.length() - 1)) JassException.Error(l, p, "wrong identifier: ends with \"_\"");
 
         if (i < source.length()) i--;
         return new Token(p, l, j, s, typ);

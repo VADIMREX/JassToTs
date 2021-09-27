@@ -50,7 +50,7 @@ namespace JassToTs
                 case StatementType.Func:
                 case StatementType.CFunc:
                     return ConvertFunc(stat);
-                default: throw new Exception($"unknown statement {stat.Start}");
+                default: throw new JassTranslatorException($"unknown statement {stat.Start}");
             }
         }
 
@@ -92,7 +92,7 @@ namespace JassToTs
                 case "!=":
                     return "~=";
                 default:
-                    throw new Exception("unknown operator");
+                    throw new JassTranslatorException("unknown operator");
             }
         }
 
@@ -117,7 +117,7 @@ namespace JassToTs
                         baseType = tree.Childs[i].Start.Text;
                         continue;
                     default:
-                        throw new Exception($"unknown statement {tree.Childs[i].Start}");
+                        throw new JassTranslatorException($"unknown statement {tree.Childs[i].Start}");
                 }
             }
             return sb.Append("-- ").Append(typeName).Append(" extends ").Append(baseType).Append(comm);
@@ -134,7 +134,7 @@ namespace JassToTs
                 case StatementType.GVar:
                 case StatementType.GArr:
                     return ConvertVarDecl(stat);
-                default: throw new Exception($"unknown statement {stat.Start}");
+                default: throw new JassTranslatorException($"unknown statement {stat.Start}");
             }
         }
 
@@ -148,7 +148,7 @@ namespace JassToTs
                 case StatementType.LVar:
                 case StatementType.LArr:
                     return ConvertVarDecl(stat, indent);
-                default: throw new Exception($"unknown statement {stat.Start}");
+                default: throw new JassTranslatorException($"unknown statement {stat.Start}");
             }
         }
 
@@ -199,7 +199,7 @@ namespace JassToTs
                         expr = ConvertExprElem(tree.Childs[i]);
                         continue;
                     default:
-                        throw new Exception($"unknown statement {tree.Childs[i].Start}");
+                        throw new JassTranslatorException($"unknown statement {tree.Childs[i].Start}");
                 }
             }
             AddIndent(sb, indent);
@@ -250,7 +250,7 @@ namespace JassToTs
                 case StatementType.Expr:
                     return ConvertExpr(elem);
                 default:
-                    throw new Exception($"unknown statement {elem.Start}");
+                    throw new JassTranslatorException($"unknown statement {elem.Start}");
             }
         }
 
@@ -315,7 +315,7 @@ namespace JassToTs
                         index = ConvertExprElem(stat.Childs[i]);
                         continue;
                     default:
-                        throw new Exception($"unknown statement {stat.Childs[i].Start}");
+                        throw new JassTranslatorException($"unknown statement {stat.Childs[i].Start}");
                 }
             }
 
@@ -378,7 +378,7 @@ namespace JassToTs
                             .AppendJoin("", tree.Childs[i].Childs.Select(x => ConvertStatement(x, 1)));
                         continue;
                     default:
-                        throw new Exception($"unknown statement {tree.Childs[i].Start}");
+                        throw new JassTranslatorException($"unknown statement {tree.Childs[i].Start}");
                 }
             }
             if (isNative) sb.Append("--native ");
@@ -432,7 +432,7 @@ namespace JassToTs
                         returnType = ConvertType(tree.Childs[i].Start.Text);
                         continue;
                     default:
-                        throw new Exception($"unknown statement {tree.Childs[i].Start}");
+                        throw new JassTranslatorException($"unknown statement {tree.Childs[i].Start}");
                 }
             }
 
@@ -469,7 +469,7 @@ namespace JassToTs
                         name = tree.Childs[i].Start.Text;
                         continue;
                     default:
-                        throw new Exception($"unknown statement {tree.Childs[i].Start}");
+                        throw new JassTranslatorException($"unknown statement {tree.Childs[i].Start}");
                 }
             }
 
@@ -512,7 +512,7 @@ namespace JassToTs
                 case StatementType.Return:
                     return AddIndent(sb, indent).Append("return ").Append(ConvertExpr(stat)).Append("\n");
                 default:
-                    throw new Exception($"unknown statement {stat.Start}");
+                    throw new JassTranslatorException($"unknown statement {stat.Start}");
             }
         }
 
@@ -548,7 +548,7 @@ namespace JassToTs
                         newValue = ConvertExprElem(tree.Childs[i]);
                         continue;
                     default:
-                        throw new Exception($"unknown statement {tree.Childs[i].Start}");
+                        throw new JassTranslatorException($"unknown statement {tree.Childs[i].Start}");
                 }
             }
 
@@ -587,7 +587,7 @@ namespace JassToTs
                         AddIndent(sb, indent).Append("else\n");
                         goto case StatementType.Then;
                     default:
-                        throw new Exception($"unknown statement {tree.Childs[i].Start}");
+                        throw new JassTranslatorException($"unknown statement {tree.Childs[i].Start}");
                 }
             }
 

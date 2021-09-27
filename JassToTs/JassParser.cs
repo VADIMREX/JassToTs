@@ -38,7 +38,7 @@ namespace Jass
             {
                 if (AddComment(stat)) continue;
                 if (j < 4 && TokenKind.ln == tokens[i].Kind)
-                    throw new Exception($"Line {tokens[i].Line}, Col {tokens[i].Col}: wrong type declaration: linebreak");
+                    throw new JassException(tokens[i].Line, tokens[i].Col, "wrong type declaration: linebreak");
                 switch (j)
                 {
                     case 0:
@@ -48,24 +48,24 @@ namespace Jass
                         break;
                     case 1:
                         if (TokenKind.name != tokens[i].Kind)
-                            throw new Exception($"Line {tokens[i].Line}, Col {tokens[i].Col}: wrong type declaration: identifier expected");
+                            throw new JassException(tokens[i].Line, tokens[i].Col, "wrong type declaration: identifier expected");
                         stat.AddChild("TypeName", tokens[i]);
                         j++;
                         break;
                     case 2:
                         if (TokenKind.kwd != tokens[i].Kind || "extends" != tokens[i].Text)
-                            throw new Exception($"Line {tokens[i].Line}, Col {tokens[i].Col}: wrong type declaration: extends keyword expected");
+                            throw new JassException(tokens[i].Line, tokens[i].Col, "wrong type declaration: extends keyword expected");
                         j++;
                         break;
                     case 3:
                         if (TokenKind.name != tokens[i].Kind && TokenKind.btyp != tokens[i].Kind)
-                            throw new Exception($"Line {tokens[i].Line}, Col {tokens[i].Col}: wrong type declaration: type identifier expected");
+                            throw new JassException(tokens[i].Line, tokens[i].Col, "wrong type declaration: type identifier expected");
                         j++;
                         stat.AddChild("BaseType", tokens[i]);
                         break;
                     case 4:
                         if (TokenKind.ln != tokens[i].Kind)
-                            throw new Exception($"Line {tokens[i].Line}, Col {tokens[i].Col}: wrong type declaration: new line expected");
+                            throw new JassException(tokens[i].Line, tokens[i].Col, "wrong type declaration: new line expected");
                         j++;
                         break;
                 }
@@ -93,7 +93,7 @@ namespace Jass
                     case 1:
                     case 3:
                         if (TokenKind.ln != tokens[i].Kind)
-                            throw new Exception($"Line {tokens[i].Line}, Col {tokens[i].Col}: wrong globals declaration: new line expected");
+                            throw new JassException(tokens[i].Line, tokens[i].Col, "wrong globals declaration: new line expected");
                         j++;
                         break;
                     case 2:
@@ -147,19 +147,19 @@ namespace Jass
                         break;
                     case 1:
                         if (TokenKind.name != tokens[i].Kind && TokenKind.btyp != tokens[i].Kind)
-                            throw new Exception($"Line {tokens[i].Line}, Col {tokens[i].Col}: wrong const declaration: type identifier expected");
+                            throw new JassException(tokens[i].Line, tokens[i].Col, "wrong const declaration: type identifier expected");
                         stat.AddChild("Type", tokens[i]);
                         j++;
                         break;
                     case 2:
                         if (TokenKind.name != tokens[i].Kind)
-                            throw new Exception($"Line {tokens[i].Line}, Col {tokens[i].Col}: wrong const declaration: identifier expected");
+                            throw new JassException(tokens[i].Line, tokens[i].Col, "wrong const declaration: identifier expected");
                         stat.AddChild("Name", tokens[i]);
                         j++;
                         break;
                     case 3:
                         if (TokenKind.oper != tokens[i].Kind || "=" != tokens[i].Text)
-                            throw new Exception($"Line {tokens[i].Line}, Col {tokens[i].Col}: wrong const declaration: initialization expected");
+                            throw new JassException(tokens[i].Line, tokens[i].Col, "wrong const declaration: initialization expected");
                         i++;
                         var expr = TryParseExpression();
                         stat.AddChild(expr);
@@ -167,7 +167,7 @@ namespace Jass
                         break;
                     case 4:
                         if (TokenKind.ln != tokens[i].Kind)
-                            throw new Exception($"Line {tokens[i].Line}, Col {tokens[i].Col}: wrong const declaration: new line expected");
+                            throw new JassException(tokens[i].Line, tokens[i].Col, "wrong const declaration: new line expected");
                         j++;
                         break;
                 }
@@ -206,7 +206,7 @@ namespace Jass
                     //   тип
                     case 1:
                         if (TokenKind.name != tokens[i].Kind && TokenKind.btyp != tokens[i].Kind)
-                            throw new Exception($"Line {tokens[i].Line}, Col {tokens[i].Col}: wrong var declaration: type identifier expected");
+                            throw new JassException(tokens[i].Line, tokens[i].Col, "wrong var declaration: type identifier expected");
                         if (null == stat.Start) stat.Start = tokens[i];
                         stat.AddChild("Type", tokens[i]);
                         j++;
@@ -224,7 +224,7 @@ namespace Jass
                     //       имя
                     case 3:
                         if (TokenKind.name != tokens[i].Kind)
-                            throw new Exception($"Line {tokens[i].Line}, Col {tokens[i].Col}: wrong var declaration: identifier expected");
+                            throw new JassException(tokens[i].Line, tokens[i].Col, "wrong var declaration: identifier expected");
                         stat.AddChild("Name", tokens[i]);
                         j += IsArray ? 2 : 1;
                         break;
@@ -243,7 +243,7 @@ namespace Jass
                     //           конец строки
                     case 5:
                         if (TokenKind.ln != tokens[i].Kind)
-                            throw new Exception($"Line {tokens[i].Line}, Col {tokens[i].Col}: wrong var declaration: new line expected");
+                            throw new JassException(tokens[i].Line, tokens[i].Col, "wrong var declaration: new line expected");
                         j++;
                         break;
                 }
@@ -287,15 +287,15 @@ namespace Jass
                             case TokenKind.rbra:
                             case TokenKind.rind:
                                 if ("Par" != stat.Type)
-                                    throw new Exception($"Line {tokens[i].Line}, Col {tokens[i].Col}: wrong expression: unexpected closing parenthes");
+                                    throw new JassException(tokens[i].Line, tokens[i].Col, "wrong expression: unexpected closing parenthes");
                                 if (TokenKind.lbra != stat.Start.Kind && TokenKind.rbra == tokens[i].Kind)
-                                    throw new Exception($"Line {tokens[i].Line}, Col {tokens[i].Col}: wrong expression: another parenthes expected");
+                                    throw new JassException(tokens[i].Line, tokens[i].Col, "wrong expression: another parenthes expected");
                                 if (TokenKind.lind != stat.Start.Kind && TokenKind.rind == tokens[i].Kind)
-                                    throw new Exception($"Line {tokens[i].Line}, Col {tokens[i].Col}: wrong expression: another parenthes expected");
+                                    throw new JassException(tokens[i].Line, tokens[i].Col, "wrong expression: another parenthes expected");
                                 stat = par.Pop();
                                 continue;
                         }
-                        throw new Exception($"Line {tokens[i].Line}, Col {tokens[i].Col}: wrong expression: unexpected parenthes kind");
+                        throw new JassException(tokens[i].Line, tokens[i].Col, "wrong expression: unexpected parenthes kind");
                     case TokenType.val:
                         stat.AddChild("Val", tokens[i]);
                         continue;
@@ -325,7 +325,7 @@ namespace Jass
                 }
                 break;
             }
-            //if (0 == stat.Childs.Count) throw new Exception($"Line {tokens[i].Line}, Col {tokens[i].Col}: wrong expression: empty expression");
+            //if (0 == stat.Childs.Count) throw new JassException(tokens[i].Line, tokens[i].Col, "wrong expression: empty expression");
             if (i < tokens.Count) i--;
             if (1 == stat.Childs.Count) return stat.Childs[0];
             return stat;
@@ -352,7 +352,7 @@ namespace Jass
                 {
                     case 0:
                         if (TokenKind.name != tokens[i].Kind)
-                            throw new Exception($"Line {tokens[i].Line}, Col {tokens[i].Col}: wrong expression: identifier expected");
+                            throw new JassException(tokens[i].Line, tokens[i].Col, "wrong expression: identifier expected");
                         stat.AddChild("Name", tokens[i]);
                         j++;
                         continue;
@@ -368,7 +368,7 @@ namespace Jass
                         var arg = TryParseExpression(ArgStopper);
                         if ("Expr" != arg.Type || arg.Childs.Count > 0) stat.AddChild(arg);
                         else if (stat.Childs.Count > 1)
-                            throw new Exception($"Line {tokens[i].Line}, Col {tokens[i].Col}: wrong expression: argument expected");
+                            throw new JassException(tokens[i].Line, tokens[i].Col, "wrong expression: argument expected");
                         j++;
                         continue;
                     case 3:
@@ -377,7 +377,7 @@ namespace Jass
                         else if (TokenKind.rbra == tokens[i].Kind)
                             j++;
                         else
-                            throw new Exception($"Line {tokens[i].Line}, Col {tokens[i].Col}: wrong expression: comma or parenthes expected");
+                            throw new JassException(tokens[i].Line, tokens[i].Col, "wrong expression: comma or parenthes expected");
                         continue;
                 }
             }
@@ -406,7 +406,7 @@ namespace Jass
                 {
                     case 0:
                         if (TokenKind.name != tokens[i].Kind) 
-                            throw new Exception($"Line {tokens[i].Line}, Col {tokens[i].Col}: wrong expression: identifier expected");
+                            throw new JassException(tokens[i].Line, tokens[i].Col, "wrong expression: identifier expected");
                         stat.AddChild("Name", tokens[i]);
                         j++;
                         continue;
@@ -421,14 +421,14 @@ namespace Jass
                     case 2:
                         var ind = TryParseExpression(IndStopper);
                         if ("Expr" == ind.Type && 0 == ind.Childs.Count)
-                            throw new Exception($"Line {tokens[i].Line}, Col {tokens[i].Col}: wrong expression: index expected");
+                            throw new JassException(tokens[i].Line, tokens[i].Col, "wrong expression: index expected");
                         stat.MakeChild("Ind", ind.Start)
                             .AddChild(ind);
                         j++;
                         continue;
                     case 3:
                         if (TokenKind.rind != tokens[i].Kind)
-                            throw new Exception($"Line {tokens[i].Line}, Col {tokens[i].Col}: wrong expression: comma or parenthes expected");
+                            throw new JassException(tokens[i].Line, tokens[i].Col, "wrong expression: comma or parenthes expected");
                         j++;
                         continue;
                 }
@@ -452,12 +452,12 @@ namespace Jass
                 {
                     case 0:
                         if (TokenKind.kwd != tokens[i].Kind && "function" != tokens[i].Text)
-                            throw new Exception($"Line {tokens[i].Line}, Col {tokens[i].Col}: wrong expression: function expected");
+                            throw new JassException(tokens[i].Line, tokens[i].Col, "wrong expression: function expected");
                         j++;
                         continue;
                     case 1:
                         if (TokenKind.name != tokens[i].Kind)
-                            throw new Exception($"Line {tokens[i].Line}, Col {tokens[i].Col}: wrong expression: identifier expected");
+                            throw new JassException(tokens[i].Line, tokens[i].Col, "wrong expression: identifier expected");
                         stat.Start = tokens[i];
                         j++;
                         continue;
@@ -506,7 +506,7 @@ namespace Jass
                         break;
                     case 3:
                         if (TokenKind.ln != tokens[i].Kind)
-                            throw new Exception($"Line {tokens[i].Line}, Col {tokens[i].Col}: wrong native declaration: new line expected");
+                            throw new JassException(tokens[i].Line, tokens[i].Col, "wrong native declaration: new line expected");
                         j++;
                         break;
                 }
@@ -531,13 +531,13 @@ namespace Jass
                 {
                     case 0:
                         if (TokenKind.name != tokens[i].Kind)
-                            throw new Exception($"Line {tokens[i].Line}, Col {tokens[i].Col}: wrong function declaration: identifier expected");
+                            throw new JassException(tokens[i].Line, tokens[i].Col, "wrong function declaration: identifier expected");
                         stat.AddChild("Name", tokens[i]);
                         j++;
                         continue;
                     case 1:
                         if (TokenKind.kwd != tokens[i].Kind || "takes" != tokens[i].Text)
-                            throw new Exception($"Line {tokens[i].Line}, Col {tokens[i].Col}: wrong function declaration: takes keyword expected");
+                            throw new JassException(tokens[i].Line, tokens[i].Col, "wrong function declaration: takes keyword expected");
                         j++;
                         continue;
                     case 2:
@@ -549,7 +549,7 @@ namespace Jass
                         continue;
                     case 3:
                         if (TokenKind.kwd != tokens[i].Kind || "returns" != tokens[i].Text)
-                            throw new Exception($"Line {tokens[i].Line}, Col {tokens[i].Col}: wrong function declaration: returns keyword expected");
+                            throw new JassException(tokens[i].Line, tokens[i].Col, "wrong function declaration: returns keyword expected");
                         j++;
                         continue;
                     case 4:
@@ -557,7 +557,7 @@ namespace Jass
                             (TokenType.name == tokens[i].Type))
                             stat.AddChild("Result", tokens[i]);
                         else
-                            throw new Exception($"Line {tokens[i].Line}, Col {tokens[i].Col}: wrong function declaration: nothing or type name expected");
+                            throw new JassException(tokens[i].Line, tokens[i].Col, "wrong function declaration: nothing or type name expected");
                         j++;
                         continue;
                 }
@@ -582,13 +582,13 @@ namespace Jass
                 {
                     case 0:
                         if (TokenType.name != tokens[i].Type)
-                            throw new Exception($"Line {tokens[i].Line}, Col {tokens[i].Col}: wrong function declaration: type name expected");
+                            throw new JassException(tokens[i].Line, tokens[i].Col, "wrong function declaration: type name expected");
                         type = tokens[i];
                         j++;
                         continue;
                     case 1:
                         if (TokenType.name != tokens[i].Type)
-                            throw new Exception($"Line {tokens[i].Line}, Col {tokens[i].Col}: wrong function declaration: param name expected");
+                            throw new JassException(tokens[i].Line, tokens[i].Col, "wrong function declaration: param name expected");
                         stat.MakeChild("Param", type)
                             .AddChild("Type", type)
                             .AddChild("Name", tokens[i]);
@@ -600,7 +600,7 @@ namespace Jass
                         else if (TokenKind.kwd == tokens[i].Kind && "returns" == tokens[i].Text)
                             j++;
                         else
-                            throw new Exception($"Line {tokens[i].Line}, Col {tokens[i].Col}: wrong expression: comma or returns expected");
+                            throw new JassException(tokens[i].Line, tokens[i].Col, "wrong expression: comma or returns expected");
                         continue;
                 }
             }
@@ -644,7 +644,7 @@ namespace Jass
                     case 3:
                     case 6:
                         if (TokenKind.ln != tokens[i].Kind)
-                            throw new Exception($"Line {tokens[i].Line}, Col {tokens[i].Col}: wrong function declaration: new line expected");
+                            throw new JassException(tokens[i].Line, tokens[i].Col, "wrong function declaration: new line expected");
                         j++;
                         continue;
                     case 4:
@@ -654,7 +654,7 @@ namespace Jass
                         continue;
                     case 5:
                         if (TokenKind.kwd != tokens[i].Kind || "endfunction" != tokens[i].Text)
-                            throw new Exception($"Line {tokens[i].Line}, Col {tokens[i].Col}: wrong function declaration: endfunction expected");
+                            throw new JassException(tokens[i].Line, tokens[i].Col, "wrong function declaration: endfunction expected");
                         j++;
                         continue;
                 }
@@ -737,7 +737,7 @@ namespace Jass
                 if (isYdweCompatible && TokenKind.name == tokens[i].Kind) {
                     return TryParseMacroCall();
                 }
-                if (TokenKind.kwd != tokens[i].Kind) throw new Exception($"Line {tokens[i].Line}, Col {tokens[i].Col}: statement error: keyword expected");
+                if (TokenKind.kwd != tokens[i].Kind) throw new JassException(tokens[i].Line, tokens[i].Col, "statement error: keyword expected");
 
                 switch (tokens[i].Text)
                 {
@@ -757,12 +757,12 @@ namespace Jass
                         i++;
                         var dbg = TryParseStatement();
                         if ("Return" == dbg.Type || "Debug" == dbg.Type)
-                            throw new Exception($"Line {tokens[i].Line}, Col {tokens[i].Col}: statement error: wrong statement");
+                            throw new JassException(tokens[i].Line, tokens[i].Col, "statement error: wrong statement");
                         var stat = new Statement { Type = "Debug" };
                         stat.AddChild(dbg);
                         return stat;
                 }
-                throw new Exception($"Line {tokens[i].Line}, Col {tokens[i].Col}: statement error: unknown keyword");
+                throw new JassException(tokens[i].Line, tokens[i].Col, "statement error: unknown keyword");
             }
             return null;
         }
@@ -786,7 +786,7 @@ namespace Jass
                         continue;
                     case 1:
                         if (TokenType.name != tokens[i].Type)
-                            throw new Exception($"Line {tokens[i].Line}, Col {tokens[i].Col}: wrong set statement: variable name expected");
+                            throw new JassException(tokens[i].Line, tokens[i].Col, "wrong set statement: variable name expected");
                         stat.AddChild("Name", tokens[i]);
                         j++;
                         continue;
@@ -806,7 +806,7 @@ namespace Jass
                         continue;
                     case 3:
                         if (TokenKind.oper != tokens[i].Kind || "=" != tokens[i].Text)
-                            throw new Exception($"Line {tokens[i].Line}, Col {tokens[i].Col}: wrong set statement: = expected");
+                            throw new JassException(tokens[i].Line, tokens[i].Col, "wrong set statement: = expected");
                         i++;
                         var expr = TryParseExpression();
                         stat.AddChild(expr);
@@ -814,7 +814,7 @@ namespace Jass
                         continue;
                     case 4:
                         if (TokenKind.ln != tokens[i].Kind)
-                            throw new Exception($"Line {tokens[i].Line}, Col {tokens[i].Col}: wrong native declaration: new line expected");
+                            throw new JassException(tokens[i].Line, tokens[i].Col, "wrong native declaration: new line expected");
                         j++;
                         break;
                 }
@@ -845,7 +845,7 @@ namespace Jass
                         continue;
                     case 2:
                         if (TokenKind.ln != tokens[i].Kind)
-                            throw new Exception($"Line {tokens[i].Line}, Col {tokens[i].Col}: wrong native declaration: new line expected");
+                            throw new JassException(tokens[i].Line, tokens[i].Col, "wrong native declaration: new line expected");
                         j++;
                         break;
                 }
@@ -887,7 +887,7 @@ namespace Jass
                         continue;
                     case 2:
                         if (TokenKind.kwd != tokens[i].Kind || "then" != tokens[i].Text)
-                            throw new Exception($"Line {tokens[i].Line}, Col {tokens[i].Col}: wrong if statement: then expected");
+                            throw new JassException(tokens[i].Line, tokens[i].Col, "wrong if statement: then expected");
                         then = new Statement { Type = "Then" };
                         stat.AddChild(then);
                         j++;
@@ -896,7 +896,7 @@ namespace Jass
                     case 5:
                     case 7:
                         if (TokenKind.ln != tokens[i].Kind)
-                            throw new Exception($"Line {tokens[i].Line}, Col {tokens[i].Col}: wrong if statement: new line expected");
+                            throw new JassException(tokens[i].Line, tokens[i].Col, "wrong if statement: new line expected");
                         j++;
                         continue;
                     case 4:
@@ -970,7 +970,7 @@ namespace Jass
                         continue;
                     case 2:
                         if (TokenKind.ln != tokens[i].Kind)
-                            throw new Exception($"Line {tokens[i].Line}, Col {tokens[i].Col}: wrong loop statement: new line expected");
+                            throw new JassException(tokens[i].Line, tokens[i].Col, "wrong loop statement: new line expected");
                         j++;
                         break;
                 }
@@ -1001,7 +1001,7 @@ namespace Jass
                         continue;
                     case 2:
                         if (TokenKind.ln != tokens[i].Kind)
-                            throw new Exception($"Line {tokens[i].Line}, Col {tokens[i].Col}: wrong exitwhen statement: new line expected");
+                            throw new JassException(tokens[i].Line, tokens[i].Col, "wrong exitwhen statement: new line expected");
                         j++;
                         break;
                 }
@@ -1032,7 +1032,7 @@ namespace Jass
                         continue;
                     case 2:
                         if (TokenKind.ln != tokens[i].Kind)
-                            throw new Exception($"Line {tokens[i].Line}, Col {tokens[i].Col}: wrong return statement: new line expected");
+                            throw new JassException(tokens[i].Line, tokens[i].Col, "wrong return statement: new line expected");
                         j++;
                         break;
                 }
@@ -1056,18 +1056,18 @@ namespace Jass
                 if (AddComment(prog)) continue;
                 if (TokenKind.ln == tokens[i].Kind) continue;
 
-                if (TokenKind.kwd != tokens[i].Kind) throw new Exception($"Line {tokens[i].Line}, Col {tokens[i].Col}: error: keyword expected");
+                if (TokenKind.kwd != tokens[i].Kind) throw new JassException(tokens[i].Line, tokens[i].Col, "error: keyword expected");
 
                 if ("type" == tokens[i].Text)
                 {
-                    if (isDeclPassed) throw new Exception($"Line {tokens[i].Line}, Col {tokens[i].Col}: wrong type declaration: not in declaration block");
+                    if (isDeclPassed) throw new JassException(tokens[i].Line, tokens[i].Col, "wrong type declaration: not in declaration block");
                     stat = TryParseTypeDecl();
                     prog.AddChild(stat);
                     continue;
                 }
                 if ("globals" == tokens[i].Text)
                 {
-                    if (isDeclPassed) throw new Exception($"Line {tokens[i].Line}, Col {tokens[i].Col}: wrong global declaration: not in declaration block");
+                    if (isDeclPassed) throw new JassException(tokens[i].Line, tokens[i].Col, "wrong global declaration: not in declaration block");
                     stat = TryParseGlobals();
                     prog.Childs.Add(stat);
                     continue;
@@ -1077,7 +1077,7 @@ namespace Jass
                     stat = TryParseNative();
                     if (null != stat)
                     {
-                        if (isDeclPassed) throw new Exception($"Line {tokens[i].Line}, Col {tokens[i].Col}: wrong native declaration: not in declaration block");
+                        if (isDeclPassed) throw new JassException(tokens[i].Line, tokens[i].Col, "wrong native declaration: not in declaration block");
                         prog.Childs.Add(stat);
                         continue;
                     }

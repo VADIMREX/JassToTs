@@ -42,7 +42,7 @@ public class JassParser {
         {
             if (AddComment(stat)) continue;
             if (j < 4 && TokenKind.ln.equals(tokens.get(i).Kind))
-                throw new JassException(tokens.get(i).Line, tokens.get(i).Col, "wrong type declaration: linebreak");
+                JassException.Error(tokens.get(i).Line, tokens.get(i).Col, "wrong type declaration: linebreak");
             switch (j)
             {
                 case 0:
@@ -52,24 +52,24 @@ public class JassParser {
                     break;
                 case 1:
                     if (!TokenKind.name.equals(tokens.get(i).Kind))
-                        throw new JassException(tokens.get(i).Line, tokens.get(i).Col, "wrong type declaration: identifier expected");
+                        JassException.Error(tokens.get(i).Line, tokens.get(i).Col, "wrong type declaration: identifier expected");
                     stat.AddChild("TypeName", tokens.get(i));
                     j++;
                     break;
                 case 2:
                     if (!TokenKind.kwd.equals(tokens.get(i).Kind) || !"extends".equals(tokens.get(i).Text))
-                        throw new JassException(tokens.get(i).Line, tokens.get(i).Col, "wrong type declaration: extends keyword expected");
+                        JassException.Error(tokens.get(i).Line, tokens.get(i).Col, "wrong type declaration: extends keyword expected");
                     j++;
                     break;
                 case 3:
                     if (!TokenKind.name.equals(tokens.get(i).Kind) && TokenKind.btyp.equals(tokens.get(i).Kind))
-                        throw new JassException(tokens.get(i).Line, tokens.get(i).Col, "wrong type declaration: type identifier expected");
+                        JassException.Error(tokens.get(i).Line, tokens.get(i).Col, "wrong type declaration: type identifier expected");
                     j++;
                     stat.AddChild("BaseType", tokens.get(i));
                     break;
                 case 4:
                     if (!TokenKind.ln.equals(tokens.get(i).Kind))
-                        throw new JassException(tokens.get(i).Line, tokens.get(i).Col, "wrong type declaration: new line expected");
+                        JassException.Error(tokens.get(i).Line, tokens.get(i).Col, "wrong type declaration: new line expected");
                     j++;
                     break;
             }
@@ -97,7 +97,7 @@ public class JassParser {
                 case 1:
                 case 3:
                     if (!TokenKind.ln.equals(tokens.get(i).Kind))
-                        throw new JassException(tokens.get(i).Line, tokens.get(i).Col, "wrong globals declaration: new line expected");
+                        JassException.Error(tokens.get(i).Line, tokens.get(i).Col, "wrong globals declaration: new line expected");
                     j++;
                     break;
                 case 2:
@@ -147,19 +147,19 @@ public class JassParser {
                     break;
                 case 1:
                     if (!TokenKind.name.equals(tokens.get(i).Kind) && !TokenKind.btyp.equals(tokens.get(i).Kind))
-                        throw new JassException(tokens.get(i).Line, tokens.get(i).Col, "wrong const declaration: type identifier expected");
+                        JassException.Error(tokens.get(i).Line, tokens.get(i).Col, "wrong const declaration: type identifier expected");
                     stat.AddChild("Type", tokens.get(i));
                     j++;
                     break;
                 case 2:
                     if (!TokenKind.name.equals(tokens.get(i).Kind))
-                        throw new JassException(tokens.get(i).Line, tokens.get(i).Col, "wrong const declaration: identifier expected");
+                        JassException.Error(tokens.get(i).Line, tokens.get(i).Col, "wrong const declaration: identifier expected");
                     stat.AddChild("Name", tokens.get(i));
                     j++;
                     break;
                 case 3:
                     if (!TokenKind.oper.equals(tokens.get(i).Kind) || !"=".equals(tokens.get(i).Text))
-                        throw new JassException(tokens.get(i).Line, tokens.get(i).Col, "wrong const declaration: initialization expected");
+                        JassException.Error(tokens.get(i).Line, tokens.get(i).Col, "wrong const declaration: initialization expected");
                     i++;
                     var expr = TryParseExpression();
                     stat.AddChild(expr);
@@ -167,7 +167,7 @@ public class JassParser {
                     break;
                 case 4:
                     if (!TokenKind.ln.equals(tokens.get(i).Kind))
-                        throw new JassException(tokens.get(i).Line, tokens.get(i).Col, "wrong const declaration: new line expected");
+                        JassException.Error(tokens.get(i).Line, tokens.get(i).Col, "wrong const declaration: new line expected");
                     j++;
                     break;
             }
@@ -205,7 +205,7 @@ public class JassParser {
                 //   тип
                 case 1:
                     if (!TokenKind.name.equals(tokens.get(i).Kind) && !TokenKind.btyp.equals(tokens.get(i).Kind))
-                        throw new JassException(tokens.get(i).Line, tokens.get(i).Col, "wrong var declaration: type identifier expected");
+                        JassException.Error(tokens.get(i).Line, tokens.get(i).Col, "wrong var declaration: type identifier expected");
                     if (null == stat.Start) stat.Start = tokens.get(i);
                     stat.AddChild("Type", tokens.get(i));
                     j++;
@@ -222,7 +222,7 @@ public class JassParser {
                 //       имя
                 case 3:
                     if (!TokenKind.name.equals(tokens.get(i).Kind))
-                        throw new JassException(tokens.get(i).Line, tokens.get(i).Col, "wrong var declaration: identifier expected");
+                        JassException.Error(tokens.get(i).Line, tokens.get(i).Col, "wrong var declaration: identifier expected");
                     stat.AddChild("Name", tokens.get(i));
                     j += IsArray ? 2 : 1;
                     break;
@@ -240,7 +240,7 @@ public class JassParser {
                 //           конец строки
                 case 5:
                     if (!TokenKind.ln.equals(tokens.get(i).Kind))
-                        throw new JassException(tokens.get(i).Line, tokens.get(i).Col, "wrong var declaration: new line expected");
+                        JassException.Error(tokens.get(i).Line, tokens.get(i).Col, "wrong var declaration: new line expected");
                     j++;
                     break;
             }
@@ -288,15 +288,15 @@ public class JassParser {
                         case TokenKind.rbra:
                         case TokenKind.rind:
                             if (!"Par".equals(stat.Type))
-                                throw new JassException(tokens.get(i).Line, tokens.get(i).Col, "wrong expression: unexpected closing parenthes");
+                                JassException.Error(tokens.get(i).Line, tokens.get(i).Col, "wrong expression: unexpected closing parenthes");
                             if (!TokenKind.lbra.equals(stat.Start.Kind) && TokenKind.rbra.equals(tokens.get(i).Kind))
-                                throw new JassException(tokens.get(i).Line, tokens.get(i).Col, "wrong expression: another parenthes expected");
+                                JassException.Error(tokens.get(i).Line, tokens.get(i).Col, "wrong expression: another parenthes expected");
                             if (!TokenKind.lind.equals(stat.Start.Kind) && TokenKind.rind.equals(tokens.get(i).Kind))
-                                throw new JassException(tokens.get(i).Line, tokens.get(i).Col, "wrong expression: another parenthes expected");
+                                JassException.Error(tokens.get(i).Line, tokens.get(i).Col, "wrong expression: another parenthes expected");
                             stat = par.pop();
                             continue;
                     }
-                    throw new JassException(tokens.get(i).Line, tokens.get(i).Col, "wrong expression: unexpected parenthes kind");
+                    JassException.Error(tokens.get(i).Line, tokens.get(i).Col, "wrong expression: unexpected parenthes kind");
                 case TokenType.val:
                     stat.AddChild("Val", tokens.get(i));
                     continue;
@@ -325,7 +325,7 @@ public class JassParser {
             }
             break;
         }
-        //if (0 == stat.Childs.size()) throw new JassException(tokens.get(i).Line, tokens.get(i).Col, "wrong expression: empty expression");
+        //if (0 == stat.Childs.size()) JassException.Error(tokens.get(i).Line, tokens.get(i).Col, "wrong expression: empty expression");
         if (i < tokens.size()) i--;
         if (1 == stat.Childs.size()) return stat.Childs.get(0);
         return stat;
@@ -353,7 +353,7 @@ public class JassParser {
             {
                 case 0:
                     if (!TokenKind.name.equals(tokens.get(i).Kind))
-                        throw new JassException(tokens.get(i).Line, tokens.get(i).Col, "wrong expression: identifier expected");
+                        JassException.Error(tokens.get(i).Line, tokens.get(i).Col, "wrong expression: identifier expected");
                     stat.AddChild("Name", tokens.get(i));
                     j++;
                     continue;
@@ -369,7 +369,7 @@ public class JassParser {
                     var arg = TryParseExpression(ArgStopper);
                     if (!"Expr".equals(arg.Type) || arg.Childs.size() > 0) stat.AddChild(arg);
                     else if (stat.Childs.size() > 1)
-                        throw new JassException(tokens.get(i).Line, tokens.get(i).Col, "wrong expression: argument expected");
+                        JassException.Error(tokens.get(i).Line, tokens.get(i).Col, "wrong expression: argument expected");
                     j++;
                     continue;
                 case 3:
@@ -378,7 +378,7 @@ public class JassParser {
                     else if (TokenKind.rbra.equals(tokens.get(i).Kind))
                         j++;
                     else
-                        throw new JassException(tokens.get(i).Line, tokens.get(i).Col, "wrong expression: comma or parenthes expected");
+                        JassException.Error(tokens.get(i).Line, tokens.get(i).Col, "wrong expression: comma or parenthes expected");
                     continue;
             }
         }
@@ -408,7 +408,7 @@ public class JassParser {
             {
                 case 0:
                     if (!TokenKind.name.equals(tokens.get(i).Kind))
-                        throw new JassException(tokens.get(i).Line, tokens.get(i).Col, "wrong expression: identifier expected");
+                        JassException.Error(tokens.get(i).Line, tokens.get(i).Col, "wrong expression: identifier expected");
                     stat.AddChild("Name", tokens.get(i));
                     j++;
                     continue;
@@ -423,14 +423,14 @@ public class JassParser {
                 case 2:
                     var ind = TryParseExpression(IndStopper);
                     if ("Expr".equals(ind.Type) && 0 == ind.Childs.size())
-                        throw new JassException(tokens.get(i).Line, tokens.get(i).Col, "wrong expression: index expected");
+                        JassException.Error(tokens.get(i).Line, tokens.get(i).Col, "wrong expression: index expected");
                     stat.MakeChild("Ind", ind.Start)
                         .AddChild(ind);
                     j++;
                     continue;
                 case 3:
                     if (!TokenKind.rind.equals(tokens.get(i).Kind))
-                        throw new JassException(tokens.get(i).Line, tokens.get(i).Col, "wrong expression: comma or parenthes expected");
+                        JassException.Error(tokens.get(i).Line, tokens.get(i).Col, "wrong expression: comma or parenthes expected");
                     j++;
                     continue;
             }
@@ -454,12 +454,12 @@ public class JassParser {
             {
                 case 0:
                     if (!TokenKind.kwd.equals(tokens.get(i).Kind) && !"function".equals(tokens.get(i).Text))
-                        throw new JassException(tokens.get(i).Line, tokens.get(i).Col, "wrong expression: function expected");
+                        JassException.Error(tokens.get(i).Line, tokens.get(i).Col, "wrong expression: function expected");
                     j++;
                     continue;
                 case 1:
                     if (!TokenKind.name.equals(tokens.get(i).Kind))
-                        throw new JassException(tokens.get(i).Line, tokens.get(i).Col, "wrong expression: identifier expected");
+                        JassException.Error(tokens.get(i).Line, tokens.get(i).Col, "wrong expression: identifier expected");
                     stat.Start = tokens.get(i);
                     j++;
                     continue;
@@ -502,7 +502,7 @@ public class JassParser {
                     break;
                 case 3:
                     if (!TokenKind.ln.equals(tokens.get(i).Kind))
-                        throw new JassException(tokens.get(i).Line, tokens.get(i).Col, "wrong native declaration: new line expected");
+                        JassException.Error(tokens.get(i).Line, tokens.get(i).Col, "wrong native declaration: new line expected");
                     j++;
                     break;
             }
@@ -527,13 +527,13 @@ public class JassParser {
             {
                 case 0:
                     if (!TokenKind.name.equals(tokens.get(i).Kind))
-                        throw new JassException(tokens.get(i).Line, tokens.get(i).Col, "wrong function declaration: identifier expected");
+                        JassException.Error(tokens.get(i).Line, tokens.get(i).Col, "wrong function declaration: identifier expected");
                     stat.AddChild("Name", tokens.get(i));
                     j++;
                     continue;
                 case 1:
                     if (!TokenKind.kwd.equals(tokens.get(i).Kind) || !"takes".equals(tokens.get(i).Text))
-                        throw new JassException(tokens.get(i).Line, tokens.get(i).Col, "wrong function declaration: takes keyword expected");
+                        JassException.Error(tokens.get(i).Line, tokens.get(i).Col, "wrong function declaration: takes keyword expected");
                     j++;
                     continue;
                 case 2:
@@ -545,7 +545,7 @@ public class JassParser {
                     continue;
                 case 3:
                     if (!TokenKind.kwd.equals(tokens.get(i).Kind) || !"returns".equals(tokens.get(i).Text))
-                        throw new JassException(tokens.get(i).Line, tokens.get(i).Col, "wrong function declaration: returns keyword expected");
+                        JassException.Error(tokens.get(i).Line, tokens.get(i).Col, "wrong function declaration: returns keyword expected");
                     j++;
                     continue;
                 case 4:
@@ -553,7 +553,7 @@ public class JassParser {
                         (TokenType.name.equals(tokens.get(i).getType())))
                         stat.AddChild("Result", tokens.get(i));
                     else
-                        throw new JassException(tokens.get(i).Line, tokens.get(i).Col, "wrong function declaration: nothing or type name expected");
+                        JassException.Error(tokens.get(i).Line, tokens.get(i).Col, "wrong function declaration: nothing or type name expected");
                     j++;
                     continue;
             }
@@ -578,13 +578,13 @@ public class JassParser {
             {
                 case 0:
                     if (!TokenType.name.equals(tokens.get(i).getType()))
-                        throw new JassException(tokens.get(i).Line, tokens.get(i).Col, "wrong function declaration: type name expected");
+                        JassException.Error(tokens.get(i).Line, tokens.get(i).Col, "wrong function declaration: type name expected");
                     type = tokens.get(i);
                     j++;
                     continue;
                 case 1:
                     if (!TokenType.name.equals(tokens.get(i).getType()))
-                        throw new JassException(tokens.get(i).Line, tokens.get(i).Col, "wrong function declaration: param name expected");
+                        JassException.Error(tokens.get(i).Line, tokens.get(i).Col, "wrong function declaration: param name expected");
                     stat.MakeChild("Param", type)
                         .AddChild("Type", type)
                         .AddChild("Name", tokens.get(i));
@@ -596,7 +596,7 @@ public class JassParser {
                     else if (TokenKind.kwd.equals(tokens.get(i).Kind) && "returns".equals(tokens.get(i).Text))
                         j++;
                     else
-                        throw new JassException(tokens.get(i).Line, tokens.get(i).Col, "wrong expression: comma or returns expected");
+                        JassException.Error(tokens.get(i).Line, tokens.get(i).Col, "wrong expression: comma or returns expected");
                     continue;
             }
         }
@@ -639,7 +639,7 @@ public class JassParser {
                 case 3:
                 case 6:
                     if (!TokenKind.ln.equals(tokens.get(i).Kind))
-                        throw new JassException(tokens.get(i).Line, tokens.get(i).Col, "wrong function declaration: new line expected");
+                        JassException.Error(tokens.get(i).Line, tokens.get(i).Col, "wrong function declaration: new line expected");
                     j++;
                     continue;
                 case 4:
@@ -649,7 +649,7 @@ public class JassParser {
                     continue;
                 case 5:
                     if (!TokenKind.kwd.equals(tokens.get(i).Kind) || !"endfunction".equals(tokens.get(i).Text))
-                        throw new JassException(tokens.get(i).Line, tokens.get(i).Col, "wrong function declaration: endfunction expected");
+                        JassException.Error(tokens.get(i).Line, tokens.get(i).Col, "wrong function declaration: endfunction expected");
                     j++;
                     continue;
             }
@@ -747,12 +747,12 @@ public class JassParser {
                     i++;
                     var dbg = TryParseStatement();
                     if ("Return".equals(dbg.Type) || "Debug".equals(dbg.Type))
-                        throw new JassException(tokens.get(i).Line, tokens.get(i).Col, "statement error: wrong statement");
+                        JassException.Error(tokens.get(i).Line, tokens.get(i).Col, "statement error: wrong statement");
                     var stat = new Statement("Debug");
                     stat.AddChild(dbg);
                     return stat;
             }
-            throw new JassException(tokens.get(i).Line, tokens.get(i).Col, "statement error: unknown keyword");
+            JassException.Error(tokens.get(i).Line, tokens.get(i).Col, "statement error: unknown keyword");
         }
         return null;
     }
@@ -776,7 +776,7 @@ public class JassParser {
                     continue;
                 case 1:
                     if (!TokenType.name.equals(tokens.get(i).getType()))
-                        throw new JassException(tokens.get(i).Line, tokens.get(i).Col, "wrong set statement: variable name expected");
+                        JassException.Error(tokens.get(i).Line, tokens.get(i).Col, "wrong set statement: variable name expected");
                     stat.AddChild("Name", tokens.get(i));
                     j++;
                     continue;
@@ -794,7 +794,7 @@ public class JassParser {
                     j++;
                 case 3:
                     if (!TokenKind.oper.equals(tokens.get(i).Kind) || !"=".equals(tokens.get(i).Text))
-                        throw new JassException(tokens.get(i).Line, tokens.get(i).Col, "wrong set statement: = expected");
+                        JassException.Error(tokens.get(i).Line, tokens.get(i).Col, "wrong set statement: = expected");
                     i++;
                     var expr = TryParseExpression();
                     stat.AddChild(expr);
@@ -802,7 +802,7 @@ public class JassParser {
                     continue;
                 case 4:
                     if (!TokenKind.ln.equals(tokens.get(i).Kind))
-                        throw new JassException(tokens.get(i).Line, tokens.get(i).Col, "wrong native declaration: new line expected");
+                        JassException.Error(tokens.get(i).Line, tokens.get(i).Col, "wrong native declaration: new line expected");
                     j++;
                     break;
             }
@@ -833,7 +833,7 @@ public class JassParser {
                     continue;
                 case 2:
                     if (!TokenKind.ln.equals(tokens.get(i).Kind))
-                        throw new JassException(tokens.get(i).Line, tokens.get(i).Col, "wrong native declaration: new line expected");
+                        JassException.Error(tokens.get(i).Line, tokens.get(i).Col, "wrong native declaration: new line expected");
                     j++;
                     break;
             }
@@ -876,7 +876,7 @@ public class JassParser {
                     continue;
                 case 2:
                     if (!TokenKind.kwd.equals(tokens.get(i).Kind) || !"then".equals(tokens.get(i).Text))
-                        throw new JassException(tokens.get(i).Line, tokens.get(i).Col, "wrong if statement: then expected");
+                        JassException.Error(tokens.get(i).Line, tokens.get(i).Col, "wrong if statement: then expected");
                     then = new Statement("Then");
                     stat.AddChild(then);
                     j++;
@@ -885,7 +885,7 @@ public class JassParser {
                 case 5:
                 case 7:
                     if (!TokenKind.ln.equals(tokens.get(i).Kind))
-                        throw new JassException(tokens.get(i).Line, tokens.get(i).Col, "wrong if statement: new line expected");
+                        JassException.Error(tokens.get(i).Line, tokens.get(i).Col, "wrong if statement: new line expected");
                     j++;
                     continue;
                 case 4:
@@ -959,7 +959,7 @@ public class JassParser {
                     continue;
                 case 2:
                     if (!TokenKind.ln.equals(tokens.get(i).Kind))
-                        throw new JassException(tokens.get(i).Line, tokens.get(i).Col, "wrong loop statement: new line expected");
+                        JassException.Error(tokens.get(i).Line, tokens.get(i).Col, "wrong loop statement: new line expected");
                     j++;
                     break;
             }
@@ -990,7 +990,7 @@ public class JassParser {
                     continue;
                 case 2:
                     if (!TokenKind.ln.equals(tokens.get(i).Kind))
-                        throw new JassException(tokens.get(i).Line, tokens.get(i).Col, "wrong exitwhen statement: new line expected");
+                        JassException.Error(tokens.get(i).Line, tokens.get(i).Col, "wrong exitwhen statement: new line expected");
                     j++;
                     break;
             }
@@ -1021,7 +1021,7 @@ public class JassParser {
                     continue;
                 case 2:
                     if (!TokenKind.ln.equals(tokens.get(i).Kind))
-                        throw new JassException(tokens.get(i).Line, tokens.get(i).Col, "wrong return statement: new line expected");
+                        JassException.Error(tokens.get(i).Line, tokens.get(i).Col, "wrong return statement: new line expected");
                     j++;
                     break;
             }
@@ -1043,18 +1043,18 @@ public class JassParser {
             if (AddComment(prog)) continue;
             if (TokenKind.ln.equals(tokens.get(i).Kind)) continue;
 
-            if (!TokenKind.kwd.equals(tokens.get(i).Kind)) throw new JassException(tokens.get(i).Line, tokens.get(i).Col, "error: keyword expected");
+            if (!TokenKind.kwd.equals(tokens.get(i).Kind)) JassException.Error(tokens.get(i).Line, tokens.get(i).Col, "error: keyword expected");
 
             if ("type".equals(tokens.get(i).Text))
             {
-                if (isDeclPassed) throw new JassException(tokens.get(i).Line, tokens.get(i).Col, "wrong type declaration: not in declaration block");
+                if (isDeclPassed) JassException.Error(tokens.get(i).Line, tokens.get(i).Col, "wrong type declaration: not in declaration block");
                 stat = TryParseTypeDecl();
                 prog.AddChild(stat);
                 continue;
             }
             if ("globals".equals(tokens.get(i).Text))
             {
-                if (isDeclPassed) throw new JassException(tokens.get(i).Line, tokens.get(i).Col, "wrong global declaration: not in declaration block");
+                if (isDeclPassed) JassException.Error(tokens.get(i).Line, tokens.get(i).Col, "wrong global declaration: not in declaration block");
                 stat = TryParseGlobals();
                 prog.Childs.add(stat);
                 continue;
@@ -1064,7 +1064,7 @@ public class JassParser {
                 stat = TryParseNative();
                 if (null != stat)
                 {
-                    if (isDeclPassed) throw new JassException(tokens.get(i).Line, tokens.get(i).Col, "wrong native declaration: not in declaration block");
+                    if (isDeclPassed) JassException.Error(tokens.get(i).Line, tokens.get(i).Col, "wrong native declaration: not in declaration block");
                     prog.Childs.add(stat);
                     continue;
                 }
