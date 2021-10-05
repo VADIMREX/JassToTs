@@ -727,7 +727,7 @@ public class JassParser {
             if (isYdweCompatible && TokenKind.name.equals(tokens.get(i).Kind)) {
                 return TryParseMacroCall();
             }
-            if (!TokenKind.kwd.equals(tokens.get(i).Kind)) new JassException(tokens.get(i).Line, tokens.get(i).Col, "statement error: keyword expected");
+            if (!TokenKind.kwd.equals(tokens.get(i).Kind)) JassException.Error(tokens.get(i).Line, tokens.get(i).Col, "statement error: keyword expected");
 
             switch (tokens.get(i).Text)
             {
@@ -754,7 +754,7 @@ public class JassParser {
             }
             JassException.Error(tokens.get(i).Line, tokens.get(i).Col, "statement error: unknown keyword");
         }
-        return null;
+        return new Statement("Error", tokens.get(i));
     }
 
     Statement TryParseSet() throws JassException
@@ -840,7 +840,7 @@ public class JassParser {
         }
 
         if (i < tokens.size()) i--;
-        return stat;
+        return null == stat ? new Statement("Error", tokens.get(i)) : stat;
     }
 
     Function<Token, Boolean> IfStopper = (token) -> TokenKind.ln.equals(token.Kind) || 

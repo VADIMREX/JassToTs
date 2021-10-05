@@ -82,7 +82,9 @@ public class JassToTs {
             case StatementType.Func:
             case StatementType.CFunc:
                 return ConvertFunc(stat);
-            default: throw new JassTranslatorException(String.format("unknown statement %s", stat.Start));
+            default: 
+                JassTranslatorException.Error(String.format("unknown statement %s", stat.Start));
+                return new StringBuilder(String.format("/*unknown statement %s*/", stat.Start));
         }
     }
 
@@ -130,7 +132,8 @@ public class JassToTs {
             case "not":
                 return "!";
             default:
-                throw new JassTranslatorException("unknown operator");
+                JassTranslatorException.Error("unknown operator");
+                return String.format("/* unknown operator %s */", type);
         }
     }
 
@@ -157,7 +160,8 @@ public class JassToTs {
                     baseType = tree.Childs.get(i).Start.Text;
                     continue;
                 default:
-                    throw new JassTranslatorException(String.format("unknown statement %s",tree.Childs.get(i).Start));
+                    /** @todo error */
+                    JassTranslatorException.Error(String.format("unknown statement %s",tree.Childs.get(i).Start));
             }
         }
         if (IsDTS) sb.append("declare ");
@@ -178,7 +182,9 @@ public class JassToTs {
             case StatementType.GVar:
             case StatementType.GArr:
                 return ConvertVarDecl(stat);
-            default: throw new JassTranslatorException(String.format("unknown statement %s", stat.Start));
+            default: 
+                JassTranslatorException.Error(String.format("unknown statement %s", stat.Start));
+                return new StringBuilder(String.format("/* unknown statement %s */", stat.Start));
         }
     }
 
@@ -202,7 +208,9 @@ public class JassToTs {
             case StatementType.LVar:
             case StatementType.LArr:
                 return ConvertVarDecl(stat, indent);
-            default: throw new JassTranslatorException(String.format("unknown statement %s", stat.Start));
+            default: 
+                JassTranslatorException.Error(String.format("unknown statement %s", stat.Start));
+                return new StringBuilder(String.format("/* unknown statement %s */", stat.Start));
         }
     }
 
@@ -261,7 +269,8 @@ public class JassToTs {
                     expr = ConvertExprElem(tree.Childs.get(i));
                     continue;
                 default:
-                    throw new JassTranslatorException(String.format("unknown statement %s", tree.Childs.get(i).Start));
+                    /** @todo error */
+                    JassTranslatorException.Error(String.format("unknown statement %s", tree.Childs.get(i).Start));
             }
         }
         AddIndent(sb, indent);
@@ -326,7 +335,8 @@ public class JassToTs {
             case StatementType.Expr:
                 return ConvertExpr(elem);
             default:
-                throw new JassTranslatorException(String.format("unknown statement %s", elem.Start));
+                JassTranslatorException.Error(String.format("unknown statement %s", elem.Start));
+                return new StringBuilder(String.format("/* unknown statement %s */", elem.Start));
         }
     }
 
@@ -394,7 +404,8 @@ public class JassToTs {
                     index = ConvertExprElem(stat.Childs.get(i));
                     continue;
                 default:
-                    throw new JassTranslatorException(String.format("unknown statement %s", stat.Childs.get(i).Start));
+                    /** @todo error */
+                    JassTranslatorException.Error(String.format("unknown statement %s", stat.Childs.get(i).Start));
             }
         }
 
@@ -482,7 +493,8 @@ public class JassToTs {
                         );
                     continue;
                 default:
-                    throw new JassTranslatorException(String.format("unknown statement %s", tree.Childs.get(i).Start));
+                    /** @todo error */
+                    JassTranslatorException.Error(String.format("unknown statement %s", tree.Childs.get(i).Start));
             }
         }
         if (IsDTS || isNative) sb.append("declare ");
@@ -542,7 +554,8 @@ public class JassToTs {
                     returnType = ConvertType(tree.Childs.get(i).Start.Text);
                     continue;
                 default:
-                    throw new JassTranslatorException(String.format("unknown statement %s", tree.Childs.get(i).Start));
+                    /** @todo error */
+                    JassTranslatorException.Error(String.format("unknown statement %s", tree.Childs.get(i).Start));
             }
         }
 
@@ -581,7 +594,8 @@ public class JassToTs {
                     name = tree.Childs.get(i).Start.Text;
                     continue;
                 default:
-                    throw new JassTranslatorException(String.format("unknown statement %s", tree.Childs.get(i).Start));
+                    /** @todo error */
+                    JassTranslatorException.Error(String.format("unknown statement %s", tree.Childs.get(i).Start));
             }
         }
 
@@ -639,7 +653,8 @@ public class JassToTs {
             case StatementType.Return:
                 return AddIndent(sb, indent).append("return ").append(ConvertExpr(stat)).append(";\n");
             default:
-                throw new JassTranslatorException(String.format("unknown statement %s", stat.Start));
+                JassTranslatorException.Error(String.format("unknown statement %s", stat.Start));
+                return new StringBuilder(String.format("/* unknown statement %s */", stat.Start));
         }
     }
 
@@ -684,7 +699,8 @@ public class JassToTs {
                     newValue = ConvertExprElem(tree.Childs.get(i));
                     continue;
                 default:
-                    throw new JassTranslatorException(String.format("unknown statement %s", tree.Childs.get(i).Start));
+                    /** @todo error */
+                    JassTranslatorException.Error(String.format("unknown statement %s", tree.Childs.get(i).Start));
             }
         }
 
@@ -750,7 +766,8 @@ public class JassToTs {
                     AddIndent(sb, indent).append("}\n");
                     continue;
                 default:
-                    throw new JassTranslatorException(String.format("unknown statement %s", tree.Childs.get(i).Start));
+                    /** @todo error */
+                    JassTranslatorException.Error(String.format("unknown statement %s", tree.Childs.get(i).Start));
             }
         }
 

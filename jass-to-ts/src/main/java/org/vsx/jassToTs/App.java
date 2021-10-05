@@ -130,7 +130,10 @@ public class App
                     case "-t": language = Language.TypeScriptDeclaration; continue;
                     case "-lua": language = Language.Lua; continue;
                     case "-galaxy-raw": language = Language.GalaxyRaw; continue;
-                    case "-lenient": JassException.setIsStrict(false); continue;
+                    case "-lenient": 
+                        JassException.setIsStrict(false); 
+                        JassTranslatorException.setIsStrict(false);
+                        continue;
                     case "-h":
                         System.out.println(help);
                         System.exit(0);
