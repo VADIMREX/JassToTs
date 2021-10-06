@@ -47,4 +47,6 @@ public class StatementType {
     public static final String Param = "Param";
     public static final String Ind = "Ind";
     public static final String Par = "Par";
+
+    public static final String YdweMacro = "YdweMacro";
 }

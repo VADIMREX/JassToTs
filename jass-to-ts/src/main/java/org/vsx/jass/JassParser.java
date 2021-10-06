@@ -711,7 +711,7 @@ public class JassParser {
             sb.append(String.format(" %s", tokens.get(i).Text));
         }
         stoken.Text = sb.toString();
-        return new Statement(StatementType.Comm, stoken);
+        return new Statement(StatementType.YdweMacro, stoken);
     }
 
     /** Попытаться распарсить инструкцию */

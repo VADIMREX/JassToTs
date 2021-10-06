@@ -54,6 +54,7 @@ public class JassToTs {
     {
         switch (stat.Type)
         {
+            case StatementType.YdweMacro:
             case StatementType.Comm:
                 return new StringBuilder().append(stat.Start.Text).append("\n");
             case StatementType.Prog:
@@ -150,6 +151,7 @@ public class JassToTs {
         {
             switch (tree.Childs.get(i).Type)
             {
+                case StatementType.YdweMacro:
                 case StatementType.Comm:
                     comm.append(tree.Childs.get(i).Start.Text).append('\n');
                     continue;
@@ -176,6 +178,7 @@ public class JassToTs {
     {
         switch (stat.Type)
         {
+            case StatementType.YdweMacro:
             case StatementType.Comm:
                 return new StringBuilder().append(stat.Start.Text).append("\n");
             case StatementType.GConst:
@@ -203,6 +206,7 @@ public class JassToTs {
     {
         switch (stat.Type)
         {
+            case StatementType.YdweMacro:
             case StatementType.Comm:
                 return AddIndent(new StringBuilder(), indent).append(stat.Start.Text).append("\n");
             case StatementType.LVar:
@@ -250,6 +254,7 @@ public class JassToTs {
         {
             switch (tree.Childs.get(i).Type)
             {
+                case StatementType.YdweMacro:
                 case StatementType.Comm:
                     comm.append(tree.Childs.get(i).Start.Text).append('\n');
                     continue;
@@ -308,6 +313,7 @@ public class JassToTs {
         var sb = new StringBuilder();
         switch (elem.Type)
         {
+            case StatementType.YdweMacro:
             case StatementType.Comm:
                 return sb.append(elem.Start.Text).append('\n');
             case StatementType.RVar:
@@ -394,6 +400,7 @@ public class JassToTs {
         {
             switch (stat.Childs.get(i).Type)
             {
+                case StatementType.YdweMacro:
                 case StatementType.Comm:
                     comm.append(stat.Childs.get(i).Start.Text).append('\n');
                     continue;
@@ -427,6 +434,7 @@ public class JassToTs {
         {
             switch (tree.Childs.get(i).Type)
             {
+                case StatementType.YdweMacro:
                 case StatementType.Comm:
                     return sb.append(tree.Childs.get(i)).append('\n');
                 case StatementType.Name:
@@ -462,6 +470,7 @@ public class JassToTs {
         {
             switch (tree.Childs.get(i).Type)
             {
+                case StatementType.YdweMacro:
                 case StatementType.Comm:
                     sb.append(tree.Childs.get(i).Start.Text).append('\n');
                     continue;
@@ -531,6 +540,7 @@ public class JassToTs {
         {
             switch (tree.Childs.get(i).Type)
             {
+                case StatementType.YdweMacro:
                 case StatementType.Comm:
                     sb.append(tree.Childs.get(i).Start.Text).append('\n');
                     continue;
@@ -584,6 +594,7 @@ public class JassToTs {
         {
             switch (tree.Childs.get(i).Type)
             {
+                case StatementType.YdweMacro:
                 case StatementType.Comm:
                     sb.append(tree.Childs.get(i).Start.Text).append('\n');
                     continue;
@@ -619,6 +630,7 @@ public class JassToTs {
         var sb = new StringBuilder();
         switch (stat.Type)
         {
+            case StatementType.YdweMacro:
             case StatementType.Comm:
                 return AddIndent(sb, indent).append(stat.Start.Text).append('\n');
             case StatementType.Debug:
@@ -680,6 +692,7 @@ public class JassToTs {
         {
             switch (tree.Childs.get(i).Type)
             {
+                case StatementType.YdweMacro:
                 case StatementType.Comm:
                     sb.append(tree.Childs.get(i).Start.Text).append('\n');
                     continue;
@@ -728,6 +741,7 @@ public class JassToTs {
         {
             switch (tree.Childs.get(i).Type)
             {
+                case StatementType.YdweMacro:
                 case StatementType.Comm:
                     AddIndent(sb, indent).append(tree.Childs.get(i).Start.Text).append('\n');
                     continue;
