@@ -122,7 +122,10 @@ namespace JassToTs
                     case "-t": language = Language.TypeScriptDeclaration; continue;
                     case "-lua": language = Language.Lua; continue;
                     case "-galaxy-raw": language = Language.GalaxyRaw; continue;
-                    case "-lenient": Jass.JassException.IsStrict = false; continue;
+                    case "-lenient": 
+                        Jass.JassException.IsStrict = false;
+                        JassTranslatorException.IsStrict = false;
+                        continue;
                     case "-h":
                         Console.WriteLine(help);
                         return 0;
