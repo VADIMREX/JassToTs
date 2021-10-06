@@ -452,7 +452,7 @@ public class JassToTs {
                                                           .append(y))
                                           .delete(0, 2))
                               .append(")");*/
-                sb.append(name.substring(0, name.indexOf("Set") - 1)).append(" = ").append(args.get(2));
+                sb.append(name.substring(0, name.indexOf("Set"))).append(" = ").append(args.get(2));
     };
 
     final FuncThrows<Statement, StringBuilder, Exception> ConvertYDLocal_Get = (tree) -> {
@@ -482,7 +482,7 @@ public class JassToTs {
                                                   (x,y)->x.append(", ")
                                                           .append(y))
                                           .delete(0, 2))
-                              .append(")");*/ sb.append(name.substring(0, name.indexOf("Get") - 1));
+                              .append(")");*/ sb.append(name.substring(0, name.indexOf("Get")));
     };
 
     FuncThrows<Statement, StringBuilder, Exception> CheckYdweMacro(String name) {
