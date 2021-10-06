@@ -1,6 +1,7 @@
 package org.vsx.jassToTs;
 
 import java.util.ArrayList;
+import java.util.function.Function;
 
 import org.vsx.func.FuncThrows;
 import org.vsx.exception.NotImplementedException;
@@ -20,19 +21,21 @@ public class JassToTs {
     int IndentSize;
 
     boolean isOptimizationNeeded;
+    boolean isYdweCompatible;
 
     public JassToTs() {
-        this(false, false, 4);
+        this(false, false, false, 4);
     }
 
-    public JassToTs(boolean isOptimizationNeeded, boolean IsDTS)
+    public JassToTs(boolean isOptimizationNeeded, boolean isYdweCompatible, boolean IsDTS)
     {
-        this(isOptimizationNeeded, IsDTS, 4);
+        this(isOptimizationNeeded, isYdweCompatible, IsDTS, 4);
     }
 
-    public JassToTs(boolean isOptimizationNeeded, boolean IsDTS, int IndentSize)
+    public JassToTs(boolean isOptimizationNeeded, boolean isYdweCompatible, boolean IsDTS, int IndentSize)
     {
         this.isOptimizationNeeded = isOptimizationNeeded;
+        this.isYdweCompatible = isYdweCompatible;
         this.IsDTS = IsDTS;
         this.IndentSize = IndentSize;
     }
@@ -421,6 +424,73 @@ public class JassToTs {
         return sb;
     }
 
+    final FuncThrows<Statement, StringBuilder, Exception> ConvertYDLocal_Set = (tree) -> {
+        var sb = new StringBuilder();
+        var name = "";
+        var args = new ArrayList<StringBuilder>();
+        var comm = new StringBuilder();
+        for (var i = 0; i < tree.Childs.size(); i++)
+        {
+            switch (tree.Childs.get(i).Type)
+            {
+                case StatementType.YdweMacro:
+                case StatementType.Comm:
+                    return sb.append(tree.Childs.get(i)).append('\n');
+                case StatementType.Name:
+                    name = tree.Childs.get(i).Start.Text;
+                    continue;
+                default:
+                    args.add(ConvertExprElem(tree.Childs.get(i)));
+                    continue;
+            }
+        }
+        return /*sb.append(String.format("YDLocal[%d]Set", name.substring(7, name.indexOf("Set")))).append("(")
+                              //.AppendJoin(", ", args).append(")");
+                              .append(args.stream()
+                                          .reduce(new StringBuilder(""),
+                                                  (x,y)->x.append(", ")
+                                                          .append(y))
+                                          .delete(0, 2))
+                              .append(")");*/
+                sb.append(name).append(" = ").append(args.get(2));
+    };
+
+    final FuncThrows<Statement, StringBuilder, Exception> ConvertYDLocal_Get = (tree) -> {
+        var sb = new StringBuilder();
+        var name = "";
+        var args = new ArrayList<StringBuilder>();
+        var comm = new StringBuilder();
+        for (var i = 0; i < tree.Childs.size(); i++)
+        {
+            switch (tree.Childs.get(i).Type)
+            {
+                case StatementType.YdweMacro:
+                case StatementType.Comm:
+                    return sb.append(tree.Childs.get(i)).append('\n');
+                case StatementType.Name:
+                    name = tree.Childs.get(i).Start.Text;
+                    continue;
+                default:
+                    args.add(ConvertExprElem(tree.Childs.get(i)));
+                    continue;
+            }
+        }
+        return /*sb.append(String.format("YDLocal[%d]Get", name.substring(7, name.indexOf("Get")))).append("(")
+                              //.AppendJoin(", ", args).append(")");
+                              .append(args.stream()
+                                          .reduce(new StringBuilder(""),
+                                                  (x,y)->x.append(", ")
+                                                          .append(y))
+                                          .delete(0, 2))
+                              .append(")");*/ sb.append(name);
+    };
+
+    FuncThrows<Statement, StringBuilder, Exception> CheckYdweMacro(String name) {
+        if (name.matches("YDLocal[0-9]+Set")) return ConvertYDLocal_Set;
+        if (name.matches("YDLocal[0-9]+Get")) return ConvertYDLocal_Get;
+        return null;
+    }
+    
     /**
      * Преобразование вызова функции
      */
@@ -439,6 +509,11 @@ public class JassToTs {
                     return sb.append(tree.Childs.get(i)).append('\n');
                 case StatementType.Name:
                     name = tree.Childs.get(i).Start.Text;
+                    /** Возможно здесь вызов макроса @todo переписать на препроцессор макросов */
+                    if (!isYdweCompatible) continue;
+                    var macro = CheckYdweMacro(name);
+                    if (null != macro) return macro.run(tree);
+                    sb = new StringBuilder();
                     continue;
                 default:
                     args.add(ConvertExprElem(tree.Childs.get(i)));
