@@ -444,15 +444,7 @@ public class JassToTs {
                     continue;
             }
         }
-        return /*sb.append(String.format("YDLocal[%d]Set", name.substring(7, name.indexOf("Set")))).append("(")
-                              //.AppendJoin(", ", args).append(")");
-                              .append(args.stream()
-                                          .reduce(new StringBuilder(""),
-                                                  (x,y)->x.append(", ")
-                                                          .append(y))
-                                          .delete(0, 2))
-                              .append(")");*/
-                sb.append(name.substring(0, name.indexOf("Set"))).append(" = ").append(args.get(2));
+        return sb.append(args.get(1).substring(1, args.get(1).length() - 1)).append(" = ").append(args.get(2));
     };
 
     final FuncThrows<Statement, StringBuilder, Exception> ConvertYDLocal_Get = (tree) -> {
@@ -475,14 +467,7 @@ public class JassToTs {
                     continue;
             }
         }
-        return /*sb.append(String.format("YDLocal[%d]Get", name.substring(7, name.indexOf("Get")))).append("(")
-                              //.AppendJoin(", ", args).append(")");
-                              .append(args.stream()
-                                          .reduce(new StringBuilder(""),
-                                                  (x,y)->x.append(", ")
-                                                          .append(y))
-                                          .delete(0, 2))
-                              .append(")");*/ sb.append(name.substring(0, name.indexOf("Get")));
+        return sb.append(args.get(1).substring(1, args.get(1).length() - 1));
     };
 
     FuncThrows<Statement, StringBuilder, Exception> CheckYdweMacro(String name) {
