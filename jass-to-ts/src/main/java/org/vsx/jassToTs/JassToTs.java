@@ -58,7 +58,7 @@ public class JassToTs {
                            .append("\n")
                            .append("var dataBaseContext: { [id: string]: any } = {};\n")
                            .append("\n")
-                           .append("function UserDataSet(type: string, handle: handle, varName: string, varValue): void {\n")
+                           .append("function UserDataSet(type: string, handle: handle, varName: string, varValue: any): void {\n")
                            .append("    let key = type + GetHandleId(handle);\n")
                            .append("    let data = dataBaseContext[key] || (dataBaseContext[key] = {});\n")
                            .append("    data[varName] = varValue;\n")
