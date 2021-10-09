@@ -23,6 +23,8 @@ public class JassToTs {
     boolean isOptimizationNeeded;
     boolean isYdweCompatible;
 
+    boolean isYdwe_YDUserData = false;
+
     public JassToTs() {
         this(false, false, false, 4);
     }
@@ -45,8 +47,33 @@ public class JassToTs {
      */
     public String Convert(Statement tree) throws Exception
     {
-        var sb = ConvertDeclarations(tree);
-        return sb.toString();
+        var header = new StringBuilder()
+            .append("/// Some references\n")
+            .append("/// <reference path=\"war3core.d.ts\"/>\n")
+            .append("\n");
+        
+            var sb = ConvertDeclarations(tree);
+        if (isYdwe_YDUserData) 
+            header = header.append("/// For YDWE Macro\n")
+                           .append("\n")
+                           .append("var dataBaseContext: { [id: string]: any } = {};\n")
+                           .append("\n")
+                           .append("function UserDataSet(type: string, handle: handle, varName: string, varValue): void {\n")
+                           .append("    let key = type + GetHandleId(handle);\n")
+                           .append("    let data = dataBaseContext[key] || (dataBaseContext[key] = {});\n")
+                           .append("    data[varName] = varValue;\n")
+                           .append("}\n")
+                           .append("\n")
+                           .append("function UserDataGet(type: string, handle: handle, varName: string): any {\n")
+                           .append("    let key = type + GetHandleId(handle);\n")
+                           .append("    let data = dataBaseContext[key];\n")
+                           .append("    return data ? data[varName] : null;\n")
+                           .append("}\n")
+                           .append("\n")
+                           .append("///\n")
+                           .append("\n");
+                           
+        return header.append(sb).toString();
     }
 
     /**
@@ -62,8 +89,6 @@ public class JassToTs {
                 return new StringBuilder().append(stat.Start.Text).append("\n");
             case StatementType.Prog:
                 return new StringBuilder()
-                    .append("/// Some references\n")
-                    .append("/// <reference path=\"war3core.d.ts\"/>\n")
                     //.AppendJoin("", stat.Childs.Select(x => ConvertDeclarations(x)));
                     .append(stat.Childs
                                 .stream()
@@ -470,9 +495,77 @@ public class JassToTs {
         return sb.append(args.get(1).substring(1, args.get(1).length() - 1));
     };
 
+    final FuncThrows<Statement, StringBuilder, Exception> ConvertYDUserDataSet = (tree) -> {
+        isYdwe_YDUserData = true;
+        
+        var sb = new StringBuilder();
+        var name = "";
+        var args = new ArrayList<StringBuilder>();
+        var comm = new StringBuilder();
+        for (var i = 0; i < tree.Childs.size(); i++)
+        {
+            switch (tree.Childs.get(i).Type)
+            {
+                case StatementType.YdweMacro:
+                case StatementType.Comm:
+                    return sb.append(tree.Childs.get(i)).append('\n');
+                case StatementType.Name:
+                    name = tree.Childs.get(i).Start.Text;
+                    continue;
+                default:
+                    args.add(ConvertExprElem(tree.Childs.get(i)));
+                    continue;
+            }
+        }
+        return sb.append("UserDataSet")
+                 .append("(")
+                 .append(args.get(0))
+                 .append(",")
+                 .append(args.get(1))
+                 .append(",")
+                 .append(args.get(2))
+                 .append(",")
+                 .append(args.get(4))
+                 .append(")");
+    };
+
+    final FuncThrows<Statement, StringBuilder, Exception> ConvertYDUserDataGet = (tree) -> {
+        isYdwe_YDUserData = true;
+
+        var sb = new StringBuilder();
+        var name = "";
+        var args = new ArrayList<StringBuilder>();
+        var comm = new StringBuilder();
+        for (var i = 0; i < tree.Childs.size(); i++)
+        {
+            switch (tree.Childs.get(i).Type)
+            {
+                case StatementType.YdweMacro:
+                case StatementType.Comm:
+                    return sb.append(tree.Childs.get(i)).append('\n');
+                case StatementType.Name:
+                    name = tree.Childs.get(i).Start.Text;
+                    continue;
+                default:
+                    args.add(ConvertExprElem(tree.Childs.get(i)));
+                    continue;
+            }
+        }
+        return sb.append("UserDataGet")
+                 .append("(")
+                 .append(args.get(0))
+                 .append(",")
+                 .append(args.get(1))
+                 .append(",")
+                 .append(args.get(2))
+                 .append(")");
+    };
+
     FuncThrows<Statement, StringBuilder, Exception> CheckYdweMacro(String name) {
         if (name.matches("YDLocal[0-9]+Set")) return ConvertYDLocal_Set;
         if (name.matches("YDLocal[0-9]+Get")) return ConvertYDLocal_Get;
+        if (name.matches("YDUserDataSet")) return ConvertYDUserDataSet;
+        if (name.matches("YDUserDataGet")) return ConvertYDUserDataGet;
         return null;
     }
     
