@@ -56,7 +56,7 @@ public class JassToTs {
         if (isYdwe_YDUserData) 
             header = header.append("/// For YDWE Macro\n")
                            .append("\n")
-                           .append("var dataBaseContext: { [id: string]: any } = {};\n")
+                           .append("var dataBaseContext: { [id: string]: any } = dataBaseContext || {};\n")
                            .append("\n")
                            .append("function UserDataSet(type: string, handle: handle, varName: string, varValue: any): void {\n")
                            .append("    let key = type + GetHandleId(handle);\n")
