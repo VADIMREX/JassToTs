@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using Jass;
 
 namespace JassToTs
@@ -15,10 +16,15 @@ namespace JassToTs
         int IndentSize;
 
         bool isOptimizationNeeded;
+        bool isYdweCompatible;
 
-        public JassToTs(bool isOptimizationNeeded = false, bool IsDTS = false, int IndentSize = 4)
+        
+        bool isYdwe_YDUserData = false;
+
+        public JassToTs(bool isOptimizationNeeded = false, bool isYdweCompatible = false, bool IsDTS = false, int IndentSize = 4)
         {
             this.isOptimizationNeeded = isOptimizationNeeded;
+            this.isYdweCompatible = isYdweCompatible;
             this.IsDTS = IsDTS;
             this.IndentSize = IndentSize;
         }
@@ -26,8 +32,34 @@ namespace JassToTs
         /// <summary> Транслировать дерево в TypeScript код </summary>
         public string Convert(Statement tree)
         {
+            var header = new StringBuilder()
+                .Append("/// Some references\n")
+                .Append("/// <reference path=\"war3core.d.ts\"/>\n")
+                .Append("\n");
+
             var sb = ConvertDeclarations(tree);
-            return sb.ToString();
+        
+            if (isYdwe_YDUserData) 
+                header = header.Append("/// For YDWE Macro\n")
+                               .Append("\n")
+                               .Append("var dataBaseContext: { [id: string]: any } = dataBaseContext || {};\n")
+                               .Append("\n")
+                               .Append("function UserDataSet(type: string, handle: handle, varName: string, varValue: any): void {\n")
+                               .Append("    let key = type + GetHandleId(handle);\n")
+                               .Append("    let data = dataBaseContext[key] || (dataBaseContext[key] = {});\n")
+                               .Append("    data[varName] = varValue;\n")
+                               .Append("}\n")
+                               .Append("\n")
+                               .Append("function UserDataGet(type: string, handle: handle, varName: string): any {\n")
+                               .Append("    let key = type + GetHandleId(handle);\n")
+                               .Append("    let data = dataBaseContext[key];\n")
+                               .Append("    return data ? data[varName] : null;\n")
+                               .Append("}\n")
+                               .Append("\n")
+                               .Append("///\n")
+                               .Append("\n");
+                            
+            return header.Append(sb).ToString();
         }
 
         /// <summary> Преобразовать объявления </summary>
@@ -36,12 +68,11 @@ namespace JassToTs
         {
             switch (stat.Type)
             {
+                case StatementType.YdweMacro:
                 case StatementType.Comm:
                     return new StringBuilder().Append(stat.Start.Text).Append("\n");
                 case StatementType.Prog:
                     return new StringBuilder()
-                        .Append("/// Some references\n")
-                        .Append("/// <reference path=\"war3core.d.ts\"/>\n")
                         .AppendJoin("", stat.Childs.Select(x => ConvertDeclarations(x)));
                 case StatementType.TypeDecl:
                     return ConvertTypeDecl(stat);
@@ -55,7 +86,9 @@ namespace JassToTs
                 case StatementType.Func:
                 case StatementType.CFunc:
                     return ConvertFunc(stat);
-                default: throw new JassTranslatorException($"unknown statement {stat.Start}");
+                default: 
+                    JassTranslatorException.Error($"unknown statement {stat.Start}");
+                    return new StringBuilder($"/* unknown statement {stat.Start} */");
             }
         }
 
@@ -99,7 +132,8 @@ namespace JassToTs
                 case "not":
                     return "!";
                 default:
-                    throw new JassTranslatorException("unknown operator");
+                    JassTranslatorException.Error($"/* unknown operator {type} */");
+                    return $"/* unknown operator {type} */";
             }
         }
 
@@ -114,6 +148,7 @@ namespace JassToTs
             {
                 switch (tree.Childs[i].Type)
                 {
+                    case StatementType.YdweMacro:
                     case StatementType.Comm:
                         comm.Append(tree.Childs[i].Start.Text).Append('\n');
                         continue;
@@ -124,7 +159,9 @@ namespace JassToTs
                         baseType = tree.Childs[i].Start.Text;
                         continue;
                     default:
-                        throw new JassTranslatorException($"unknown statement {tree.Childs[i].Start}");
+                        /** @todo error */
+                        JassTranslatorException.Error($"unknown statement {tree.Childs[i].Start}");
+                        break;
                 }
             }
             if (IsDTS) sb.Append("declare ");
@@ -137,13 +174,16 @@ namespace JassToTs
         {
             switch (stat.Type)
             {
+                case StatementType.YdweMacro:
                 case StatementType.Comm:
                     return new StringBuilder().Append(stat.Start.Text).Append("\n");
                 case StatementType.GConst:
                 case StatementType.GVar:
                 case StatementType.GArr:
                     return ConvertVarDecl(stat);
-                default: throw new JassTranslatorException($"unknown statement {stat.Start}");
+                default: 
+                JassTranslatorException.Error($"unknown statement {stat.Start}");
+                return new StringBuilder($"/* unknown statement {stat.Start} */");
             }
         }
 
@@ -152,12 +192,15 @@ namespace JassToTs
         {
             switch (stat.Type)
             {
+                case StatementType.YdweMacro:
                 case StatementType.Comm:
                     return AddIndent(new StringBuilder(), indent).Append(stat.Start.Text).Append("\n");
                 case StatementType.LVar:
                 case StatementType.LArr:
                     return ConvertVarDecl(stat, indent);
-                default: throw new JassTranslatorException($"unknown statement {stat.Start}");
+                default: 
+                    JassTranslatorException.Error($"unknown statement {stat.Start}");
+                    return new StringBuilder($"/* unknown statement {stat.Start} */");
             }
         }
 
@@ -191,6 +234,7 @@ namespace JassToTs
             {
                 switch (tree.Childs[i].Type)
                 {
+                    case StatementType.YdweMacro:
                     case StatementType.Comm:
                         comm.Append(tree.Childs[i].Start.Text).Append('\n');
                         continue;
@@ -210,7 +254,8 @@ namespace JassToTs
                         expr = ConvertExprElem(tree.Childs[i]);
                         continue;
                     default:
-                        throw new JassTranslatorException($"unknown statement {tree.Childs[i].Start}");
+                        JassTranslatorException.Error($"unknown statement {tree.Childs[i].Start}");
+                        return new StringBuilder($"/* unknown statement {tree.Childs[i].Start} */");
                 }
             }
             AddIndent(sb, indent);
@@ -234,6 +279,7 @@ namespace JassToTs
             var sb = new StringBuilder();
             switch (elem.Type)
             {
+                case StatementType.YdweMacro:
                 case StatementType.Comm:
                     return sb.Append(elem.Start.Text).Append('\n');
                 case StatementType.RVar:
@@ -261,7 +307,8 @@ namespace JassToTs
                 case StatementType.Expr:
                     return ConvertExpr(elem);
                 default:
-                    throw new JassTranslatorException($"unknown statement {elem.Start}");
+                    JassTranslatorException.Error($"unknown statement {elem.Start}");
+                    return new StringBuilder($"/* unknown statement {elem.Start} */");
             }
         }
 
@@ -314,6 +361,7 @@ namespace JassToTs
             {
                 switch (stat.Childs[i].Type)
                 {
+                    case StatementType.YdweMacro:
                     case StatementType.Comm:
                         comm.Append(stat.Childs[i].Start.Text).Append('\n');
                         continue;
@@ -324,13 +372,139 @@ namespace JassToTs
                         index = ConvertExprElem(stat.Childs[i]);
                         continue;
                     default:
-                        throw new JassTranslatorException($"unknown statement {stat.Childs[i].Start}");
+                        JassTranslatorException.Error($"unknown statement {stat.Childs[i].Start}");
+                        return new StringBuilder($"/* unknown statement {stat.Childs[i].Start} */");
                 }
             }
 
             sb.Append(name).Append(index).Append(comm);
 
             return sb;
+        }
+
+        StringBuilder ConvertYDLocal_Set(Statement tree) {
+            var sb = new StringBuilder();
+            var name = "";
+            var args = new List<StringBuilder>();
+            var comm = new StringBuilder();
+            for (var i = 0; i < tree.Childs.Count; i++)
+            {
+                switch (tree.Childs[i].Type)
+                {
+                    case StatementType.YdweMacro:
+                    case StatementType.Comm:
+                        return sb.Append(tree.Childs[i]).Append('\n');
+                    case StatementType.Name:
+                        name = tree.Childs[i].Start.Text;
+                        continue;
+                    default:
+                        args.Add(ConvertExprElem(tree.Childs[i]));
+                        continue;
+                }
+            }
+
+            name = args[1].ToString();
+            name = name.Substring(1, name.Length - 2);
+            return sb.Append(name).Append(" = ").Append(args[2]);
+        }
+
+        StringBuilder ConvertYDLocal_Get(Statement tree) {
+            var sb = new StringBuilder();
+            var name = "";
+            var args = new List<StringBuilder>();
+            var comm = new StringBuilder();
+            for (var i = 0; i < tree.Childs.Count; i++)
+            {
+                switch (tree.Childs[i].Type)
+                {
+                    case StatementType.YdweMacro:
+                    case StatementType.Comm:
+                        return sb.Append(tree.Childs[i]).Append('\n');
+                    case StatementType.Name:
+                        name = tree.Childs[i].Start.Text;
+                        continue;
+                    default:
+                        args.Add(ConvertExprElem(tree.Childs[i]));
+                        continue;
+                }
+            }
+            name = args[1].ToString();
+            name = name.Substring(1, name.Length - 2);
+            return sb.Append(name);
+        }
+
+        StringBuilder ConvertYDUserDataSet(Statement tree) {
+            isYdwe_YDUserData = true;
+            
+            var sb = new StringBuilder();
+            var name = "";
+            var args = new List<StringBuilder>();
+            var comm = new StringBuilder();
+            for (var i = 0; i < tree.Childs.Count; i++)
+            {
+                switch (tree.Childs[i].Type)
+                {
+                    case StatementType.YdweMacro:
+                    case StatementType.Comm:
+                        return sb.Append(tree.Childs[i]).Append('\n');
+                    case StatementType.Name:
+                        name = tree.Childs[i].Start.Text;
+                        continue;
+                    default:
+                        args.Add(ConvertExprElem(tree.Childs[i]));
+                        continue;
+                }
+            }
+            return sb.Append("UserDataSet")
+                     .Append("(")
+                     .Append(args[0])
+                     .Append(",")
+                     .Append(args[1])
+                     .Append(",")
+                     .Append(args[2])
+                     .Append(",")
+                     .Append(args[4])
+                     .Append(")");
+        }
+
+        StringBuilder ConvertYDUserDataGet(Statement tree) {
+            isYdwe_YDUserData = true;
+
+            var sb = new StringBuilder();
+            var name = "";
+            var args = new List<StringBuilder>();
+            var comm = new StringBuilder();
+            for (var i = 0; i < tree.Childs.Count; i++)
+            {
+                switch (tree.Childs[i].Type)
+                {
+                    case StatementType.YdweMacro:
+                    case StatementType.Comm:
+                        return sb.Append(tree.Childs[i]).Append('\n');
+                    case StatementType.Name:
+                        name = tree.Childs[i].Start.Text;
+                        continue;
+                    default:
+                        args.Add(ConvertExprElem(tree.Childs[i]));
+                        continue;
+                }
+            }
+            return sb.Append("UserDataGet")
+                     .Append("(")
+                     .Append(args[0])
+                     .Append(",")
+                     .Append(args[1])
+                     .Append(",")
+                     .Append(args[2])
+                     .Append(")");
+        }
+
+        Func<Statement, StringBuilder> CheckYdweMacro(string name) {
+            if (Regex.Match(name, "YDLocal[0-9]+Set").Success) return ConvertYDLocal_Set;
+            if (Regex.Match(name, "YDLocal[0-9]+Get").Success) return ConvertYDLocal_Get;
+            if (Regex.Match(name, "YDUserDataSet").Success) return ConvertYDUserDataSet;
+            if (Regex.Match(name, "YDUserDataGet").Success) return ConvertYDUserDataGet;
+            return null;
         }
 
         /// <summary> Преобразование вызова функции </summary>
@@ -344,17 +518,24 @@ namespace JassToTs
             {
                 switch (tree.Childs[i].Type)
                 {
+                    case StatementType.YdweMacro:
                     case StatementType.Comm:
-                        return sb.Append(tree.Childs[i]).Append('\n');
+                        comm.Append(tree.Childs[i]).Append('\n');
+                        continue;
                     case StatementType.Name:
                         name = tree.Childs[i].Start.Text;
+                        /** Возможно здесь вызов макроса @todo переписать на препроцессор макросов */
+                        if (!isYdweCompatible) continue;
+                        var macro = CheckYdweMacro(name);
+                        if (null != macro) return macro(tree);
+                        sb = new StringBuilder();
                         continue;
                     default:
                         args.Add(ConvertExprElem(tree.Childs[i]));
                         continue;
                 }
             }
-            return sb.Append(name).Append("(").AppendJoin(", ", args).Append(")");
+            return sb.Append(name).Append("(").AppendJoin(", ", args).Append(")").Append(comm);
         }
 
         /// <summary> Преобразование объявления функции </summary>
@@ -370,6 +551,7 @@ namespace JassToTs
             {
                 switch (tree.Childs[i].Type)
                 {
+                    case StatementType.YdweMacro:
                     case StatementType.Comm:
                         sb.Append(tree.Childs[i].Start.Text).Append('\n');
                         continue;
@@ -387,7 +569,9 @@ namespace JassToTs
                             .AppendJoin("", tree.Childs[i].Childs.Select(x => ConvertStatement(x, 1)));
                         continue;
                     default:
-                        throw new JassTranslatorException($"unknown statement {tree.Childs[i].Start}");
+                        /** @todo error */
+                        JassTranslatorException.Error($"unknown statement {tree.Childs[i].Start}");
+                        break;
                 }
             }
             if (IsDTS || isNative) sb.Append("declare ");
@@ -422,6 +606,7 @@ namespace JassToTs
             {
                 switch (tree.Childs[i].Type)
                 {
+                    case StatementType.YdweMacro:
                     case StatementType.Comm:
                         sb.Append(tree.Childs[i].Start.Text).Append('\n');
                         continue;
@@ -435,7 +620,9 @@ namespace JassToTs
                         returnType = ConvertType(tree.Childs[i].Start.Text);
                         continue;
                     default:
-                        throw new JassTranslatorException($"unknown statement {tree.Childs[i].Start}");
+                        /** @todo error */
+                        JassTranslatorException.Error($"unknown statement {tree.Childs[i].Start}");
+                        break;
                 }
             }
 
@@ -462,6 +649,7 @@ namespace JassToTs
             {
                 switch (tree.Childs[i].Type)
                 {
+                    case StatementType.YdweMacro:
                     case StatementType.Comm:
                         sb.Append(tree.Childs[i].Start.Text).Append('\n');
                         continue;
@@ -472,7 +660,9 @@ namespace JassToTs
                         name = tree.Childs[i].Start.Text;
                         continue;
                     default:
-                        throw new JassTranslatorException($"unknown statement {tree.Childs[i].Start}");
+                        /** @todo error */
+                        JassTranslatorException.Error($"unknown statement {tree.Childs[i].Start}");
+                        break;
                 }
             }
 
@@ -487,6 +677,7 @@ namespace JassToTs
             var sb = new StringBuilder();
             switch (stat.Type)
             {
+                case StatementType.YdweMacro:
                 case StatementType.Comm:
                     return AddIndent(sb, indent).Append(stat.Start.Text).Append('\n');
                 case StatementType.Debug:
@@ -514,7 +705,8 @@ namespace JassToTs
                 case StatementType.Return:
                     return AddIndent(sb, indent).Append("return ").Append(ConvertExpr(stat)).Append(";\n");
                 default:
-                    throw new JassTranslatorException($"unknown statement {stat.Start}");
+                    JassTranslatorException.Error($"unknown statement {stat.Start}");
+                    return new StringBuilder($"/* unknown statement {stat.Start} */");
             }
         }
 
@@ -531,6 +723,7 @@ namespace JassToTs
             {
                 switch (tree.Childs[i].Type)
                 {
+                    case StatementType.YdweMacro:
                     case StatementType.Comm:
                         sb.Append(tree.Childs[i].Start.Text).Append('\n');
                         continue;
@@ -550,7 +743,9 @@ namespace JassToTs
                         newValue = ConvertExprElem(tree.Childs[i]);
                         continue;
                     default:
-                        throw new JassTranslatorException($"unknown statement {tree.Childs[i].Start}");
+                        /** @todo error */
+                        JassTranslatorException.Error($"unknown statement {tree.Childs[i].Start}");
+                        break;
                 }
             }
 
@@ -569,6 +764,7 @@ namespace JassToTs
             {
                 switch (tree.Childs[i].Type)
                 {
+                    case StatementType.YdweMacro:
                     case StatementType.Comm:
                         AddIndent(sb, indent).Append(tree.Childs[i].Start.Text).Append('\n');
                         continue;
@@ -593,7 +789,9 @@ namespace JassToTs
                         AddIndent(sb, indent).Append("else\n");
                         goto case StatementType.Then;
                     default:
-                        throw new JassTranslatorException($"unknown statement {tree.Childs[i].Start}");
+                        /** @todo error */
+                        JassTranslatorException.Error($"unknown statement {tree.Childs[i].Start}");
+                        break;
                 }
             }
 

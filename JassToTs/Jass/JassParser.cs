@@ -721,7 +721,7 @@ namespace Jass
                 sb.AppendFormat(" {0}", tokens[i].Text);
             }
             stoken.Text = sb.ToString();
-            return new Statement { Type = StatementType.Comm, Start = stoken };
+            return new Statement { Type = StatementType.YdweMacro, Start = stoken };
         }
 
         /// <summary> Попытаться распарсить инструкцию </summary>
@@ -765,7 +765,7 @@ namespace Jass
                 }
                 JassException.Error(tokens[i].Line, tokens[i].Col, "statement error: unknown keyword");
             }
-            return null;
+            return new Statement{ Type = "Error", Start = tokens[i] };
         }
 
         Statement TryParseSet()
@@ -853,7 +853,7 @@ namespace Jass
             }
 
             if (i < tokens.Count) i--;
-            return stat;
+            return null == stat ? new Statement { Type = "Error", Start = tokens[i] } : stat;
         }
 
         bool IfStopper(Token token) => TokenKind.ln == token.Kind || (TokenKind.kwd == token.Kind && "then" == token.Text);

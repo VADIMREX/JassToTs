@@ -70,7 +70,7 @@ namespace JassToTs
             {
                 case Language.TypeScript:
                 case Language.TypeScriptDeclaration:
-                    var tsConverter = new JassToTs(isOptimizationNeeded, language == Language.TypeScriptDeclaration);
+                    var tsConverter = new JassToTs(isOptimizationNeeded, isYdweCompatible, language == Language.TypeScriptDeclaration);
                     script = tsConverter.Convert(tree);
                     break;
                 case Language.Lua:

@@ -53,6 +53,8 @@ namespace Jass
         public const string Param    = "Param";
         public const string Ind      = "Ind";
         public const string Par      = "Par";
+
+        public const string YdweMacro = "YdweMacro";
     }
 
     class Statement
