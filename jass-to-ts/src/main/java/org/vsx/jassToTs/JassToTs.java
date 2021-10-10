@@ -584,7 +584,8 @@ public class JassToTs {
             {
                 case StatementType.YdweMacro:
                 case StatementType.Comm:
-                    return sb.append(tree.Childs.get(i)).append('\n');
+                    comm.append(tree.Childs.get(i).Start.Text).append('\n');
+                    continue;
                 case StatementType.Name:
                     name = tree.Childs.get(i).Start.Text;
                     /** Возможно здесь вызов макроса @todo переписать на препроцессор макросов */
@@ -605,7 +606,8 @@ public class JassToTs {
                                                   (x,y)->x.append(", ")
                                                           .append(y))
                                           .delete(0, 2))
-                              .append(")");
+                              .append(")")
+                              .append(comm);
     }
 
     /**
