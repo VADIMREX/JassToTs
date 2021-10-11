@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Jass
 {
-    class JassLexer
+    public class JassLexer
     {
         /// <summary> номер строки в исходном коде </summary>
         int line;

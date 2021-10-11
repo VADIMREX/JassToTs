@@ -19,20 +19,50 @@ public class JassToTs {
      */
     int IndentSize;
 
+    /**
+     * Режим оптимизации
+     */
     boolean isOptimizationNeeded;
+    /**
+     * Режим совмести с YDWE
+     */
     boolean isYdweCompatible;
 
+    /**
+     * Флаг что найдена 1 из функци YDUserData*
+     */
     boolean isYdwe_YDUserData = false;
 
+    /**
+     * Транслятор из Jass в TypeScript. По умолчанию:
+     *  - без оптимизации
+     *  - без совместимости с YDWE
+     *  - преобразование в .ts
+     *  - размер сдиига 4 символа
+     */
     public JassToTs() {
         this(false, false, false, 4);
     }
 
+    /**
+     * Транслятор из Jass в TypeScript.
+     * Размер сдвига 4 символа
+     * @param isOptimizationNeeded Режим оптимизации
+     * @param isYdweCompatible Режим совместимости с YDWE
+     * @param IsDTS Режим файла описания (*.d.ts)
+     */
     public JassToTs(boolean isOptimizationNeeded, boolean isYdweCompatible, boolean IsDTS)
     {
         this(isOptimizationNeeded, isYdweCompatible, IsDTS, 4);
     }
 
+    /**
+     * Транслятор из Jass в TypeScript
+     * @param isOptimizationNeeded Режим оптимизации
+     * @param isYdweCompatible Режим совместимости с YDWE
+     * @param IsDTS Режим файла описания (*.d.ts)
+     * @param IndentSize Количество символов в 1 сдвиге
+     */
     public JassToTs(boolean isOptimizationNeeded, boolean isYdweCompatible, boolean IsDTS, int IndentSize)
     {
         this.isOptimizationNeeded = isOptimizationNeeded;

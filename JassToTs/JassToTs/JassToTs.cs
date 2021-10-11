@@ -7,20 +7,31 @@ using Jass;
 
 namespace JassToTs
 {
-    class JassToTs
+    public class JassToTs
     {
-        /// <summary> режи файла описания (*.d.ts) </summary>
+        /// <summary> Режим файла описания (*.d.ts) </summary>
         bool IsDTS;
 
         /// <summary> Количество символов в 1 сдвиге </summary>
         int IndentSize;
 
+        /// <summary> Режим оптимизации </summary>
         bool isOptimizationNeeded;
+        /// <summary> Режим совместимости с YDWE </summary>
         bool isYdweCompatible;
 
-        
-        bool isYdwe_YDUserData = false;
+        #region for YDWE
 
+        /// <summary> Флаг что найдена 1 из функци YDUserData* </summary>
+        bool isYdwe_YDUserData = false;
+        
+        #endregion
+
+        /// <summary> Транслятор из Jass в TypeScript </summary>
+        /// <param name="isOptimizationNeeded">Режим оптимизации</param>
+        /// <param name="isYdweCompatible">Режим совместимости с YDWE</param>
+        /// <param name="IsDTS">Режим файла описания (*.d.ts)</param>
+        /// <param name="IndentSize">Количество символов в 1 сдвиге</param>
         public JassToTs(bool isOptimizationNeeded = false, bool isYdweCompatible = false, bool IsDTS = false, int IndentSize = 4)
         {
             this.isOptimizationNeeded = isOptimizationNeeded;

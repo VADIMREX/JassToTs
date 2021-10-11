@@ -5,7 +5,7 @@ using System.Text;
 namespace Jass
 {
     /// <summary> Виды токенов </summary>
-    class TokenKind
+    public class TokenKind
     {
         #region виды токенов
 
@@ -101,7 +101,7 @@ namespace Jass
     }
 
     /// <summary> Типы токенов </summary>
-    class TokenType
+    public class TokenType
     {
         /// <summary> разделитель </summary>
         public const string br = "br";
@@ -120,7 +120,7 @@ namespace Jass
     }
 
     /// <summary> Токен </summary>
-    class Token
+    public class Token
     {
         public string Type => TokenKind.GetType(Kind);
         public string Kind = "";

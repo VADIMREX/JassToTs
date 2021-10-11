@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Jass
 {
-    class StatementType
+    public class StatementType
     {
         /// <summary> Программа </summary>
         public const string Prog = "Prog";
@@ -57,7 +57,7 @@ namespace Jass
         public const string YdweMacro = "YdweMacro";
     }
 
-    class Statement
+    public class Statement
     {
         public string Type;
         public Token Start;

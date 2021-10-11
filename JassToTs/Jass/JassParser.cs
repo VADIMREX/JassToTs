@@ -6,7 +6,7 @@ namespace Jass
 {
     /// <summary> Базовый класс инструкции </summary>
 
-    class JassParser
+    public class JassParser
     {
         /// <summary> список токенов по которому идёт разбор </summary>
         List<Token> tokens;
