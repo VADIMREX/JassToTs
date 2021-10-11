@@ -445,7 +445,6 @@ public class JassParser {
     {
         Statement stat = new Statement("RFunc", tokens.get(i));
 
-        var start = i;
         var j = 0;
         for (; i < tokens.size() && j < 2; i++)
         {

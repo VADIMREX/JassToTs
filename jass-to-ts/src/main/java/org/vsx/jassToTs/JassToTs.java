@@ -1,7 +1,6 @@
 package org.vsx.jassToTs;
 
 import java.util.ArrayList;
-import java.util.function.Function;
 
 import org.vsx.func.FuncThrows;
 import org.vsx.exception.NotImplementedException;
@@ -190,7 +189,7 @@ public class JassToTs {
                     baseType = tree.Childs.get(i).Start.Text;
                     continue;
                 default:
-                    /** @todo error */
+                    // TODO error
                     JassTranslatorException.Error(String.format("unknown statement %s",tree.Childs.get(i).Start));
             }
         }
@@ -302,7 +301,7 @@ public class JassToTs {
                     expr = ConvertExprElem(tree.Childs.get(i));
                     continue;
                 default:
-                    /** @todo error */
+                    // TODO error
                     JassTranslatorException.Error(String.format("unknown statement %s", tree.Childs.get(i).Start));
             }
         }
@@ -439,7 +438,7 @@ public class JassToTs {
                     index = ConvertExprElem(stat.Childs.get(i));
                     continue;
                 default:
-                    /** @todo error */
+                    // TODO error
                     JassTranslatorException.Error(String.format("unknown statement %s", stat.Childs.get(i).Start));
             }
         }
@@ -451,7 +450,6 @@ public class JassToTs {
 
     final FuncThrows<Statement, StringBuilder, Exception> ConvertYDLocal_Set = (tree) -> {
         var sb = new StringBuilder();
-        var name = "";
         var args = new ArrayList<StringBuilder>();
         var comm = new StringBuilder();
         for (var i = 0; i < tree.Childs.size(); i++)
@@ -460,21 +458,24 @@ public class JassToTs {
             {
                 case StatementType.YdweMacro:
                 case StatementType.Comm:
-                    return sb.append(tree.Childs.get(i)).append('\n');
+                    comm.append(tree.Childs.get(i).Start.Text)
+                        .append('\n');
+                    continue;
                 case StatementType.Name:
-                    name = tree.Childs.get(i).Start.Text;
                     continue;
                 default:
                     args.add(ConvertExprElem(tree.Childs.get(i)));
                     continue;
             }
         }
-        return sb.append(args.get(1).substring(1, args.get(1).length() - 1)).append(" = ").append(args.get(2));
+        return sb.append(args.get(1).substring(1, args.get(1).length() - 1))
+                 .append(" = ")
+                 .append(args.get(2))
+                 .append(comm);
     };
 
     final FuncThrows<Statement, StringBuilder, Exception> ConvertYDLocal_Get = (tree) -> {
         var sb = new StringBuilder();
-        var name = "";
         var args = new ArrayList<StringBuilder>();
         var comm = new StringBuilder();
         for (var i = 0; i < tree.Childs.size(); i++)
@@ -483,23 +484,25 @@ public class JassToTs {
             {
                 case StatementType.YdweMacro:
                 case StatementType.Comm:
-                    return sb.append(tree.Childs.get(i)).append('\n');
+                    comm.append(tree.Childs.get(i).Start.Text)
+                    .append('\n');
+                    continue;
                 case StatementType.Name:
-                    name = tree.Childs.get(i).Start.Text;
                     continue;
                 default:
                     args.add(ConvertExprElem(tree.Childs.get(i)));
                     continue;
             }
         }
-        return sb.append(args.get(1).substring(1, args.get(1).length() - 1));
+        return sb.append(args.get(1).substring(1, args.get(1).length() - 1))
+                 // TODO подумать как воспроизвести
+                 .append(comm);
     };
 
     final FuncThrows<Statement, StringBuilder, Exception> ConvertYDUserDataSet = (tree) -> {
         isYdwe_YDUserData = true;
         
         var sb = new StringBuilder();
-        var name = "";
         var args = new ArrayList<StringBuilder>();
         var comm = new StringBuilder();
         for (var i = 0; i < tree.Childs.size(); i++)
@@ -508,9 +511,9 @@ public class JassToTs {
             {
                 case StatementType.YdweMacro:
                 case StatementType.Comm:
-                    return sb.append(tree.Childs.get(i)).append('\n');
+                    comm.append(tree.Childs.get(i).Start.Text).append('\n');
+                    continue;
                 case StatementType.Name:
-                    name = tree.Childs.get(i).Start.Text;
                     continue;
                 default:
                     args.add(ConvertExprElem(tree.Childs.get(i)));
@@ -526,14 +529,14 @@ public class JassToTs {
                  .append(args.get(2))
                  .append(",")
                  .append(args.get(4))
-                 .append(")");
+                 .append(")")
+                 .append(comm);
     };
 
     final FuncThrows<Statement, StringBuilder, Exception> ConvertYDUserDataGet = (tree) -> {
         isYdwe_YDUserData = true;
 
         var sb = new StringBuilder();
-        var name = "";
         var args = new ArrayList<StringBuilder>();
         var comm = new StringBuilder();
         for (var i = 0; i < tree.Childs.size(); i++)
@@ -542,9 +545,9 @@ public class JassToTs {
             {
                 case StatementType.YdweMacro:
                 case StatementType.Comm:
-                    return sb.append(tree.Childs.get(i)).append('\n');
+                    comm.append(tree.Childs.get(i).Start.Text).append('\n');
+                    continue;
                 case StatementType.Name:
-                    name = tree.Childs.get(i).Start.Text;
                     continue;
                 default:
                     args.add(ConvertExprElem(tree.Childs.get(i)));
@@ -558,7 +561,8 @@ public class JassToTs {
                  .append(args.get(1))
                  .append(",")
                  .append(args.get(2))
-                 .append(")");
+                 .append(")")
+                 .append(comm);
     };
 
     FuncThrows<Statement, StringBuilder, Exception> CheckYdweMacro(String name) {
@@ -657,7 +661,7 @@ public class JassToTs {
                         );
                     continue;
                 default:
-                    /** @todo error */
+                    // TODO error
                     JassTranslatorException.Error(String.format("unknown statement %s", tree.Childs.get(i).Start));
             }
         }
@@ -687,6 +691,7 @@ public class JassToTs {
         var sb = new StringBuilder();
 
         var name = "";
+        var comm = new StringBuilder();
         var returnType = "";
         StringBuilder args = null;
         var isConst = false;
@@ -697,7 +702,7 @@ public class JassToTs {
             {
                 case StatementType.YdweMacro:
                 case StatementType.Comm:
-                    sb.append(tree.Childs.get(i).Start.Text).append('\n');
+                    comm.append(tree.Childs.get(i).Start.Text).append('\n');
                     continue;
                 case StatementType.Name:
                     name = tree.Childs.get(i).Start.Text;
@@ -719,7 +724,7 @@ public class JassToTs {
                     returnType = ConvertType(tree.Childs.get(i).Start.Text);
                     continue;
                 default:
-                    /** @todo error */
+                    // TODO error
                     JassTranslatorException.Error(String.format("unknown statement %s", tree.Childs.get(i).Start));
             }
         }
@@ -732,7 +737,8 @@ public class JassToTs {
         sb.append("): ");
         if (isConst)
             sb.append("");
-        sb.append(returnType);
+        sb.append(returnType)
+          .append(comm);
         return sb;
     }
 
@@ -745,13 +751,14 @@ public class JassToTs {
 
         var type = "";
         var name = "";
+        var comm = new StringBuilder();
         for (var i = 0; i < tree.Childs.size(); i++)
         {
             switch (tree.Childs.get(i).Type)
             {
                 case StatementType.YdweMacro:
                 case StatementType.Comm:
-                    sb.append(tree.Childs.get(i).Start.Text).append('\n');
+                    comm.append(tree.Childs.get(i).Start.Text).append('\n');
                     continue;
                 case StatementType.Type:
                     type = ConvertType(tree.Childs.get(i).Start.Text);
@@ -760,12 +767,15 @@ public class JassToTs {
                     name = tree.Childs.get(i).Start.Text;
                     continue;
                 default:
-                    /** @todo error */
+                    // TODO error
                     JassTranslatorException.Error(String.format("unknown statement %s", tree.Childs.get(i).Start));
             }
         }
 
-        sb.append(name).append(": ").append(type);
+        sb.append(name)
+          .append(": ")
+          .append(type)
+          .append(comm);
 
         return sb;
     }
@@ -840,6 +850,7 @@ public class JassToTs {
         var sb = AddIndent(new StringBuilder(), indent);
 
         var name = "";
+        var comm = new StringBuilder();
         var isArray = StatementType.ASet.equals(tree.Type);
         StringBuilder index = null;
         StringBuilder newValue = null;
@@ -849,7 +860,7 @@ public class JassToTs {
             {
                 case StatementType.YdweMacro:
                 case StatementType.Comm:
-                    sb.append(tree.Childs.get(i).Start.Text).append('\n');
+                    comm.append(tree.Childs.get(i).Start.Text).append('\n');
                     continue;
                 case StatementType.Name:
                     name = tree.Childs.get(i).Start.Text;
@@ -867,14 +878,17 @@ public class JassToTs {
                     newValue = ConvertExprElem(tree.Childs.get(i));
                     continue;
                 default:
-                    /** @todo error */
+                    // TODO error
                     JassTranslatorException.Error(String.format("unknown statement %s", tree.Childs.get(i).Start));
             }
         }
 
         sb.append(name);
         if (isArray) sb.append("[").append(index).append("]");
-        sb.append(" = ").append(newValue).append(";\n");
+        sb.append(" = ")
+          .append(newValue)
+          .append(";\n")
+          .append(comm);
         return sb;
     }
 
@@ -935,7 +949,7 @@ public class JassToTs {
                     AddIndent(sb, indent).append("}\n");
                     continue;
                 default:
-                    /** @todo error */
+                    // TODO error
                     JassTranslatorException.Error(String.format("unknown statement %s", tree.Childs.get(i).Start));
             }
         }

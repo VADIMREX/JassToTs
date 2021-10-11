@@ -444,7 +444,6 @@ namespace Jass
         {
             Statement stat = new Statement { Type = "RFunc", Start = tokens[i] };
 
-            var start = i;
             var j = 0;
             for (; i < tokens.Count && j < 2; i++)
             {
