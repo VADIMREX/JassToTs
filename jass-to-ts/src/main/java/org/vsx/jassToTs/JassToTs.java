@@ -595,11 +595,41 @@ public class JassToTs {
                  .append(comm);
     };
 
+    final FuncThrows<Statement, StringBuilder, Exception> ConvertYDWEOperatorString = (tree) -> {
+        isYdwe_YDUserData = true;
+
+        var sb = new StringBuilder();
+        var args = new ArrayList<StringBuilder>();
+        var comm = new StringBuilder();
+        for (var i = 0; i < tree.Childs.size(); i++)
+        {
+            switch (tree.Childs.get(i).Type)
+            {
+                case StatementType.YdweMacro:
+                case StatementType.Comm:
+                    comm.append(tree.Childs.get(i).Start.Text).append('\n');
+                    continue;
+                case StatementType.Name:
+                    continue;
+                default:
+                    args.add(ConvertExprElem(tree.Childs.get(i)));
+                    continue;
+            }
+        }
+        return sb.append(args.stream()
+                             .reduce(new StringBuilder(""),
+                                     (x,y)->x.append(" + ")
+                                             .append(y))
+                             .delete(0, 2))
+                 .append(comm);
+    };
+
     FuncThrows<Statement, StringBuilder, Exception> CheckYdweMacro(String name) {
         if (name.matches("YDLocal[0-9]+Set")) return ConvertYDLocal_Set;
         if (name.matches("YDLocal[0-9]+Get")) return ConvertYDLocal_Get;
         if (name.matches("YDUserDataSet")) return ConvertYDUserDataSet;
         if (name.matches("YDUserDataGet")) return ConvertYDUserDataGet;
+        if (name.matches("YDWEOperatorString[0-9]+")) return ConvertYDWEOperatorString;
         return null;
     }
     
