@@ -473,11 +473,11 @@ namespace JassToTs
             return sb.Append("UserDataSet")
                      .Append("(")
                      .Append(args[0])
-                     .Append(",")
+                     .Append(", ")
                      .Append(args[1])
-                     .Append(",")
+                     .Append(", ")
                      .Append(args[2])
-                     .Append(",")
+                     .Append(", ")
                      .Append(args[4])
                      .Append(")")
                      .Append(comm);
@@ -507,11 +507,36 @@ namespace JassToTs
             return sb.Append("UserDataGet")
                      .Append("(")
                      .Append(args[0])
-                     .Append(",")
+                     .Append(", ")
                      .Append(args[1])
-                     .Append(",")
+                     .Append(", ")
                      .Append(args[2])
                      .Append(")")
+                     .Append(comm);
+        }
+        
+        StringBuilder ConvertYDWEOperatorString(Statement tree) {
+            isYdwe_YDUserData = true;
+
+            var sb = new StringBuilder();
+            var args = new List<StringBuilder>();
+            var comm = new StringBuilder();
+            for (var i = 0; i < tree.Childs.Count; i++)
+            {
+                switch (tree.Childs[i].Type)
+                {
+                    case StatementType.YdweMacro:
+                    case StatementType.Comm:
+                        comm.Append(tree.Childs[i].Start.Text).Append('\n');
+                        continue;
+                    case StatementType.Name:
+                        continue;
+                    default:
+                        args.Add(ConvertExprElem(tree.Childs[i]));
+                        continue;
+                }
+            }
+            return sb.AppendJoin(" + ", args)
                      .Append(comm);
         }
 
@@ -520,6 +545,7 @@ namespace JassToTs
             if (Regex.Match(name, "YDLocal[0-9]+Get").Success) return ConvertYDLocal_Get;
             if (Regex.Match(name, "YDUserDataSet").Success) return ConvertYDUserDataSet;
             if (Regex.Match(name, "YDUserDataGet").Success) return ConvertYDUserDataGet;
+            if (Regex.Match(name, "YDWEOperatorString[0-9]+").Success) return ConvertYDWEOperatorString;
             return null;
         }
 
