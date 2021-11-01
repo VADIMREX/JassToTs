@@ -515,7 +515,7 @@ namespace JassToTs
                      .Append(comm);
         }
         
-        StringBuilder ConvertYDWEOperatorString(Statement tree) {
+        StringBuilder ConvertYDWEOperatorString3(Statement tree) {
             isYdwe_YDUserData = true;
 
             var sb = new StringBuilder();
@@ -545,7 +545,7 @@ namespace JassToTs
             if (Regex.Match(name, "YDLocal[0-9]+Get").Success) return ConvertYDLocal_Get;
             if (Regex.Match(name, "YDUserDataSet").Success) return ConvertYDUserDataSet;
             if (Regex.Match(name, "YDUserDataGet").Success) return ConvertYDUserDataGet;
-            if (Regex.Match(name, "YDWEOperatorString[0-9]+").Success) return ConvertYDWEOperatorString;
+            if (Regex.Match(name, "YDWEOperatorString3").Success) return ConvertYDWEOperatorString3;
             return null;
         }
 

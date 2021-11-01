@@ -595,7 +595,7 @@ public class JassToTs {
                  .append(comm);
     };
 
-    final FuncThrows<Statement, StringBuilder, Exception> ConvertYDWEOperatorString = (tree) -> {
+    final FuncThrows<Statement, StringBuilder, Exception> ConvertYDWEOperatorString3 = (tree) -> {
         isYdwe_YDUserData = true;
 
         var sb = new StringBuilder();
@@ -629,7 +629,7 @@ public class JassToTs {
         if (name.matches("YDLocal[0-9]+Get")) return ConvertYDLocal_Get;
         if (name.matches("YDUserDataSet")) return ConvertYDUserDataSet;
         if (name.matches("YDUserDataGet")) return ConvertYDUserDataGet;
-        if (name.matches("YDWEOperatorString[0-9]+")) return ConvertYDWEOperatorString;
+        if (name.matches("YDWEOperatorString3")) return ConvertYDWEOperatorString3;
         return null;
     }
     
