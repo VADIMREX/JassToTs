@@ -330,6 +330,10 @@ namespace JassToTs
             var val = stat.Start.Text;
             switch (stat.Start.Kind) {
                 case TokenKind.adec:
+                    if (true) {
+                        sb.Append("FourCC(").Append(val).Append(")");
+                        break;
+                    }
                     var number = 0;
                     for (var i = 1; i < val.Length -1; i++)
                     {
@@ -449,6 +453,62 @@ namespace JassToTs
                      .Append(comm);
         }
 
+        StringBuilder ConvertYDLocalSet(Statement tree) {
+            var sb = new StringBuilder();
+            var args = new List<StringBuilder>();
+            var comm = new StringBuilder();
+            for (var i = 0; i < tree.Childs.Count; i++)
+            {
+                switch (tree.Childs[i].Type)
+                {
+                    case StatementType.YdweMacro:
+                    case StatementType.Comm:
+                        comm.Append(tree.Childs[i].Start.Text)
+                            .Append('\n');
+                        continue;
+                    case StatementType.Name:
+                        continue;
+                    default:
+                        args.Add(ConvertExprElem(tree.Childs[i]));
+                        continue;
+                }
+            }
+
+            var name = args[2].ToString();
+            name = name.Substring(1, name.Length - 2);
+            return sb.Append(name)
+                     .Append(" = ")
+                     .Append(args[3])
+                     .Append(comm);
+        }
+
+        StringBuilder ConvertYDLocalGet(Statement tree) {
+            var sb = new StringBuilder();
+            var args = new List<StringBuilder>();
+            var comm = new StringBuilder();
+            for (var i = 0; i < tree.Childs.Count; i++)
+            {
+                switch (tree.Childs[i].Type)
+                {
+                    case StatementType.YdweMacro:
+                    case StatementType.Comm:
+                        comm.Append(tree.Childs[i].Start.Text)
+                            .Append('\n');
+                        continue;
+                    case StatementType.Name:
+                        continue;
+                    default:
+                        args.Add(ConvertExprElem(tree.Childs[i]));
+                        continue;
+                }
+            }
+            var name = args[2].ToString();
+            name = name.Substring(1, name.Length - 2);
+            return sb.Append(name)
+                     #warning TODO подумать как воспроизвести
+                     .Append(comm);
+        }
+
         StringBuilder ConvertYDUserDataSet(Statement tree) {
             isYdwe_YDUserData = true;
             
@@ -516,8 +576,6 @@ namespace JassToTs
         }
         
         StringBuilder ConvertYDWEOperatorString3(Statement tree) {
-            isYdwe_YDUserData = true;
-
             var sb = new StringBuilder();
             var args = new List<StringBuilder>();
             var comm = new StringBuilder();
@@ -541,8 +599,10 @@ namespace JassToTs
         }
 
         Func<Statement, StringBuilder> CheckYdweMacro(string name) {
-            if (Regex.Match(name, "YDLocal[0-9]+Set").Success) return ConvertYDLocal_Set;
-            if (Regex.Match(name, "YDLocal[0-9]+Get").Success) return ConvertYDLocal_Get;
+            if (Regex.Match(name, "YDLocalSet").Success) return ConvertYDLocalSet;
+            if (Regex.Match(name, "YDLocalGet").Success) return ConvertYDLocalGet;
+            if (Regex.Match(name, "YDLocal[1-5]Set").Success) return ConvertYDLocal_Set;
+            if (Regex.Match(name, "YDLocal[1-5]Get").Success) return ConvertYDLocal_Get;
             if (Regex.Match(name, "YDUserDataSet").Success) return ConvertYDUserDataSet;
             if (Regex.Match(name, "YDUserDataGet").Success) return ConvertYDUserDataGet;
             if (Regex.Match(name, "YDWEOperatorString3").Success) return ConvertYDWEOperatorString3;
