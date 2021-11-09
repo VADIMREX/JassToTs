@@ -1,65 +1,95 @@
 package JassToTs
 
-//const (
-/** однострочный комментарий */
-	const	LCOM = "lcom"
+const (
+	/** однострочный комментарий */
+	lcom = "lcom"
 	/**
 	 * многострочный комментарий (в JASS отсутствуют)
 	 * @deprecated в JASS только однострочные комментарии начинающиеся с //
 	 */
 	//@Deprecated
-	const	MCOM = "mcom"
+	mcom = "mcom"
 
 	/** десятичное целое */
-	const	NDEC = "ndec"
+	ndec = "ndec"
 	/** восьмеричное целое */
-	const	OCT = "oct"
+	oct = "oct"
 	/** шеснадцатиричное целое в формате 0xNN */
-	const	XHEX = "xhex"
+	xhex = "xhex"
 	/** шеснадцатиричное целое в формате $NN */
-	const	DHEX = "dhex"
+	dhex = "dhex"
 	/** действительное */
-	const	REAL = "real"
+	real = "real"
 	/** шеснадцатиричное из 4х ASCII символов, записавыается в апостравах */
-	const	ADEC = "adec"
+	adec = "adec"
 
 	/** оператор */
-	const	OPER = "oper"
+	oper = "oper"
 
 	/** строка в кавычках (в JASS единственный тип строк) */
-	const	DSTR = "dstr"
+	dstr = "dstr"
 	/**
 	 * строка в апострофах (, в JASS в апострафах хранятся целые, смотри <see cref="adec"/>)
 	 * @deprecated не используется, в JASS единственный тип строк: заключённые в кавычках
 	 */
 	//@Deprecated
-	const	SSTR = "sstr"
+	sstr = "sstr"
 
 	/** идентификатор */
-	const	NAME = "name"
+	name = "name"
 
 	/** базовый тип */
-	const	BTYP = "btyp"
+	btyp = "btyp"
 	/** ключевое слово */
-	const	KWD = "kwd"
+	kwd = "kwd"
 
 	/** null значение */
-	const	NULL = "null"
+	null = "null"
 	/** булевое значение */
-	const	BOOL = "bool"
+	_bool = "bool"
 
 	/** перевод строки */
-	const	LN = "ln"
+	ln = "ln"
 
 	/** левая скобка */
-	const	LBRA = "lbra"
+	lbra = "lbra"
 	/** правая скобка */
-	const	RBRA = "rbra"
+	rbra = "rbra"
 	/** левая квадратная скобка */
-	const	LIND = "lind"
+	lind = "lind"
 	/** правая квадратная скобка */
-	const	RIND = "rind"
+	rind = "rind"
 
 	/** макросы YDWE, пока что преобразуются в комментарий */
-	const	YMACR = "ymacr"
-//)
+	ymacr = "ymacr"
+)
+
+var TokenTypeByKind = map[string]string{
+	lcom:  comm,
+	mcom:  comm,
+	ndec:  val,
+	oct:   val,
+	xhex:  val,
+	dhex:  val,
+	real:  val,
+	adec:  val,
+	oper:  oper,
+	dstr:  val,
+	sstr:  val,
+	name:  name,
+	btyp:  name,
+	kwd:   kwd,
+	null:  val,
+	_bool: val,
+	ln:    br,
+	lbra:  par,
+	rbra:  par,
+	lind:  par,
+	rind:  par,
+
+	ymacr: comm,
+}
+
+func GetTypeOfKind(kind string) string {
+	return TokenTypeByKind[kind]
+}
