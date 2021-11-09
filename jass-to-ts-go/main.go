@@ -2,6 +2,7 @@ package JassToTs
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 )
 
@@ -36,50 +37,58 @@ var isYdweCompatible = false;
 var isOptimizationNeeded = false;
 
 func TranslateFile(ipath string, opath string, tpath string) error {
-    fmt.Println("JASS to TypeScript translator (by VADIMREX)\n");
+    fmt.Println("JASS to TypeScript translator (by VADIMREX)\n")
 
-    var lexer = JassLexer(isYdweCompatible);
-    /*var parser = new Jass.JassParser(isYdweCompatible);
+    var lexer = NewJassLexer(isYdweCompatible)
+    var parser = NewJassParser(isYdweCompatible)
     
-    Console.WriteLine($"reading file {ipath}");
-    string source;
-    using (var sr = new StreamReader(ipath))
-        source = sr.ReadToEnd();
-
-    Console.WriteLine("lexeing");
+    fmt.Println(fmt.Sprintf("reading file %s", ipath))
+    var source string;
+    
+    b, err := ioutil.ReadFile(ipath) 
+    if err != nil {
+        fmt.Print(err)
+    }
+    source = string(b) 
+    
+    fmt.Println("lexeing");
     var tokens = lexer.Tokenize(source);
 
-    Console.WriteLine("parsing");
+    fmt.Println("parsing");
     var tree = parser.Parse(tokens);
 
-    if ("" != tpath)
-    {
-        Console.WriteLine($"saving tree into {tpath}");
-        using (var sw = new StreamWriter(tpath))
-            sw.WriteLine(tree.ToString());
+    if "" != tpath {
+        fmt.Println(fmt.Sprintf("saving tree into %s", tpath));
+        b = []byte(tree.String())
+        err = ioutil.WriteFile(tpath, b, 0)
+        if err != nil {
+            fmt.Print(err)
+        }
     }
 
-    Console.WriteLine("translating");
+    fmt.Println("translating");
     var script = "";
-    switch(language)
-    {
-        case Language.TypeScript:
-        case Language.TypeScriptDeclaration:
-            var tsConverter = new JassToTs(isOptimizationNeeded, isYdweCompatible, language == Language.TypeScriptDeclaration);
+    switch language {
+        case TypeScript:
+        case TypeScriptDeclaration:
+            var tsConverter = NewJassToTs(isOptimizationNeeded, isYdweCompatible, language == TypeScriptDeclaration, 4);
             script = tsConverter.Convert(tree);
             break;
-        case Language.Lua:
+        /*case Language.Lua:
             var luaConverter = new JassToLua(isOptimizationNeeded);
             script = luaConverter.Convert(tree);
             break;
         case Language.GalaxyRaw:
             var galaxyRawConverter = new JassToGalaxyRaw(isOptimizationNeeded);
             script = galaxyRawConverter.Convert(tree);
-            break;
+            break;*/
     }
-    Console.WriteLine($"saving into {opath}");
-    using (var sw = new StreamWriter(opath))
-        sw.WriteLine(script);*/
+    fmt.Println(fmt.Sprintf("saving into %s", opath));
+    b = []byte(script)
+    err = ioutil.WriteFile(opath, b, 0)
+    if err != nil {
+        fmt.Print(err)
+    }
     return nil
 }
 
@@ -138,8 +147,8 @@ func main() {
 
     }
 
-    // if TranslateFile(Path.of(inPath), Path.of(outPath), Path.of(outTree)) != nil {
+    if TranslateFile(inPath, outPath, outTree) != nil {
 
-    // }
+    }
     os.Exit(0);
 }

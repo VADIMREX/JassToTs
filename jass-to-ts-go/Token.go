@@ -26,7 +26,7 @@ func NewToken() *Token {
 }
 
 func (this *Token) String() string {
-    return fmt.Sprintf("%s,%s [%s|%s]: %s", this.Line, this.Col, this.GetType(), this.Kind, this.Text)
+    return fmt.Sprintf("%d,%d [%s|%s]: %s", this.Line, this.Col, this.GetType(), this.Kind, this.Text)
 }
 
 func (this *Token) Clone() *Token {
