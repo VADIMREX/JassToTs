@@ -253,7 +253,7 @@ public class JassParser {
     }
 
     /** Остановить если встретился перевод строки */
-    final Function<Token, Boolean> DefStopper = (token)->TokenType.br.equals(tokens.get(i).getType());
+    final Function<Token, Boolean> DefStopper = (token)->TokenType.br.equals(token.getType());
 
     Statement TryParseExpression()  throws JassException
     {

@@ -259,7 +259,7 @@ namespace Jass
 
         #region expression
         /// <summary> Остановить если встретился перевод строки </summary>
-        bool DefStopper(Token token) => TokenType.br == tokens[i].Type;
+        bool DefStopper(Token token) => TokenType.br == token.Type;
 
         /// <summary> Попытаться распарсить выражение </summary>
         /// <param name="stopper"> Предикат используемый для остановки парсинга выражения, по умолчанию <see cref="DefStopper(Token)"/></param>
