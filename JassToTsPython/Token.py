@@ -114,11 +114,12 @@ class Token:
         self.Text = text
         self.Kind = kind
 
-    def getType(self):
+    @property
+    def Type(self):
         return GetType(self.Kind)
 
     def __str__(self):
-        return "{},{} [{}|{}]: {}".format(self.Line, self.Col, self.getType(), self.Kind, self.Text)
+        return "{},{} [{}|{}]: {}".format(self.Line, self.Col, self.Type, self.Kind, self.Text)
 
     def Clone(self):
         return Token(self.Col, self.Line, self.Pos, self.Text, self.Kind)
