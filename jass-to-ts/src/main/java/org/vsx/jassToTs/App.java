@@ -98,144 +98,144 @@ public class App
     public static void main( String[] args )
     {
         language = Language.TypeScript;
-            for (var i = 0; i < args.length; i++)
+        for (var i = 0; i < args.length; i++)
+        {
+            switch (args[i])
             {
-                switch (args[i])
-                {
-                    case "-input":
-                        System.out.println("please enter arguments, empty line for continue");
-                        var scan = new Scanner(System.in);
-                        var lst = new ArrayList<String>();
-                        int j = 0;
-                        while (j < 2)
+                case "-input":
+                    System.out.println("please enter arguments, empty line for continue");
+                    var scan = new Scanner(System.in);
+                    var lst = new ArrayList<String>();
+                    int j = 0;
+                    while (j < 2)
+                    {
+                        var s = scan.nextLine();
+                        if ("" == s)
                         {
-                            var s = scan.nextLine();
-                            if ("" == s)
-                            {
-                                j++;
-                                continue;
-                            }
-                            j = 0;
-                            lst.add(s);
+                            j++;
+                            continue;
                         }
-                        args = lst.toArray(new String[0]);
-                        i = -1;
-                        continue;
-                    case "-i": if (i + 1 == args.length) break; inPath = args[i + 1]; i++; continue;
-                    case "-o": if (i + 1 == args.length) break; outPath = args[i + 1]; i++; continue;
-                    case "-ot": if (i + 1 == args.length) break; outTree = args[i + 1]; i++; continue;
-                    case "-nt": isTreeNeeded = true; continue;
-                    case "-ydwe": isYdweCompatible = true; continue;
-                    case "-op": isOptimizationNeeded = true; continue;case "-dts": language = Language.TypeScriptDeclaration; continue;
-                    case "-t": language = Language.TypeScriptDeclaration; continue;
-                    case "-lua": language = Language.Lua; continue;
-                    case "-galaxy-raw": language = Language.GalaxyRaw; continue;
-                    case "-lenient": 
-                        JassException.setIsStrict(false); 
-                        JassTranslatorException.setIsStrict(false);
-                        continue;
-                    case "-h":
-                        System.out.println(help);
-                        System.exit(0);
-                        return;
-                    default: continue;
-                }
-                System.exit(-1);
-                return;
-            }
-
-            if ("".equals(inPath))
-            {
-                var cwd = Paths.get(".");
-                try (var stream = Files.newDirectoryStream(cwd, "*.{j,ai}")) {
-                    for (var iPath: stream) {
-                        var fileName = iPath.getFileName().toString();
-                        var extensionPos = fileName.lastIndexOf(".");
-                        if (extensionPos > 0) fileName = fileName.substring(0, extensionPos); 
-
-                        Path tPath = null;
-                        if (isTreeNeeded)
-                            tPath = iPath.getParent()
-                                         .resolve(fileName + ".tree");
-                        
-                        switch (language)
-                        {
-                            case Language.TypeScript: fileName += ".ts"; break;
-                            case Language.TypeScriptDeclaration: fileName += ".d.ts"; break;
-                            case Language.Lua: fileName += ".lua"; break;
-                            case Language.GalaxyRaw: fileName += ".galaxy"; break;
-                        }
-
-                        var oPath = iPath.getParent()
-                                         .resolve(fileName);
-                        
-                        try
-                        {
-                            TranslateFile(iPath, oPath, tPath);
-                        }
-                        catch (Exception e)
-                        {
-                            System.out.println(e.getMessage());
-                        }
+                        j = 0;
+                        lst.add(s);
                     }
-                } catch (IOException x) {
-                    System.out.println(x.getMessage());
-                    // throw new RuntimeException(String.format("error reading folder %s: %s",
-                    // dir,
-                    // x.getMessage()),
-                    // x);
+                    args = lst.toArray(new String[0]);
+                    i = -1;
+                    continue;
+                case "-i": if (i + 1 == args.length) break; inPath = args[i + 1]; i++; continue;
+                case "-o": if (i + 1 == args.length) break; outPath = args[i + 1]; i++; continue;
+                case "-ot": if (i + 1 == args.length) break; outTree = args[i + 1]; i++; continue;
+                case "-nt": isTreeNeeded = true; continue;
+                case "-ydwe": isYdweCompatible = true; continue;
+                case "-op": isOptimizationNeeded = true; continue;case "-dts": language = Language.TypeScriptDeclaration; continue;
+                case "-t": language = Language.TypeScriptDeclaration; continue;
+                case "-lua": language = Language.Lua; continue;
+                case "-galaxy-raw": language = Language.GalaxyRaw; continue;
+                case "-lenient": 
+                    JassException.setIsStrict(false); 
+                    JassTranslatorException.setIsStrict(false);
+                    continue;
+                case "-h":
+                    System.out.println(help);
+                    System.exit(0);
+                    return;
+                default: continue;
+            }
+            System.exit(-1);
+            return;
+        }
+
+        if ("".equals(inPath))
+        {
+            var cwd = Paths.get(".");
+            try (var stream = Files.newDirectoryStream(cwd, "*.{j,ai}")) {
+                for (var iPath: stream) {
+                    var fileName = iPath.getFileName().toString();
+                    var extensionPos = fileName.lastIndexOf(".");
+                    if (extensionPos > 0) fileName = fileName.substring(0, extensionPos); 
+
+                    Path tPath = null;
+                    if (isTreeNeeded)
+                        tPath = iPath.getParent()
+                                        .resolve(fileName + ".tree");
+                    
+                    switch (language)
+                    {
+                        case Language.TypeScript: fileName += ".ts"; break;
+                        case Language.TypeScriptDeclaration: fileName += ".d.ts"; break;
+                        case Language.Lua: fileName += ".lua"; break;
+                        case Language.GalaxyRaw: fileName += ".galaxy"; break;
+                    }
+
+                    var oPath = iPath.getParent()
+                                        .resolve(fileName);
+                    
+                    try
+                    {
+                        TranslateFile(iPath, oPath, tPath);
+                    }
+                    catch (Exception e)
+                    {
+                        System.out.println(e.getMessage());
+                    }
                 }
-
-                System.exit(0);
-                return;
+            } catch (IOException x) {
+                System.out.println(x.getMessage());
+                // throw new RuntimeException(String.format("error reading folder %s: %s",
+                // dir,
+                // x.getMessage()),
+                // x);
             }
 
-            if ("".equals(outPath))
-            {
-                outPath = Path.of(inPath)
-                              .getFileName()
-                              .toString();
-
-                var extensionPos = outPath.lastIndexOf(".");
-                if (extensionPos > 0) outPath = outPath.substring(0, extensionPos); 
-
-                switch (language)
-                {
-                    case Language.TypeScript: outPath += ".ts"; break;
-                    case Language.TypeScriptDeclaration: outPath += ".d.ts"; break;
-                    case Language.Lua: outPath += ".lua"; break;
-                    case Language.GalaxyRaw: outPath += ".galaxy"; break;
-                }
-
-                outPath = Path.of(inPath)
-                              .getParent()
-                              .resolve(outPath)
-                              .toString();
-            }
-            if (isTreeNeeded && "".equals(outTree)) { 
-                outTree = Path.of(inPath)
-                              .getFileName()
-                              .toString();
-                var extensionPos = outTree.lastIndexOf(".");
-                if (extensionPos > 0) outTree = outTree.substring(0, extensionPos); 
-
-                outTree = Path.of(inPath)
-                              .getParent()
-                              .resolve(outTree + ".tree")
-                              .toString();
-            }
-
-            try
-            {
-                TranslateFile(Path.of(inPath), Path.of(outPath), Path.of(outTree));
-            }
-            catch (Exception e)
-            {
-                System.out.println(e.getMessage());
-                for (var a : e.getStackTrace())
-                    System.out.println(a);
-            }
             System.exit(0);
             return;
+        }
+
+        if ("".equals(outPath))
+        {
+            outPath = Path.of(inPath)
+                            .getFileName()
+                            .toString();
+
+            var extensionPos = outPath.lastIndexOf(".");
+            if (extensionPos > 0) outPath = outPath.substring(0, extensionPos); 
+
+            switch (language)
+            {
+                case Language.TypeScript: outPath += ".ts"; break;
+                case Language.TypeScriptDeclaration: outPath += ".d.ts"; break;
+                case Language.Lua: outPath += ".lua"; break;
+                case Language.GalaxyRaw: outPath += ".galaxy"; break;
+            }
+
+            outPath = Path.of(inPath)
+                            .getParent()
+                            .resolve(outPath)
+                            .toString();
+        }
+        if (isTreeNeeded && "".equals(outTree)) { 
+            outTree = Path.of(inPath)
+                            .getFileName()
+                            .toString();
+            var extensionPos = outTree.lastIndexOf(".");
+            if (extensionPos > 0) outTree = outTree.substring(0, extensionPos); 
+
+            outTree = Path.of(inPath)
+                            .getParent()
+                            .resolve(outTree + ".tree")
+                            .toString();
+        }
+
+        try
+        {
+            TranslateFile(Path.of(inPath), Path.of(outPath), Path.of(outTree));
+        }
+        catch (Exception e)
+        {
+            System.out.println(e.getMessage());
+            for (var a : e.getStackTrace())
+                System.out.println(a);
+        }
+        System.exit(0);
+        return;
     }
 }
