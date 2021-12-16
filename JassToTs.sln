@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.31515.178
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31912.275
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JassToTs", "JassToTs\JassToTs.csproj", "{3ADCBDA0-D51A-4C8B-B50E-7223759A5B3A}"
+EndProject
+Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "JassToTsPython", "JassToTsPython\JassToTsPython.pyproj", "{DC099830-FDAF-413C-A12E-3730EED88906}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,8 @@ Global
 		{3ADCBDA0-D51A-4C8B-B50E-7223759A5B3A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3ADCBDA0-D51A-4C8B-B50E-7223759A5B3A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3ADCBDA0-D51A-4C8B-B50E-7223759A5B3A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DC099830-FDAF-413C-A12E-3730EED88906}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DC099830-FDAF-413C-A12E-3730EED88906}.Release|Any CPU.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
