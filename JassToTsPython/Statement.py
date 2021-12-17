@@ -1,53 +1,53 @@
 import enum
 
 class StatementType(enum.Enum):
-    Prog = "Prog";
+    Prog = "Prog"
 
-    TypeDecl   = "TypeDecl";
-    Glob       = "Glob";
-    GConst     = "GConst";
-    GVar       = "GVar";
-    GArr       = "GArr";
-    LVar       = "LVar";
-    LArr       = "LArr";
-    Expr       = "Expr";
-    RVar       = "RVar";
-    FCall      = "FCall";
-    RArr       = "RArr";
-    RFunc      = "RFunc";
-    Native     = "Native";
-    CNative    = "CNative";
-    FuncDecl   = "FuncDecl";
-    Params     = "Params";
-    Func       = "Func";
-    CFunc      = "CFunc";
-    FuncLocals = "FuncLocals";
-    FuncBody   = "FuncBody";
-    Comm       = "Comm";
-    Debug      = "Debug";
-    Set        = "Set";
-    ASet       = "ASet";
-    If         = "If";
-    Cond       = "Cond";
-    Then       = "Then";
-    ElseCond   = "ElseCond";
-    Else       = "Else";
-    Loop       = "Loop";
-    Exit       = "Exit";
-    Return     = "Return";
+    TypeDecl   = "TypeDecl"
+    Glob       = "Glob"
+    GConst     = "GConst"
+    GVar       = "GVar"
+    GArr       = "GArr"
+    LVar       = "LVar"
+    LArr       = "LArr"
+    Expr       = "Expr"
+    RVar       = "RVar"
+    FCall      = "FCall"
+    RArr       = "RArr"
+    RFunc      = "RFunc"
+    Native     = "Native"
+    CNative    = "CNative"
+    FuncDecl   = "FuncDecl"
+    Params     = "Params"
+    Func       = "Func"
+    CFunc      = "CFunc"
+    FuncLocals = "FuncLocals"
+    FuncBody   = "FuncBody"
+    Comm       = "Comm"
+    Debug      = "Debug"
+    Set        = "Set"
+    ASet       = "ASet"
+    If         = "If"
+    Cond       = "Cond"
+    Then       = "Then"
+    ElseCond   = "ElseCond"
+    Else       = "Else"
+    Loop       = "Loop"
+    Exit       = "Exit"
+    Return     = "Return"
 
-    TypeName = "TypeName";
-    BaseType = "BaseType";
-    Type     = "Type";
-    Name     = "Name";
-    Val      = "Val";
-    Oper     = "Oper";
-    Result   = "Result";
-    Param    = "Param";
-    Ind      = "Ind";
-    Par      = "Par";
+    TypeName = "TypeName"
+    BaseType = "BaseType"
+    Type     = "Type"
+    Name     = "Name"
+    Val      = "Val"
+    Oper     = "Oper"
+    Result   = "Result"
+    Param    = "Param"
+    Ind      = "Ind"
+    Par      = "Par"
 
-    YdweMacro = "YdweMacro";
+    YdweMacro = "YdweMacro"
 
 class Statement:
     def __init__(self, parent = None, type = None, start = None):
@@ -85,8 +85,9 @@ class Statement:
     def __str__(self): return self.ToString(0)
     
     def ToString(self, ident) -> str:
-        res = "// {}{} {}\n".format("".PadLeft(ident, ' '), self.Type, self.Start)
+        res = "// {}{} {}\n".format("".ljust(ident, ' '), self.Type, self.Start)
         if len(self.Childs) > 0:
-            res += "".join(self.Childs.map(lambda x: x.ToString(ident + 2)))
+            res += "".join(map(lambda x: x.ToString(ident + 2), self.Childs))
+                  #"".join(x.ToString(ident + 2) for x in self.Childs)
         return res
             

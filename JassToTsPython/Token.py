@@ -66,7 +66,7 @@ class TokenType(enum.Enum):
     # ключевое слово
     kwd = "kwd"
     # идентификатор
-    name = "name"
+    _name = "name"
     # оператор
     oper = "oper"
     # скобки
@@ -87,8 +87,8 @@ TypeByKind = {
     TokenKind.oper:  TokenType.oper,
     TokenKind.dstr:  TokenType.val,
     TokenKind.sstr:  TokenType.val,
-    TokenKind.name:  TokenType.name,
-    TokenKind.btyp:  TokenType.name,
+    TokenKind.name:  TokenType._name,
+    TokenKind.btyp:  TokenType._name,
     TokenKind.kwd:   TokenType.kwd,
     TokenKind.null:  TokenType.val,
     TokenKind.bool:  TokenType.val,

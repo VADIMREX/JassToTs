@@ -45,8 +45,8 @@ def TranslateFile(ipath, opath, tpath):
     try:
         f = io.open(ipath, mode="r", encoding="utf-8")
         source = f.read()
-    except:
-        print("file not found")
+    except Exception as e:
+        print(e)
 
     print("lexing")
 
@@ -59,9 +59,9 @@ def TranslateFile(ipath, opath, tpath):
         print("saving tree into %s", tpath)
         try:
             f = io.open(tpath, mode="w", encoding="utf-8")
-            f.write(tree)
+            f.write(str(tree))
         except Exception as e:
-            print("file not found")
+            print(str(e))
 
     print("translating")
     script = ""
@@ -81,7 +81,7 @@ def TranslateFile(ipath, opath, tpath):
         f = io.open(opath, mode="w", encoding="utf-8")
         f.write(script)
     except Exception as e:
-        print("file not found")
+        print(str(e))
 
 i = 0
 while i < len(sys.argv):
