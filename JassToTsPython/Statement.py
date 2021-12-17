@@ -49,6 +49,9 @@ class StatementType(enum.Enum):
 
     YdweMacro = "YdweMacro"
 
+    def __str__(self):
+        return self.value
+
 class Statement:
     def __init__(self, parent = None, type = None, start = None):
         self.Parent = parent

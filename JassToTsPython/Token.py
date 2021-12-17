@@ -31,7 +31,7 @@ class TokenKind(enum.Enum):
     sstr = "sstr"
 
     # идентификатор
-    name = "name"
+    _name = "name"
 
     # базовый тип
     btyp = "btyp"
@@ -58,6 +58,9 @@ class TokenKind(enum.Enum):
     # макросы YDWE, пока что преобразуются в комментарий
     ymacr = "ymacr"
 
+    def __str__(self):
+        return self.value
+
 class TokenType(enum.Enum):
     # разделитель
     br = "br"
@@ -74,6 +77,10 @@ class TokenType(enum.Enum):
     # комментарий
     comm = "comm"
 
+    def __str__(self):
+        return self.value
+        
+
 # связь между видом и типом
 TypeByKind = {
     TokenKind.lcom:  TokenType.comm,
@@ -87,7 +94,7 @@ TypeByKind = {
     TokenKind.oper:  TokenType.oper,
     TokenKind.dstr:  TokenType.val,
     TokenKind.sstr:  TokenType.val,
-    TokenKind.name:  TokenType._name,
+    TokenKind._name: TokenType._name,
     TokenKind.btyp:  TokenType._name,
     TokenKind.kwd:   TokenType.kwd,
     TokenKind.null:  TokenType.val,
@@ -98,7 +105,7 @@ TypeByKind = {
     TokenKind.lind:  TokenType.par,
     TokenKind.rind:  TokenType.par,
     # макросы считаем за коментарии
-    TokenKind.ymacr: TokenType.comm
+    TokenKind.ymacr: TokenType.comm    
 }
 
 # получить тип

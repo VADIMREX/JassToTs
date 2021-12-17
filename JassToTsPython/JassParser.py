@@ -39,7 +39,7 @@ class JassParser:
             stat.Start = self.tokens[self.i]
             return j + 1
         def state1(j):
-            if TokenKind.name != self.tokens[self.i].Kind:
+            if TokenKind._name != self.tokens[self.i].Kind:
                 JassException.Error(self.tokens[self.i].Line, self.tokens[self.i].Col, "wrong type declaration: identifier expected")
             stat.AddChild("TypeName", self.tokens[self.i])
             return j + 1
@@ -48,7 +48,7 @@ class JassParser:
                 JassException.Error(self.tokens[self.i].Line, self.tokens[self.i].Col, "wrong type declaration: extends keyword expected")
             return j + 1
         def state3():
-            if TokenKind.name != self.tokens[self.i].Kind and TokenKind.btyp != self.tokens[self.i].Kind:
+            if TokenKind._name != self.tokens[self.i].Kind and TokenKind.btyp != self.tokens[self.i].Kind:
                 JassException.Error(self.tokens[self.i].Line, self.tokens[self.i].Col, "wrong type declaration: type identifier expected")
             stat.AddChild("BaseType", self.tokens[self.i])
             return j + 1
@@ -118,12 +118,12 @@ class JassParser:
             stat.Start = self.tokens[self.i]
             return j + 1
         def state1(j):
-            if TokenKind.name != self.tokens[self.i].Kind and TokenKind.btyp != self.tokens[self.i].Kind:
+            if TokenKind._name != self.tokens[self.i].Kind and TokenKind.btyp != self.tokens[self.i].Kind:
                 JassException.Error(self.tokens[self.i].Line, self.tokens[self.i].Col, "wrong const declaration: type identifier expected")
             stat.AddChild("Type", self.tokens[self.i])
             return j + 1
         def state2(j):
-            if TokenKind.name != self.tokens[self.i].Kind:
+            if TokenKind._name != self.tokens[self.i].Kind:
                 JassException.Error(self.tokens[self.i].Line, self.tokens[self.i].Col, "wrong const declaration: identifier expected")
             stat.AddChild("Name", self.tokens[self.i])
             return j + 1
@@ -166,7 +166,7 @@ class JassParser:
             return j + 1
         #   тип
         def state1(j):
-            if TokenKind.name != self.tokens[self.i].Kind and TokenKind.btyp != self.tokens[self.i].Kind:
+            if TokenKind._name != self.tokens[self.i].Kind and TokenKind.btyp != self.tokens[self.i].Kind:
                 JassException.Error(self.tokens[self.i].Line, self.tokens[self.i].Col, "wrong var declaration: type identifier expected")
             if None == stat.Start: stat.Start = self.tokens[self.i]
             stat.AddChild("Type", self.tokens[self.i])
@@ -180,7 +180,7 @@ class JassParser:
             return j + 1
         #       имя
         def state3(j):
-            if TokenKind.name != self.tokens[self.i].Kind:
+            if TokenKind._name != self.tokens[self.i].Kind:
                 JassException.Error(self.tokens[self.i].Line, self.tokens[self.i].Col, "wrong var declaration: identifier expected")
             stat.AddChild("Name", self.tokens[self.i])
             if flags["IsArray"]:
@@ -300,7 +300,7 @@ class JassParser:
         start = self.i
 
         def state0(j):
-            if TokenKind.name != self.tokens[self.i].Kind:
+            if TokenKind._name != self.tokens[self.i].Kind:
                 JassException.Error(self.tokens[self.i].Line, self.tokens[self.i].Col, "wrong expression: identifier expected")
             stat.AddChild("Name", self.tokens[self.i])
             return j + 1
@@ -346,7 +346,7 @@ class JassParser:
         start = self.i
 
         def state0(j):
-            if TokenKind.name != self.tokens[self.i].Kind:
+            if TokenKind._name != self.tokens[self.i].Kind:
                 JassException.Error(self.tokens[self.i].Line, self.tokens[self.i].Col, "wrong expression: identifier expected")
             stat.AddChild("Name", self.tokens[self.i])
             return j + 1
@@ -383,7 +383,7 @@ class JassParser:
                 JassException.Error(self.tokens[self.i].Line, self.tokens[self.i].Col, "wrong expression: function expected")
             return j + 1
         def state1(j):
-            if TokenKind.name != self.tokens[self.i].Kind:
+            if TokenKind._name != self.tokens[self.i].Kind:
                 JassException.Error(self.tokens[self.i].Line, self.tokens[self.i].Col, "wrong expression: identifier expected")
             stat.Start = self.tokens[self.i]
             return j + 1
@@ -436,7 +436,7 @@ class JassParser:
         stat = Statement(type = StatementType.FuncDecl)
 
         def state0(j):
-            if TokenKind.name != self.tokens[self.i].Kind:
+            if TokenKind._name != self.tokens[self.i].Kind:
                 JassException.Error(self.tokens[self.i].Line, self.tokens[self.i].Col, "wrong function declaration: identifier expected")
             stat.AddChild("Name", self.tokens[self.i])
             return j + 1
@@ -612,7 +612,7 @@ class JassParser:
             if TokenKind.ln == self.tokens[self.i].Kind: break
 
             #warning Вызов потенциального макроса, у парсера макросы должны быть выпилены
-            if self.isYdweCompatible and TokenKind.name == self.tokens[self.i].Kind:
+            if self.isYdweCompatible and TokenKind._name == self.tokens[self.i].Kind:
                 return self.TryParseMacroCall()
             if TokenKind.kwd != self.tokens[self.i].Kind: JassException.Error(self.tokens[self.i].Line, self.tokens[self.i].Col, "statement error: keyword expected")
 

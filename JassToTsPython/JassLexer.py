@@ -285,7 +285,7 @@ class JassLexer:
             self.i += 1
             self.pos += 1
 
-        typ = TokenKind.name
+        typ = TokenKind._name
         if s in keywords: typ = keywords[s]
         if '_' == s[-1:]: JassException.Error(l, p, "wrong identifier: ends with \"_\"")
 

@@ -33,6 +33,8 @@
     <Compile Include="JassToTsPython.py" />
     <Compile Include="JassTranslatorException.py" />
     <Compile Include="Language.py" />
+    <Compile Include="Statement.py" />
+    <Compile Include="Token.py" />
   </ItemGroup>
   <ItemGroup>
     <InterpreterReference Include="Global|PythonCore|3.10" />
