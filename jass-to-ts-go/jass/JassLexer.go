@@ -1,4 +1,4 @@
-package JassToTs
+package jass
 
 import "strings"
 
@@ -84,126 +84,126 @@ type JassLexer struct {
 }
 
 /*
-	создать Лексер
-	@param isYdweCompatible режим совместимости с YDWE
+создать Лексер
+@param isYdweCompatible режим совместимости с YDWE
 */
 func NewJassLexer(isYdweCompatible bool) *JassLexer {
 	return &JassLexer{isYdweCompatible: isYdweCompatible}
 }
 
 /*
-	Проверить на перевод строки.
-	Инкрементирует переменную this.line и
-	обнуляет переменную this.pos,
-	если обнаружен перевод строки.
+Проверить на перевод строки.
+Инкрементирует переменную jl.line и
+обнуляет переменную jl.pos,
+если обнаружен перевод строки.
 
-	@return true если обнаружен перевод строки
+@return true если обнаружен перевод строки
 */
-func (this *JassLexer) LineBreak(set bool) bool { // @todo make private
-	if '\n' != this.source[this.i] {
+func (jl *JassLexer) LineBreak(set bool) bool { // @todo make private
+	if jl.source[jl.i] != '\n' {
 		return false
 	}
 	if set {
 		return true
 	}
-	this.line++
-	this.pos = 0
+	jl.line++
+	jl.pos = 0
 	return true
 }
 
 // Попытаться распарсить комментарий
-/// <returns>  nil если не удалось распарсить комментарий </returns>
-func (this *JassLexer) TryParseComment() *Token { // @todo private
-	if this.i == len(this.source)-1 {
+// / <returns>  nil если не удалось распарсить комментарий </returns>
+func (jl *JassLexer) TryParseComment() *Token { // @todo private
+	if jl.i == len(jl.source)-1 {
 		return nil
 	}
-	if '/' != this.source[this.i+1] {
+	if '/' != jl.source[jl.i+1] {
 		return nil
 	}
-	var j, l, p = this.i, this.line, this.pos
-	var s = this.source[this.i : this.i+2]
-	this.i += 2
-	for this.i < len(this.source) {
-		if '\r' == this.source[this.i] {
+	var j, l, p = jl.i, jl.line, jl.pos
+	var s = jl.source[jl.i : jl.i+2]
+	jl.i += 2
+	for jl.i < len(jl.source) {
+		if '\r' == jl.source[jl.i] {
 			continue
 		}
-		if this.LineBreak(true) {
+		if jl.LineBreak(true) {
 			break
 		}
-		s += this.source[this.i:this.i]
+		s += jl.source[jl.i:jl.i]
 
-		this.i++
-		this.pos++
+		jl.i++
+		jl.pos++
 	}
 
-	if this.i < len(this.source) {
-		this.i--
+	if jl.i < len(jl.source) {
+		jl.i--
 	}
 	return &Token{Col: p, Line: l, Pos: j, Text: s, Kind: lcom}
 }
 
 // Попытаться распарсить YDWE макрос
-/// <returns>  nil если не удалось распарсить макрос </returns>
-func (this *JassLexer) TryParseYDWEMacro() *Token { // @todo private
-	if this.i == len(this.source)-1 {
+// / <returns>  nil если не удалось распарсить макрос </returns>
+func (jl *JassLexer) TryParseYDWEMacro() *Token { // @todo private
+	if jl.i == len(jl.source)-1 {
 		return nil
 	}
-	var j, l, p = this.i, this.line, this.pos
+	var j, l, p = jl.i, jl.line, jl.pos
 	//#warning Убрать // после добавления интерпретатора макросов
 	var s = "//#"
-	this.i++
-	for this.i < len(this.source) {
-		if '\r' == this.source[this.i] {
+	jl.i++
+	for jl.i < len(jl.source) {
+		if '\r' == jl.source[jl.i] {
 			continue
 		}
-		if this.LineBreak(true) {
+		if jl.LineBreak(true) {
 			break
 		}
-		s += this.source[this.i:this.i]
+		s += jl.source[jl.i:jl.i]
 
-		this.i++
-		this.pos++
+		jl.i++
+		jl.pos++
 	}
 
-	if this.i < len(this.source) {
-		this.i--
+	if jl.i < len(jl.source) {
+		jl.i--
 	}
 	return &Token{Col: p, Line: l, Pos: j, Text: s, Kind: ymacr}
 }
 
 // Попытаться распарсить число
-/// <returns>  nil если не удалось распарсить число </returns>
-func (this *JassLexer) TryParseNumber() *Token { // @todo private
+// / <returns>  nil если не удалось распарсить число </returns>
+func (jl *JassLexer) TryParseNumber() *Token { // @todo private
 	var s = ""
-	var j, l, p = this.i, this.line, this.pos
-	var isOct = '0' == this.source[this.i] // octal    0[0-7]*
-	var isHex = '$' == this.source[this.i] // hex      $[0-9a-fA-F]+
-	var isXFound = false                   //          0[xX][0-9a-fA-F]+
-	var isDotFound = false                 // real     [0-9]+\.[0-9]*|\.[0-9]+
+	var j, l, p = jl.i, jl.line, jl.pos
+	var isOct = '0' == jl.source[jl.i] // octal    0[0-7]*
+	var isHex = '$' == jl.source[jl.i] // hex      $[0-9a-fA-F]+
+	var isXFound = false               //          0[xX][0-9a-fA-F]+
+	var isDotFound = false             // real     [0-9]+\.[0-9]*|\.[0-9]+
 	var isNumFound = false
-	for this.i < len(this.source) {
+	for jl.i < len(jl.source) {
 		// условия при которых продолжаем
-		if '0' <= this.source[this.i] && this.source[this.i] <= '9' {
-			if isOct && '8' <= this.source[this.i] {
+		if '0' <= jl.source[jl.i] && jl.source[jl.i] <= '9' {
+			if isOct && '8' <= jl.source[jl.i] {
 				JassError(l, p, "wrong number: wrong octal number")
 			}
 			isNumFound = true
 			continue
 		}
 		// hex в формате 0[xX][0-9a-fA-F]+
-		if isOct && 1 == len(s) && ('x' == this.source[this.i] || 'X' == this.source[this.i]) {
+		if isOct && 1 == len(s) && ('x' == jl.source[jl.i] || 'X' == jl.source[jl.i]) {
 			isOct = false
 			isHex = true
 			isXFound = true
 			continue
 		}
-		if isHex && (('A' <= this.source[this.i] && this.source[this.i] <= 'F') ||
-			('a' <= this.source[this.i] && this.source[this.i] <= 'f') ||
-			(!isNumFound && '$' == this.source[this.i])) {
+		if isHex && (('A' <= jl.source[jl.i] && jl.source[jl.i] <= 'F') ||
+			('a' <= jl.source[jl.i] && jl.source[jl.i] <= 'f') ||
+			(!isNumFound && '$' == jl.source[jl.i])) {
 			isNumFound = true
 			continue
 		}
-		if '.' == this.source[this.i] {
+		if '.' == jl.source[jl.i] {
 			if isDotFound {
 				JassError(l, p, "wrong number: multiple dot")
 			}
@@ -218,21 +218,21 @@ func (this *JassLexer) TryParseNumber() *Token { // @todo private
 			continue
 		}
 		// условия при которых завершаем
-		if strings.Contains(opers, this.source[this.i:this.i]) {
+		if strings.Contains(opers, jl.source[jl.i:jl.i]) {
 			break
 		}
-		if strings.Contains(brac, this.source[this.i:this.i]) {
+		if strings.Contains(brac, jl.source[jl.i:jl.i]) {
 			break
 		}
-		if this.LineBreak(true) {
+		if jl.LineBreak(true) {
 			break
 		}
-		if strings.Contains(whiteChar, this.source[this.i:this.i]) {
+		if strings.Contains(whiteChar, jl.source[jl.i:jl.i]) {
 			break
 		}
 		// наткнулись на символ не число, не оператор, не перевод строки, не белый символ
 		if isDotFound || !isNumFound {
-			this.i = j
+			jl.i = j
 			return nil
 		}
 		JassError(l, p, "wrong number: not a number")
@@ -252,54 +252,56 @@ func (this *JassLexer) TryParseNumber() *Token { // @todo private
 		typ = real
 	}
 
-	if this.i < len(this.source) {
-		this.i--
+	if jl.i < len(jl.source) {
+		jl.i--
 	}
 	return &Token{Col: p, Line: l, Pos: j, Text: s, Kind: typ}
 }
 
 // Попытаться распарсить оператор
-func (this *JassLexer) TryParseOperator() *Token { // @todo private
+func (jl *JassLexer) TryParseOperator() *Token { // @todo private
 	// костыль
-	if ',' == this.source[this.i] {
-		return &Token{Col: this.pos, Line: this.line, Pos: this.i, Text: ",", Kind: oper}
+	if ',' == jl.source[jl.i] {
+		return &Token{Col: jl.pos, Line: jl.line, Pos: jl.i, Text: ",", Kind: oper}
 	}
 
 	var s = ""
-	var j, l, p = this.i, this.line, this.pos
+	var j, l, p = jl.i, jl.line, jl.pos
 
-	for this.i < len(this.source) {
-		if !strings.Contains(opers, this.source[this.i:this.i]) {
+	for jl.i < len(jl.source) {
+		if !strings.Contains(opers, jl.source[jl.i:jl.i]) {
 			break
 		}
 		if 2 == len(s) {
 			break
 		}
-		s += this.source[this.i:this.i]
-		this.i++
-		this.pos++
+		s += jl.source[jl.i:jl.i]
+		jl.i++
+		jl.pos++
 	}
 
 	var isContains = false
 	for _, op := range operators {
-		if op != s { continue }
+		if op != s {
+			continue
+		}
 		isContains = true
 		break
 	}
 	if !isContains {
 		s = s[0:1]
-		this.i--
+		jl.i--
 	}
 
-	if this.i < len(this.source) {
-		this.i--
+	if jl.i < len(jl.source) {
+		jl.i--
 	}
 	return &Token{Col: p, Line: l, Pos: j, Text: s, Kind: oper}
 }
 
 // Попытаться распарсить число из 4х ASCII символов
-func (this *JassLexer) TryParse4AsciiInt() *Token { // @todo private
-	var tok = this.TryParseString()
+func (jl *JassLexer) TryParse4AsciiInt() *Token { // @todo private
+	var tok = jl.TryParseString()
 	if len(tok.Text) > 6 {
 		JassError(tok.Line, tok.Col, "wrong number: more than 4 ascii symbols")
 	}
@@ -314,78 +316,78 @@ func (this *JassLexer) TryParse4AsciiInt() *Token { // @todo private
 }
 
 // Попытаться распарсить строку
-func (this *JassLexer) TryParseString() *Token { // @todo private
-	var eoc = this.source[this.i]
+func (jl *JassLexer) TryParseString() *Token { // @todo private
+	var eoc = jl.source[jl.i]
 
-	var s = this.source[this.i:this.i]
-	var j, l, p = this.i, this.line, this.pos
+	var s = jl.source[jl.i:jl.i]
+	var j, l, p = jl.i, jl.line, jl.pos
 
-	if this.i == len(this.source)-1 {
+	if jl.i == len(jl.source)-1 {
 		JassError(l, p, "unclosed string")
 	}
 
-	this.i++
-	for this.i < len(this.source) {
-		s += this.source[this.i:this.i]
-		if this.source[this.i] == eoc && this.source[this.i-1] != '\\' {
+	jl.i++
+	for jl.i < len(jl.source) {
+		s += jl.source[jl.i:jl.i]
+		if jl.source[jl.i] == eoc && jl.source[jl.i-1] != '\\' {
 			break
 		}
-		if this.LineBreak(true) {
+		if jl.LineBreak(true) {
 		}
 		//#warning todo: надо проверить как реагирует обычный jass
-		this.i++
-		this.pos++
+		jl.i++
+		jl.pos++
 	}
 
-	//if this.i < len(this.source)) this.i--;
+	//if jl.i < len(jl.source)) jl.i--;
 	//return &Token { Col: p, Line: l, Pos: j, Text: s, Type = eoc == '"' ? TokenType.dstr : TokenType.sstr };
 	return &Token{Col: p, Line: l, Pos: j, Text: s, Kind: dstr}
 }
 
 // Попытаться распарсить имя
-func (this *JassLexer) TryParseName() *Token { // @todo private
+func (jl *JassLexer) TryParseName() *Token { // @todo private
 	var s = ""
-	var j, l, p = this.i, this.line, this.pos
+	var j, l, p = jl.i, jl.line, jl.pos
 
-	for this.i < len(this.source) {
+	for jl.i < len(jl.source) {
 		// допустимые символы
-		if 'a' <= this.source[this.i] && this.source[this.i] <= 'z' {
+		if 'a' <= jl.source[jl.i] && jl.source[jl.i] <= 'z' {
 			continue
 		}
-		if 'A' <= this.source[this.i] && this.source[this.i] <= 'Z' {
+		if 'A' <= jl.source[jl.i] && jl.source[jl.i] <= 'Z' {
 			continue
 		}
-		if len(s) > 0 && '0' <= this.source[this.i] && this.source[this.i] <= '9' {
+		if len(s) > 0 && '0' <= jl.source[jl.i] && jl.source[jl.i] <= '9' {
 			continue
 		}
-		if len(s) > 0 && '_' == this.source[this.i] {
+		if len(s) > 0 && '_' == jl.source[jl.i] {
 			continue
 		}
 		// не допустимые символы
-		if strings.Contains(whiteChar, this.source[this.i:this.i]) {
+		if strings.Contains(whiteChar, jl.source[jl.i:jl.i]) {
 			break
 		}
-		if this.LineBreak(true) {
+		if jl.LineBreak(true) {
 			break
 		}
-		if strings.Contains(brac, this.source[this.i:this.i]) {
+		if strings.Contains(brac, jl.source[jl.i:jl.i]) {
 			break
 		}
-		if strings.Contains(opers, this.source[this.i:this.i]) {
+		if strings.Contains(opers, jl.source[jl.i:jl.i]) {
 			break
 		}
-		if strings.Contains(strChar, this.source[this.i:this.i]) {
+		if strings.Contains(strChar, jl.source[jl.i:jl.i]) {
 			break
 		} // в некоторых случаях может быть норм
 		// левые символы
 		JassError(l, p, "wrong identifier: unknown symbol")
 
-		s += this.source[this.i:this.i]
-		this.i++
-		this.pos++
+		s += jl.source[jl.i:jl.i]
+		jl.i++
+		jl.pos++
 	}
 	var typ = name
-	var _, ok = keywords[s];
+	var _, ok = keywords[s]
 	if ok {
 		typ = keywords[s]
 	}
@@ -393,106 +395,102 @@ func (this *JassLexer) TryParseName() *Token { // @todo private
 		JassError(l, p, "wrong identifier: ends with \"_\"")
 	}
 
-	if this.i < len(this.source) {
-		this.i--
+	if jl.i < len(jl.source) {
+		jl.i--
 	}
 	return &Token{Col: p, Line: l, Pos: j, Text: s, Kind: typ}
 }
 
 // распарсить исходный код на токены
-/// <param name="source"> исходный код на языке jass</param>
-/// <returns> список из токенов </returns>
-func (this *JassLexer) Tokenize(source string) []*Token {
-	this.source = source
-	this.i = 0
-	this.line = 0
-	this.pos = 0
+// / <param name="source"> исходный код на языке jass</param>
+// / <returns> список из токенов </returns>
+func (jl *JassLexer) Tokenize(source string) []*Token {
+	jl.source = source
+	jl.i = 0
+	jl.line = 0
+	jl.pos = 0
 	var tokens []*Token
 
-	var tok * Token = nil
-	for this.i < len(this.source) {
-		if '/' == this.source[this.i] {
+	var tok *Token = nil
+	for jl.i < len(jl.source) {
+		if '/' == jl.source[jl.i] {
 			// попытка распознать комментарий
-			tok = this.TryParseComment()
+			tok = jl.TryParseComment()
 			if nil != tok {
 				tokens = append(tokens, tok)
 				continue
 			}
 		}
-		if this.isYdweCompatible && '#' == this.source[this.i] {
-			tok = this.TryParseYDWEMacro()
+		if jl.isYdweCompatible && '#' == jl.source[jl.i] {
+			tok = jl.TryParseYDWEMacro()
 			if nil != tok {
 				tokens = append(tokens, tok)
 				continue
 			}
 		}
-		if strings.Contains(strChar, source[this.i:this.i]) {
+		if strings.Contains(strChar, source[jl.i:jl.i]) {
 			// попытка распознать строку
-			tok = this.TryParseString()
+			tok = jl.TryParseString()
 			if nil != tok {
 				tokens = append(tokens, tok)
 				continue
 			}
 		}
 		// int из 4 ascii символов
-		if '\'' == this.source[this.i] {
-			tok = this.TryParse4AsciiInt()
+		if '\'' == jl.source[jl.i] {
+			tok = jl.TryParse4AsciiInt()
 			if nil != tok {
 				tokens = append(tokens, tok)
 				continue
 			}
 		}
-		if '0' <= this.source[this.i] && this.source[this.i] <= '9' || '.' == this.source[this.i] || '$' == this.source[this.i] {
+		if '0' <= jl.source[jl.i] && jl.source[jl.i] <= '9' || '.' == jl.source[jl.i] || '$' == jl.source[jl.i] {
 			// попытка распарсить число
-			tok = this.TryParseNumber()
+			tok = jl.TryParseNumber()
 			if nil != tok {
 				tokens = append(tokens, tok)
 				continue
 			}
 		}
-		if strings.Contains(opers, this.source[this.i:this.i]) {
+		if strings.Contains(opers, jl.source[jl.i:jl.i]) {
 			// попытка распарсить оператор
-			tok = this.TryParseOperator()
+			tok = jl.TryParseOperator()
 			if nil != tok {
 				tokens = append(tokens, tok)
 				continue
 			}
 		}
-		if strings.Contains(whiteChar, source[this.i:this.i]) {
+		if strings.Contains(whiteChar, source[jl.i:jl.i]) {
 			// игнорим пробелы
 			continue
 		}
-		if strings.Contains(brac, source[this.i:this.i]) {
+		if strings.Contains(brac, source[jl.i:jl.i]) {
 			var typ = ""
-			var s = this.source[this.i:this.i]
-			switch source[this.i] {
+			var s = jl.source[jl.i:jl.i]
+			switch source[jl.i] {
 			case '(':
 				typ = lbra
-				break
 			case ')':
 				typ = rbra
-				break
 			case '[':
 				typ = lind
-				break
 			case ']':
 				typ = rind
-				break
 			}
-			tok = &Token{Col: this.pos, Line: this.line, Pos: this.i, Text: s, Kind: typ}
+			tok = &Token{Col: jl.pos, Line: jl.line, Pos: jl.i, Text: s, Kind: typ}
 			tokens = append(tokens, tok)
 			continue
 		}
-		if this.LineBreak(false) {
+		if jl.LineBreak(false) {
 			// записываем конец строки
-			tokens = append(tokens, &Token{Col: this.pos, Line: this.line, Pos: this.i, Text: "\n", Kind: ln})
+			tokens = append(tokens, &Token{Col: jl.pos, Line: jl.line, Pos: jl.i, Text: "\n", Kind: ln})
 			continue
 		}
-		tok = this.TryParseName()
+		tok = jl.TryParseName()
 		tokens = append(tokens, tok)
 
-		this.i++
-		this.pos++
+		jl.i++
+		jl.pos++
 	}
 	return tokens
 }

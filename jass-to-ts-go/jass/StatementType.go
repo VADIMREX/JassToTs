@@ -1,4 +1,4 @@
-package JassToTs
+package jass
 
 const (
 	/** Программа */

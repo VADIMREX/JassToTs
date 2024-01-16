@@ -1,4 +1,4 @@
-package JassToTs
+package jass
 
 const (
 	/** однострочный комментарий */
@@ -90,6 +90,6 @@ var TokenTypeByKind = map[string]string{
 	ymacr: comm,
 }
 
-func GetTypeOfKind(kind string) string {
+func GetTokenTypeOfKind(kind string) string {
 	return TokenTypeByKind[kind]
 }

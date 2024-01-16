@@ -1,4 +1,4 @@
-package JassToTs
+package jass
 
 type JassParser struct {
 }
@@ -7,6 +7,6 @@ func NewJassParser(isYdweCompatible bool) *JassParser {
 	return &JassParser{}
 }
 
-func (this *JassParser) Parse(tokens []*Token) *Statement {
+func (p *JassParser) Parse(tokens []*Token) *Statement {
 	return nil
 }

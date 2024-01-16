@@ -1,0 +1,3 @@
+module jass-to-ts
+
+go 1.21.3

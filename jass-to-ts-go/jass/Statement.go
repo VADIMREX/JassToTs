@@ -1,4 +1,4 @@
-package JassToTs
+package jass
 
 import "fmt"
 
@@ -9,7 +9,7 @@ type Statement struct {
 	Childs []*Statement
 }
 
-func newStatement() *Statement {
+func NewStatement() *Statement {
 	return &Statement{}
 }
 
@@ -21,14 +21,14 @@ func newStatement() *Statement {
 * @return дочернюю инструкцию
 * @see Statement#AddChild
  */
-func (this *Statement) MakeChild(_type string, token *Token) *Statement {
+func (s *Statement) MakeChild(_type string, token *Token) *Statement {
 	var child = &Statement{
 		_type,
 		token,
-		this,
+		s,
 		[]*Statement{},
 	}
-	this.Childs = append(this.Childs, child)
+	s.Childs = append(s.Childs, child)
 	return child
 }
 
@@ -40,9 +40,9 @@ func (this *Statement) MakeChild(_type string, token *Token) *Statement {
 * @return себя
 * @see Statement#MakeChild
  */
-func (this *Statement) AddChild(_type string, token *Token) *Statement {
-	this.MakeChild(_type, token)
-	return this
+func (statement *Statement) AddChild(_type string, token *Token) *Statement {
+	statement.MakeChild(_type, token)
+	return statement
 }
 
 /**
@@ -51,22 +51,22 @@ func (this *Statement) AddChild(_type string, token *Token) *Statement {
 * @param child дочерняя инструкция
 * @return себя
  */
-func (this *Statement) AddChildStatement(child *Statement) *Statement {
-	child.Parent = this
-	this.Childs = append(this.Childs, child)
-	return this
+func (statement *Statement) AddChildStatement(child *Statement) *Statement {
+	child.Parent = statement
+	statement.Childs = append(statement.Childs, child)
+	return statement
 }
 
-func (this *Statement) String() string {
-	return this.toString(0)
+func (statement *Statement) String() string {
+	return statement.toString(0)
 }
 
-func (this *Statement) toString(ident int) string {
+func (statement *Statement) toString(ident int) string {
 	var s = ""
-	for _, statement := range this.Childs {
+	for _, statement := range statement.Childs {
 		s += statement.toString(ident + 2)
 	}
-	var sident = fmt.Sprintf("%d", ident);
-	sident = fmt.Sprintf("%"+sident+"s", "");
-	return fmt.Sprintf("%s%s %s\n%s", sident, this.Type, this.Start, s)
+	var sident = fmt.Sprintf("%d", ident)
+	sident = fmt.Sprintf("%"+sident+"s", "")
+	return fmt.Sprintf("%s%s %s\n%s", sident, statement.Type, statement.Start, s)
 }

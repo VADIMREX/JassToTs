@@ -1,4 +1,8 @@
-package JassToTs
+package jassToTs
+
+import (
+	"jass-to-ts/jass"
+)
 
 type JassToTs struct {
 	/// <summary> Режим файла описания (*.d.ts) </summary>
@@ -24,6 +28,6 @@ func NewJassToTs(isOptimizationNeeded bool, isYdweCompatible bool, isDTS bool, i
 	return &JassToTs{isDTS, indentSize, isOptimizationNeeded, isYdweCompatible, false}
 }
 
-func (this *JassToTs) Convert(stat *Statement) string {
+func (toTs *JassToTs) Convert(stat *jass.Statement) string {
 	return ""
 }
