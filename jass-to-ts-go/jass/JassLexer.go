@@ -1,6 +1,8 @@
 package jass
 
-import "strings"
+import (
+	"strings"
+)
 
 const (
 	// алфавит операторов
@@ -173,7 +175,7 @@ func (jl *JassLexer) TryParseYDWEMacro() *Token { // @todo private
 
 // Попытаться распарсить число
 // / <returns>  nil если не удалось распарсить число </returns>
-func (jl *JassLexer) TryParseNumber() *Token { // @todo private
+func (jl *JassLexer) TryParseNumber() (*Token, error) { // @todo private
 	var s = ""
 	var j, l, p = jl.i, jl.line, jl.pos
 	var isOct = '0' == jl.source[jl.i] // octal    0[0-7]*
@@ -185,7 +187,10 @@ func (jl *JassLexer) TryParseNumber() *Token { // @todo private
 		// условия при которых продолжаем
 		if '0' <= jl.source[jl.i] && jl.source[jl.i] <= '9' {
 			if isOct && '8' <= jl.source[jl.i] {
-				JassError(l, p, "wrong number: wrong octal number")
+				err := NewJassError(l, p, "wrong number: wrong octal number")
+				if err != nil {
+					return nil, err
+				}
 			}
 			isNumFound = true
 			continue
@@ -205,13 +210,22 @@ func (jl *JassLexer) TryParseNumber() *Token { // @todo private
 		}
 		if '.' == jl.source[jl.i] {
 			if isDotFound {
-				JassError(l, p, "wrong number: multiple dot")
+				err := NewJassError(l, p, "wrong number: multiple dot")
+				if err != nil {
+					return nil, err
+				}
 			}
 			if isHex {
-				JassError(l, p, "wrong number: dot inside hex")
+				err := NewJassError(l, p, "wrong number: dot inside hex")
+				if err != nil {
+					return nil, err
+				}
 			}
 			if isOct && len(s) > 1 {
-				JassError(l, p, "wrong number: dot inside octadecimal")
+				err := NewJassError(l, p, "wrong number: dot inside octadecimal")
+				if err != nil {
+					return nil, err
+				}
 			}
 			isOct = false
 			isDotFound = true
@@ -233,9 +247,12 @@ func (jl *JassLexer) TryParseNumber() *Token { // @todo private
 		// наткнулись на символ не число, не оператор, не перевод строки, не белый символ
 		if isDotFound || !isNumFound {
 			jl.i = j
-			return nil
+			return nil, nil
 		}
-		JassError(l, p, "wrong number: not a number")
+		err := NewJassError(l, p, "wrong number: not a number")
+		if err != nil {
+			return nil, err
+		}
 	}
 	var typ = ndec
 	if isOct {
@@ -255,7 +272,7 @@ func (jl *JassLexer) TryParseNumber() *Token { // @todo private
 	if jl.i < len(jl.source) {
 		jl.i--
 	}
-	return &Token{Col: p, Line: l, Pos: j, Text: s, Kind: typ}
+	return &Token{Col: p, Line: l, Pos: j, Text: s, Kind: typ}, nil
 }
 
 // Попытаться распарсить оператор
@@ -300,30 +317,42 @@ func (jl *JassLexer) TryParseOperator() *Token { // @todo private
 }
 
 // Попытаться распарсить число из 4х ASCII символов
-func (jl *JassLexer) TryParse4AsciiInt() *Token { // @todo private
-	var tok = jl.TryParseString()
+func (jl *JassLexer) TryParse4AsciiInt() (*Token, error) { // @todo private
+	tok, err := jl.TryParseString()
+	if err != nil {
+		return tok, err
+	}
 	if len(tok.Text) > 6 {
-		JassError(tok.Line, tok.Col, "wrong number: more than 4 ascii symbols")
+		err := NewJassError(tok.Line, tok.Col, "wrong number: more than 4 ascii symbols")
+		if err != nil {
+			return nil, err
+		}
 	}
 	for _, c := range tok.Text {
 		if c > '\u00ff' {
-			JassError(tok.Line, tok.Col, "wrong number: non ascii symbol")
+			err := NewJassError(tok.Line, tok.Col, "wrong number: non ascii symbol")
+			if err != nil {
+				return nil, err
+			}
 		}
 	}
 	// Надо проверить как оригинальный компилятор относится к 'a\'bc' последовательности
 	tok.Kind = adec
-	return tok
+	return tok, nil
 }
 
 // Попытаться распарсить строку
-func (jl *JassLexer) TryParseString() *Token { // @todo private
+func (jl *JassLexer) TryParseString() (*Token, error) { // @todo private
 	var eoc = jl.source[jl.i]
 
 	var s = jl.source[jl.i:jl.i]
 	var j, l, p = jl.i, jl.line, jl.pos
 
 	if jl.i == len(jl.source)-1 {
-		JassError(l, p, "unclosed string")
+		err := NewJassError(l, p, "unclosed string")
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	jl.i++
@@ -341,11 +370,11 @@ func (jl *JassLexer) TryParseString() *Token { // @todo private
 
 	//if jl.i < len(jl.source)) jl.i--;
 	//return &Token { Col: p, Line: l, Pos: j, Text: s, Type = eoc == '"' ? TokenType.dstr : TokenType.sstr };
-	return &Token{Col: p, Line: l, Pos: j, Text: s, Kind: dstr}
+	return &Token{Col: p, Line: l, Pos: j, Text: s, Kind: dstr}, nil
 }
 
 // Попытаться распарсить имя
-func (jl *JassLexer) TryParseName() *Token { // @todo private
+func (jl *JassLexer) TryParseName() (*Token, error) { // @todo private
 	var s = ""
 	var j, l, p = jl.i, jl.line, jl.pos
 
@@ -380,7 +409,10 @@ func (jl *JassLexer) TryParseName() *Token { // @todo private
 			break
 		} // в некоторых случаях может быть норм
 		// левые символы
-		JassError(l, p, "wrong identifier: unknown symbol")
+		err := NewJassError(l, p, "wrong identifier: unknown symbol")
+		if err != nil {
+			return nil, err
+		}
 
 		s += jl.source[jl.i:jl.i]
 		jl.i++
@@ -392,37 +424,39 @@ func (jl *JassLexer) TryParseName() *Token { // @todo private
 		typ = keywords[s]
 	}
 	if '_' == s[len(s)-1] {
-		JassError(l, p, "wrong identifier: ends with \"_\"")
+		err := NewJassError(l, p, "wrong identifier: ends with \"_\"")
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	if jl.i < len(jl.source) {
 		jl.i--
 	}
-	return &Token{Col: p, Line: l, Pos: j, Text: s, Kind: typ}
+	return &Token{Col: p, Line: l, Pos: j, Text: s, Kind: typ}, nil
 }
 
 // распарсить исходный код на токены
 // / <param name="source"> исходный код на языке jass</param>
 // / <returns> список из токенов </returns>
-func (jl *JassLexer) Tokenize(source string) []*Token {
+func (jl *JassLexer) Tokenize(source string) ([]*Token, error) {
 	jl.source = source
 	jl.i = 0
 	jl.line = 0
 	jl.pos = 0
-	var tokens []*Token
+	tokens := []*Token{}
 
-	var tok *Token = nil
 	for jl.i < len(jl.source) {
 		if '/' == jl.source[jl.i] {
 			// попытка распознать комментарий
-			tok = jl.TryParseComment()
+			tok := jl.TryParseComment()
 			if nil != tok {
 				tokens = append(tokens, tok)
 				continue
 			}
 		}
 		if jl.isYdweCompatible && '#' == jl.source[jl.i] {
-			tok = jl.TryParseYDWEMacro()
+			tok := jl.TryParseYDWEMacro()
 			if nil != tok {
 				tokens = append(tokens, tok)
 				continue
@@ -430,7 +464,10 @@ func (jl *JassLexer) Tokenize(source string) []*Token {
 		}
 		if strings.Contains(strChar, source[jl.i:jl.i]) {
 			// попытка распознать строку
-			tok = jl.TryParseString()
+			tok, err := jl.TryParseString()
+			if err != nil {
+				return tokens, err
+			}
 			if nil != tok {
 				tokens = append(tokens, tok)
 				continue
@@ -438,7 +475,10 @@ func (jl *JassLexer) Tokenize(source string) []*Token {
 		}
 		// int из 4 ascii символов
 		if '\'' == jl.source[jl.i] {
-			tok = jl.TryParse4AsciiInt()
+			tok, err := jl.TryParse4AsciiInt()
+			if err != nil {
+				return tokens, err
+			}
 			if nil != tok {
 				tokens = append(tokens, tok)
 				continue
@@ -446,7 +486,10 @@ func (jl *JassLexer) Tokenize(source string) []*Token {
 		}
 		if '0' <= jl.source[jl.i] && jl.source[jl.i] <= '9' || '.' == jl.source[jl.i] || '$' == jl.source[jl.i] {
 			// попытка распарсить число
-			tok = jl.TryParseNumber()
+			tok, err := jl.TryParseNumber()
+			if err != nil {
+				return tokens, err
+			}
 			if nil != tok {
 				tokens = append(tokens, tok)
 				continue
@@ -454,7 +497,7 @@ func (jl *JassLexer) Tokenize(source string) []*Token {
 		}
 		if strings.Contains(opers, jl.source[jl.i:jl.i]) {
 			// попытка распарсить оператор
-			tok = jl.TryParseOperator()
+			tok := jl.TryParseOperator()
 			if nil != tok {
 				tokens = append(tokens, tok)
 				continue
@@ -477,7 +520,7 @@ func (jl *JassLexer) Tokenize(source string) []*Token {
 			case ']':
 				typ = rind
 			}
-			tok = &Token{Col: jl.pos, Line: jl.line, Pos: jl.i, Text: s, Kind: typ}
+			tok := &Token{Col: jl.pos, Line: jl.line, Pos: jl.i, Text: s, Kind: typ}
 			tokens = append(tokens, tok)
 			continue
 		}
@@ -486,11 +529,14 @@ func (jl *JassLexer) Tokenize(source string) []*Token {
 			tokens = append(tokens, &Token{Col: jl.pos, Line: jl.line, Pos: jl.i, Text: "\n", Kind: ln})
 			continue
 		}
-		tok = jl.TryParseName()
+		tok, err := jl.TryParseName()
+		if err != nil {
+			return tokens, err
+		}
 		tokens = append(tokens, tok)
 
 		jl.i++
 		jl.pos++
 	}
-	return tokens
+	return tokens, nil
 }

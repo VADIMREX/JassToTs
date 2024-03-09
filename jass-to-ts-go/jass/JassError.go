@@ -1,11 +1,18 @@
 package jass
 
 import (
-	"errors"
 	"fmt"
 )
 
 var isStrict = true
+
+type JassError struct {
+	message string
+}
+
+func (err *JassError) Error() string {
+	return err.message
+}
 
 func GetIsStrict() bool {
 	return isStrict
@@ -18,10 +25,10 @@ func formatMessage(line int, col int, message string) string {
 	return fmt.Sprintf("Line %d, Col %d: %v", line, col, message)
 }
 
-func JassError(line int, col int, message string) error {
+func NewJassError(line int, col int, message string) error {
 	msg := formatMessage(line, col, message)
 	if isStrict {
-		return errors.New(msg)
+		return &JassError{message: msg}
 	}
 	fmt.Println(msg)
 	return nil

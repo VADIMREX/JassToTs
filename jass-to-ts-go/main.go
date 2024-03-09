@@ -3,8 +3,9 @@ package main
 import (
 	"fmt"
 	"jass-to-ts/jass"
-	"jass-to-ts/jassToTs"
+	"jass-to-ts/translator"
 	"os"
+	"path"
 )
 
 const (
@@ -26,7 +27,7 @@ const help = "usable arguments:\n" +
 	"-t               tree mode, will save tree file\n" +
 	"-h               show this message\n" +
 	"-lenient         less strict mode\n" +
-	""
+	"\n"
 
 var inPath = ""
 var outPath = ""
@@ -37,7 +38,7 @@ var isOptimizationNeeded = false
 var isYdweCompatible = false
 
 func TranslateFile(ipath string, opath string, tpath string) error {
-	fmt.Println("JASS to TypeScript translator (by VADIMREX)\n")
+	fmt.Print("JASS to TypeScript translator (by VADIMREX)\n\n")
 
 	var lexer = jass.NewJassLexer(isYdweCompatible)
 	var parser = jass.NewJassParser(isYdweCompatible)
@@ -52,7 +53,10 @@ func TranslateFile(ipath string, opath string, tpath string) error {
 	source = string(b)
 
 	fmt.Println("lexeing")
-	var tokens = lexer.Tokenize(source)
+	tokens, err := lexer.Tokenize(source)
+	if err != nil {
+		return err
+	}
 
 	fmt.Println("parsing")
 	var tree = parser.Parse(tokens)
@@ -71,7 +75,7 @@ func TranslateFile(ipath string, opath string, tpath string) error {
 	switch language {
 	case TypeScript,
 		TypeScriptDeclaration:
-		var tsConverter = jassToTs.NewJassToTs(isOptimizationNeeded, isYdweCompatible, language == TypeScriptDeclaration, 4)
+		var tsConverter = translator.NewJassToTs(isOptimizationNeeded, isYdweCompatible, language == TypeScriptDeclaration, 4)
 		script = tsConverter.Convert(tree)
 	case Lua:
 		//   var luaConverter = new JassToLua(isOptimizationNeeded);
@@ -92,7 +96,7 @@ func TranslateFile(ipath string, opath string, tpath string) error {
 func main() {
 	language = TypeScript
 	//for i, arg := range w.Args {
-	for i := 0; i < len(os.Args); i++ {
+	for i := 1; i < len(os.Args); i++ {
 		switch os.Args[i] {
 		case "-input":
 			fmt.Println("please enter arguments, empty line for continue")
@@ -143,7 +147,7 @@ func main() {
 			//JassTranslatorException.setIsStrict(false);
 			continue
 		case "-h":
-			fmt.Println(help)
+			fmt.Print(help)
 			os.Exit(0)
 			return
 		default:
@@ -155,30 +159,90 @@ func main() {
 	if inPath == "" {
 		cwd, err := os.Getwd()
 		if err != nil {
+			fmt.Println(err)
 			return
 		}
 		files, err := os.ReadDir(cwd)
 		if err != nil {
+			fmt.Println(err)
 			return
 		}
-		for _, iPath := range files {
-			info, err := iPath.Info()
-			if err != nil {
-				continue
+		for _, file := range files {
+			fileName := file.Name()
+			iPath := path.Join(cwd, fileName)
+			if ext := path.Ext(fileName); ext != "" {
+				fileName = fileName[:len(fileName)-len(ext)]
 			}
-			info.Name()
+
+			tPath := ""
+			if isTreeNeeded {
+				tPath = path.Join(cwd, fileName+".tree")
+			}
+
+			switch language {
+			case TypeScript:
+				fileName += ".ts"
+			case TypeScriptDeclaration:
+				outPath += ".d.ts"
+			case Lua:
+				outPath += ".lua"
+			case GalaxyRaw:
+				outPath += ".galaxy"
+			}
+
+			var oPath = path.Join(cwd, fileName)
+
+			err = TranslateFile(iPath, oPath, tPath)
+			if err != nil {
+				fmt.Println(err)
+			}
 		}
+		return
 	}
 
 	if outPath == "" {
+		file, err := os.Stat(inPath)
+		dPath := path.Dir(inPath)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		outPath = file.Name()
+		if ext := path.Ext(outPath); ext != "" {
+			outPath = outPath[:len(outPath)-len(ext)]
+		}
 
+		switch language {
+		case TypeScript:
+			outPath += ".ts"
+		case TypeScriptDeclaration:
+			outPath += ".d.ts"
+		case Lua:
+			outPath += ".lua"
+		case GalaxyRaw:
+			outPath += ".galaxy"
+		}
+
+		outPath = path.Join(dPath, outPath)
 	}
 	if isTreeNeeded && "" == outTree {
+		file, err := os.Stat(inPath)
+		dPath := path.Base(inPath)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		outTree = file.Name()
+		if ext := path.Ext(outTree); ext != "" {
+			outTree = outTree[:len(outTree)-len(ext)]
+		}
 
+		outTree = path.Join(dPath, outTree+".tree")
 	}
 
-	if TranslateFile(inPath, outPath, outTree) != nil {
-
+	err := TranslateFile(inPath, outPath, outTree)
+	if err != nil {
+		fmt.Println(err)
 	}
 	os.Exit(0)
 }

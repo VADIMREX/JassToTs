@@ -1,4 +1,4 @@
-package jassToTs
+package translator
 
 import (
 	"jass-to-ts/jass"
